@@ -114,7 +114,7 @@ void DIALOG_CHOOSE_COMPONENT::OnInterceptSearchBoxKey( wxKeyEvent& aKeyStroke )
         selectIfValid( GetNextItem( *m_libraryComponentTree, sel ) );
         break;
 
-        // The follwoing keys we can only hijack if they are not needed by the textbox itself.
+        // The following keys we can only hijack if they are not needed by the textbox itself.
 
     case WXK_LEFT:
         if( m_searchBox->GetInsertionPoint() == 0 )
@@ -219,25 +219,53 @@ bool DIALOG_CHOOSE_COMPONENT::updateSelection()
     wxTextAttr text_attribute;
     text_attribute.SetFont(font_normal);
 
+    const wxString name = selection->GetName();
+
+    if ( !name.empty() )
+    {
+        m_componentDetails->SetDefaultStyle( headline_attribute );
+        m_componentDetails->AppendText( name );
+    }
+
     const wxString description = selection->GetDescription();
 
     if( !description.empty() )
     {
+        if ( !m_componentDetails->IsEmpty() )
+            m_componentDetails->AppendText( wxT("\n\n") );
+
         m_componentDetails->SetDefaultStyle( headline_attribute );
         m_componentDetails->AppendText( _("Description\n") );
         m_componentDetails->SetDefaultStyle( text_attribute );
         m_componentDetails->AppendText( description );
-        m_componentDetails->AppendText( wxT("\n\n") );
     }
 
     const wxString keywords = selection->GetKeyWords();
 
     if( !keywords.empty() )
     {
+        if ( !m_componentDetails->IsEmpty() )
+            m_componentDetails->AppendText( wxT("\n\n") );
+
         m_componentDetails->SetDefaultStyle( headline_attribute );
         m_componentDetails->AppendText( _("Keywords\n") );
         m_componentDetails->SetDefaultStyle( text_attribute );
         m_componentDetails->AppendText( keywords );
+    }
+
+    if ( !selection->IsRoot() )
+    {
+        LIB_PART* root_part = selection->GetPart();
+        const wxString root_component_name( root_part ?
+                root_part->GetName() : _("Unknown") );
+
+        if ( !m_componentDetails->IsEmpty() )
+            m_componentDetails->AppendText( wxT("\n\n") );
+
+        m_componentDetails->SetDefaultStyle( headline_attribute );
+        m_componentDetails->AppendText( _("Alias of ") );
+        m_componentDetails->SetDefaultStyle( text_attribute );
+        m_componentDetails->AppendText( root_component_name );
     }
 
     m_componentDetails->SetInsertionPoint( 0 );  // scroll up.
@@ -250,18 +278,39 @@ bool DIALOG_CHOOSE_COMPONENT::updateSelection()
 void DIALOG_CHOOSE_COMPONENT::OnHandlePreviewRepaint( wxPaintEvent& aRepaintEvent )
 {
     int unit = 0;
-    LIB_ALIAS* selection = m_search_container->GetSelectedAlias( &unit );
+    LIB_ALIAS*  selection = m_search_container->GetSelectedAlias( &unit );
+    LIB_PART*   part = selection ? selection->GetPart() : NULL;
 
-    renderPreview( selection ? selection->GetPart() : NULL, unit );
+    // Don't draw anything (not even the background) if we don't have
+    // a part to show
+    if( !part )
+        return;
+
+    if( selection->IsRoot() )
+    {
+        // just show the part directly
+        renderPreview( part, unit );
+    }
+    else
+    {
+        // switch out the name temporarily for the alias name
+        wxString tmp( part->GetName() );
+        part->SetName( selection->GetName() );
+
+        renderPreview( part, unit );
+
+        part->SetName( tmp );
+    }
 }
 
 
 // Render the preview in our m_componentView. If this gets more complicated, we should
 // probably have a derived class from wxPanel; but this keeps things local.
-void DIALOG_CHOOSE_COMPONENT::renderPreview( LIB_PART*      aComponent, int aUnit )
+void DIALOG_CHOOSE_COMPONENT::renderPreview( LIB_PART* aComponent, int aUnit )
 {
     wxPaintDC dc( m_componentView );
     EDA_COLOR_T bgcolor = m_parent->GetDrawBgColor();
+
     dc.SetBackground( bgcolor == BLACK ? *wxBLACK_BRUSH : *wxWHITE_BRUSH );
     dc.Clear();
 
