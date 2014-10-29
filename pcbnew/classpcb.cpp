@@ -208,6 +208,7 @@ DISPLAY_OPTIONS::DISPLAY_OPTIONS()
     DisplayModText          = true;
     DisplayPcbTrackFill     = true;  // false = sketch , true = filled
     ShowTrackClearanceMode  = SHOW_CLEARANCE_NEW_TRACKS_AND_VIA_AREAS;
+    ShowTrackClearanceForce = false;
     m_DisplayViaMode        = VIA_HOLE_NOT_SHOW;
 
     DisplayPolarCood        = false; /* false = display absolute coordinates,

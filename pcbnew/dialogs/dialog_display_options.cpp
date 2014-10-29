@@ -167,6 +167,10 @@ void DIALOG_DISPLAY_OPTIONS::OnOkClick(wxCommandEvent& event)
             break;
     }
 
+    // clear the clearance override - what the user chooses here will be
+    // displayed immediately
+    DisplayOpt.ShowTrackClearanceForce = false;
+
     m_Parent->m_DisplayModText = DisplayOpt.DisplayModText = m_OptDisplayModTexts->GetSelection();
     m_Parent->m_DisplayModEdge = DisplayOpt.DisplayModEdge = m_OptDisplayModEdges->GetSelection();
 

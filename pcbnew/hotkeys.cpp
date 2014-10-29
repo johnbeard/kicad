@@ -195,6 +195,9 @@ static EDA_HOTKEY HkTrackDisplayMode( wxT( "Track Display Mode" ),
                                       HK_SWITCH_TRACK_DISPLAY_MODE, 'K' );
 static EDA_HOTKEY HkAddModule( wxT( "Add Module" ), HK_ADD_MODULE, 'O' );
 
+static EDA_HOTKEY HkOverrideDisplayTrackClearance( wxT( "Toggle Track Clearance Override" ),
+                                           HK_OVERRIDE_TRACK_CLEARANCE, 'Q' );
+
 /* Record and play macros */
 static EDA_HOTKEY HkRecordMacros0( wxT( "Record Macro 0" ), HK_RECORD_MACROS_0, GR_KB_CTRL+'0' );
 
@@ -289,6 +292,7 @@ EDA_HOTKEY* board_edit_Hotkey_List[] =
     &HkRecordMacros8,          &HkCallMacros8,    &HkRecordMacros9,          &HkCallMacros9,
     &HkSwitchHighContrastMode,
     &HkCanvasDefault,          &HkCanvasCairo,               &HkCanvasOpenGL,
+    &HkOverrideDisplayTrackClearance,
     NULL
 };
 

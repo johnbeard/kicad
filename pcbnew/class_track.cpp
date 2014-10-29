@@ -57,11 +57,11 @@ static bool ShowClearance( const TRACK* aTrack )
     // maybe return true for tracks and vias, not for zone segments
     return IsCopperLayer( aTrack->GetLayer() )
            && ( aTrack->Type() == PCB_TRACE_T || aTrack->Type() == PCB_VIA_T )
-           && ( ( DisplayOpt.ShowTrackClearanceMode == SHOW_CLEARANCE_NEW_AND_EDITED_TRACKS_AND_VIA_AREAS
-                  && ( aTrack->IsDragging() || aTrack->IsMoving() || aTrack->IsNew() ) )
-            || ( DisplayOpt.ShowTrackClearanceMode == SHOW_CLEARANCE_ALWAYS )
+           && ( ( DisplayOpt.ShowTrackClearanceMode != SHOW_CLEARANCE_ALWAYS && DisplayOpt.ShowTrackClearanceForce )
+               || ( DisplayOpt.ShowTrackClearanceMode == SHOW_CLEARANCE_ALWAYS && !DisplayOpt.ShowTrackClearanceForce )
+               || ( DisplayOpt.ShowTrackClearanceMode == SHOW_CLEARANCE_NEW_AND_EDITED_TRACKS_AND_VIA_AREAS
+                   && ( aTrack->IsDragging() || aTrack->IsMoving() || aTrack->IsNew() ) )
             );
-
 }
 
 

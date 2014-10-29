@@ -77,6 +77,7 @@ void FOOTPRINT_EDIT_FRAME::PrintPage( wxDC* aDC,
     DisplayOpt.DisplayModText    = FILLED;
     m_DisplayPcbTrackFill = DisplayOpt.DisplayPcbTrackFill = true;
     DisplayOpt.ShowTrackClearanceMode = DO_NOT_SHOW_CLEARANCE;
+    DisplayOpt.ShowTrackClearanceForce = false;
     DisplayOpt.DisplayDrawItems    = FILLED;
     DisplayOpt.DisplayZonesMode    = 0;
     DisplayOpt.DisplayNetNamesMode = 0;
@@ -202,6 +203,7 @@ void PCB_EDIT_FRAME::PrintPage( wxDC* aDC,
     m_DisplayModText = DisplayOpt.DisplayModText    = FILLED;
     m_DisplayPcbTrackFill = DisplayOpt.DisplayPcbTrackFill = true;
     DisplayOpt.ShowTrackClearanceMode = DO_NOT_SHOW_CLEARANCE;
+    DisplayOpt.ShowTrackClearanceForce = false;
     DisplayOpt.DisplayDrawItems    = FILLED;
     DisplayOpt.DisplayZonesMode    = 0;
     DisplayOpt.DisplayNetNamesMode = 0;

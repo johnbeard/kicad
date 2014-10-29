@@ -83,6 +83,12 @@ public:
     /// How trace clearances are displayed.  @see TRACE_CLEARANCE_DISPLAY_MODE_T.
     TRACE_CLEARANCE_DISPLAY_MODE_T  ShowTrackClearanceMode;
 
+    /// Override the trace clearance specified by ShowTrackClearanceMode
+    /// If ShowTrackClearanceMode is not set to "SHOW_CLEARANCE_ALWAYS", override
+    /// will show clearances, if it is set to SHOW_CLEARANCE_ALWAYS, override
+    /// will hide clearances
+    bool  ShowTrackClearanceForce;
+
     VIA_DISPLAY_MODE_T m_DisplayViaMode;  /* 0 do not show via hole,
                                            * 1 show via hole for non default value
                                            * 2 show all via hole */

@@ -555,6 +555,11 @@ bool PCB_EDIT_FRAME::OnHotKey( wxDC* aDC, int aHotkeyCode, const wxPoint& aPosit
         m_canvas->Refresh();
         break;
 
+    case HK_OVERRIDE_TRACK_CLEARANCE:
+        DisplayOpt.ShowTrackClearanceForce = !DisplayOpt.ShowTrackClearanceForce;
+        m_canvas->Refresh();
+        break;
+
     case HK_CANVAS_CAIRO:
         evt_type = ID_MENU_CANVAS_CAIRO;
         break;

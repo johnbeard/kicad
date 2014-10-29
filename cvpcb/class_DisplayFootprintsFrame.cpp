@@ -104,6 +104,7 @@ DISPLAY_FOOTPRINTS_FRAME::DISPLAY_FOOTPRINTS_FRAME( KIWAY* aKiway, CVPCB_MAINFRA
 
     // Track and via clearance has no meaning here.
     DisplayOpt.ShowTrackClearanceMode = DO_NOT_SHOW_CLEARANCE;
+    DisplayOpt.ShowTrackClearanceForce = false;
 
     SetSize( m_FramePos.x, m_FramePos.y, m_FrameSize.x, m_FrameSize.y );
     ReCreateHToolbar();
