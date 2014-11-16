@@ -888,7 +888,6 @@ bool PCB_EDIT_FRAME::OnHotkeyMoveItem( int aIdCommand )
     return false;
 }
 
-
 bool PCB_EDIT_FRAME::OnHotkeyPlaceItem( wxDC* aDC )
 {
     BOARD_ITEM* item = GetCurItem();

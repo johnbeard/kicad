@@ -132,7 +132,9 @@ public:
     bool OnHotkeyEditItem( int aIdCommand );
     bool OnHotkeyDeleteItem( int aIdCommand );
     bool OnHotkeyMoveItem( int aIdCommand );
+    bool OnHotkeyMoveItemExact();
     bool OnHotkeyRotateItem( int aIdCommand );
+    bool OnHotkeyDuplicateItem();
 
     /**
      * Function Show3D_Frame

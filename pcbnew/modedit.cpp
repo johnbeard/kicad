@@ -54,6 +54,7 @@
 #include <tool/tool_manager.h>
 
 #include <dialog_edit_module_for_Modedit.h>
+#include <dialog_move_exact.h>
 #include <wildcards_and_files_ext.h>
 #include <menus_helpers.h>
 #include <footprint_wizard_frame.h>
@@ -63,11 +64,13 @@
 
 
 // Functions defined in block_module_editor, but used here
-// These 2 functions are used in modedit to rotate or mirror the whole footprint
+// These 3 functions are used in modedit to rotate or mirror the whole footprint
 // so they are called with force_all = true
 void MirrorMarkedItems( MODULE* module, wxPoint offset, bool force_all = false );
 void RotateMarkedItems( MODULE* module, wxPoint offset, bool force_all = false );
-
+void MoveMarkedItemsExactly( MODULE* module, const wxPoint& centre,
+                             const wxPoint& translation, double rotation,
+                             bool force_all = false );
 
 BOARD_ITEM* FOOTPRINT_EDIT_FRAME::ModeditLocateAndDisplay( int aHotKeyCode )
 {
@@ -637,6 +640,124 @@ void FOOTPRINT_EDIT_FRAME::Process_Special_Functions( wxCommandEvent& event )
         m_canvas->MoveCursorToCrossHair();
         break;
 
+    case ID_POPUP_PCB_DUPLICATE_ITEM:
+        {
+            SaveCopyInUndoList( GetBoard()->m_Modules, UR_MODEDIT );
+
+            BOARD_ITEM* item = GetScreen()->GetCurItem();
+            BOARD_ITEM* new_item = NULL;
+
+            MODULE* module = static_cast<MODULE*>( item->GetParent() );
+
+            int move_cmd = 0;
+
+            switch ( item->Type() )
+            {
+            case PCB_PAD_T:
+                {
+                    D_PAD* new_pad = new D_PAD( *static_cast<D_PAD*>( item ) );
+
+                    module->Pads().PushBack( new_pad );
+                    new_item = new_pad;
+                    move_cmd = ID_POPUP_PCB_MOVE_PAD_REQUEST;
+                }
+                break;
+            case PCB_MODULE_TEXT_T:
+                {
+                    const TEXTE_MODULE* old_text = static_cast<TEXTE_MODULE*>( item );
+
+                    // do not duplicate value or reference fields
+                    // (there can only be one of each)
+                    if ( &module->Reference() != old_text
+                            && &module->Value() != old_text )
+                    {
+                        TEXTE_MODULE* new_text = new TEXTE_MODULE( *old_text );
+
+                        module->GraphicalItems().PushBack( new_text );
+                        new_item = new_text;
+                        move_cmd = ID_POPUP_PCB_MOVE_TEXTMODULE_REQUEST;
+                    }
+                }
+                break;
+            case PCB_MODULE_EDGE_T:
+                {
+                    EDGE_MODULE* new_edge = new EDGE_MODULE(
+                            *static_cast<EDGE_MODULE*>(item) );
+
+                    module->GraphicalItems().PushBack( new_edge );
+                    new_item = new_edge;
+                    move_cmd = ID_POPUP_PCB_MOVE_EDGE;
+                }
+                break;
+            default:
+                // Un-handled item for exact move
+                wxASSERT_MSG( false, "Duplication not supported for items of class "
+                        + item->GetClass() );
+                break;
+            }
+
+            if ( new_item )
+            {
+                SetMsgPanel( new_item );
+                SetCurItem( new_item );
+
+                m_canvas->MoveCursorToCrossHair();
+            }
+
+            if ( move_cmd )
+            {
+                // pick up the item and start moving
+                PostCommandMenuEvent( move_cmd );
+            }
+        }
+        break;
+
+    case ID_POPUP_PCB_MOVE_EXACT:
+        {
+            wxPoint translation;
+            double rotation = 0;
+
+            DIALOG_MOVE_EXACT dialog( this, translation, rotation );
+            int ret = dialog.ShowModal();
+
+            if( ret == DIALOG_MOVE_EXACT::MOVE_OK )
+            {
+                SaveCopyInUndoList( GetBoard()->m_Modules, UR_MODEDIT );
+
+                BOARD_ITEM* item = GetScreen()->GetCurItem();
+
+                switch ( item->Type() )
+                {
+                case PCB_PAD_T:
+                case PCB_MODULE_TEXT_T:
+
+                    // these items can use the common BOARD_ITEM::GetPosition
+                    // to get their "centre"
+                    item->Move( translation );
+                    item->Rotate( item->GetPosition(), rotation );
+                    break;
+
+                case PCB_MODULE_EDGE_T:
+                    {
+                        // EDGE_MODULEs have a different idea of "centre"
+                        EDGE_MODULE* edge = static_cast<EDGE_MODULE*>( item );
+                        edge->Move( translation );
+                        edge->Rotate( edge->GetCenter(), rotation );
+                    }
+                    break;
+                default:
+                    // Un-handled item for exact move
+                    wxASSERT_MSG( false, "Exact move not supported for items of class "
+                            + item->GetClass() );
+                    break;
+                }
+                m_canvas->Refresh();
+            }
+
+            m_canvas->MoveCursorToCrossHair();
+        }
+        break;
+
     case ID_POPUP_PCB_IMPORT_PAD_SETTINGS:
         SaveCopyInUndoList( GetBoard()->m_Modules, UR_MODEDIT );
         m_canvas->MoveCursorToCrossHair();
@@ -736,6 +857,7 @@ void FOOTPRINT_EDIT_FRAME::Process_Special_Functions( wxCommandEvent& event )
 
     case ID_MODEDIT_MODULE_ROTATE:
     case ID_MODEDIT_MODULE_MIRROR:
+    case ID_MODEDIT_MODULE_MOVE_EXACT:
         SaveCopyInUndoList( GetBoard()->m_Modules, UR_MODEDIT );
         Transform( (MODULE*) GetScreen()->GetCurItem(), id );
         redraw = true;
@@ -800,6 +922,12 @@ void FOOTPRINT_EDIT_FRAME::Process_Special_Functions( wxCommandEvent& event )
         HandleBlockEnd( &dc );
         break;
 
+    case ID_POPUP_MOVE_BLOCK_EXACT:
+        GetScreen()->m_BlockLocate.SetCommand( BLOCK_MOVE_EXACT );
+        GetScreen()->m_BlockLocate.SetMessageBlock( this );
+        HandleBlockEnd( &dc );
+        break;
+
     case ID_GEN_IMPORT_DXF_FILE:
         InvokeDXFDialogModuleImport( this, GetBoard()->m_Modules );
         m_canvas->Refresh();
@@ -826,6 +954,22 @@ void FOOTPRINT_EDIT_FRAME::Transform( MODULE* module, int transform )
 
     case ID_MODEDIT_MODULE_MIRROR:
         MirrorMarkedItems( module, wxPoint(0,0), true );
+        break;
+
+    case ID_MODEDIT_MODULE_MOVE_EXACT:
+        {
+            wxPoint translation;
+            double rotation = 0;
+
+            DIALOG_MOVE_EXACT dialog( this, translation, rotation  );
+            int ret = dialog.ShowModal();
+
+            if( ret == DIALOG_MOVE_EXACT::MOVE_OK )
+            {
+                MoveMarkedItemsExactly( module, wxPoint(0, 0),
+                                        translation, rotation, true );
+            }
+        }
         break;
 
     default:

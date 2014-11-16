@@ -152,8 +152,24 @@ bool FOOTPRINT_EDIT_FRAME::OnHotKey( wxDC* aDC, int aHotKey, const wxPoint& aPos
         OnHotkeyMoveItem( HK_MOVE_ITEM );
         break;
 
+    case HK_MOVE_ITEM_EXACT:
+        if ( blockActive )
+        {
+            cmd.SetId( ID_POPUP_MOVE_BLOCK_EXACT );
+            GetEventHandler()->ProcessEvent( cmd );
+        }
+        else
+        {
+            OnHotkeyMoveItemExact();
+        }
+        break;
+
     case HK_ROTATE_ITEM:
         OnHotkeyRotateItem( HK_ROTATE_ITEM );
+        break;
+
+    case HK_DUPLICATE_ITEM:
+        OnHotkeyDuplicateItem();
         break;
     }
 
@@ -315,6 +331,53 @@ bool FOOTPRINT_EDIT_FRAME::OnHotkeyMoveItem( int aIdCommand )
 
         break;
 
+    default:
+        break;
+    }
+
+    return PostCommandMenuEvent( evt_type );
+}
+
+
+bool FOOTPRINT_EDIT_FRAME::OnHotkeyMoveItemExact()
+{
+    BOARD_ITEM* item = PrepareItemForHotkey( false );
+
+    if( item == NULL )
+        return false;
+
+    int evt_type = 0;       // Used to post a wxCommandEvent on demand
+
+    switch( item->Type() )
+    {
+    case PCB_PAD_T:
+    case PCB_MODULE_EDGE_T:
+    case PCB_MODULE_TEXT_T:
+        evt_type = ID_POPUP_PCB_MOVE_EXACT;
+        break;
+    default:
+        break;
+    }
+
+    return PostCommandMenuEvent( evt_type );
+}
+
+bool FOOTPRINT_EDIT_FRAME::OnHotkeyDuplicateItem()
+{
+    BOARD_ITEM* item = PrepareItemForHotkey( true );
+
+    if( item == NULL )
+        return false;
+
+    int evt_type = 0;       // Used to post a wxCommandEvent on demand
+
+    switch( item->Type() )
+    {
+    case PCB_PAD_T:
+    case PCB_MODULE_EDGE_T:
+    case PCB_MODULE_TEXT_T:
+        evt_type = ID_POPUP_PCB_DUPLICATE_ITEM;
+        break;
     default:
         break;
     }
