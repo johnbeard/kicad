@@ -161,21 +161,57 @@ bool FOOTPRINT_EDIT_FRAME::OnHotKey( wxDC* aDC, int aHotKey, const wxPoint& aPos
 }
 
 
-bool FOOTPRINT_EDIT_FRAME::OnHotkeyEditItem( int aIdCommand )
+BOARD_ITEM* FOOTPRINT_EDIT_FRAME::PrepareItemForHotkey( bool failIfCurrentlyEdited )
 {
     BOARD_ITEM* item = GetCurItem();
     bool        itemCurrentlyEdited = item && item->GetFlags();
     bool        blockActive = GetScreen()->m_BlockLocate.GetCommand() != BLOCK_IDLE;
 
-    if( itemCurrentlyEdited || blockActive )
-        return false;
+    if ( failIfCurrentlyEdited )
+    {
+        if( itemCurrentlyEdited || blockActive )
+            return NULL;
 
-    item = ModeditLocateAndDisplay();
+        item = ModeditLocateAndDisplay();
+    }
+    else
+    {
+        if( blockActive )
+            return NULL;
+
+        if( !itemCurrentlyEdited )
+            item = ModeditLocateAndDisplay();
+    }
+
+    // set item if we can, but don't clear if not
+    if( item )
+        SetCurItem( item );
+
+    return item;
+}
+
+
+bool FOOTPRINT_EDIT_FRAME::PostCommandMenuEvent( int evt_type )
+{
+    if( evt_type != 0 )
+    {
+        wxCommandEvent evt( wxEVT_COMMAND_MENU_SELECTED );
+        evt.SetEventObject( this );
+        evt.SetId( evt_type );
+        wxPostEvent( this, evt );
+        return true;
+    }
+
+    return false;
+}
+
+
+bool FOOTPRINT_EDIT_FRAME::OnHotkeyEditItem( int aIdCommand )
+{
+    BOARD_ITEM* item = PrepareItemForHotkey( true );
 
     if( item == NULL )
         return false;
-
-    SetCurItem( item );
 
     int evt_type = 0;       // Used to post a wxCommandEvent on demand
 
@@ -209,34 +245,16 @@ bool FOOTPRINT_EDIT_FRAME::OnHotkeyEditItem( int aIdCommand )
         break;
     }
 
-    if( evt_type != 0 )
-    {
-        wxCommandEvent evt( wxEVT_COMMAND_MENU_SELECTED );
-        evt.SetEventObject( this );
-        evt.SetId( evt_type );
-        wxPostEvent( this, evt );
-        return true;
-    }
-
-    return false;
+    return PostCommandMenuEvent( evt_type );
 }
 
 
 bool FOOTPRINT_EDIT_FRAME::OnHotkeyDeleteItem( int aIdCommand )
 {
-    BOARD_ITEM* item = GetCurItem();
-    bool        itemCurrentlyEdited = item && item->GetFlags();
-    bool        blockActive = GetScreen()->m_BlockLocate.GetCommand() != BLOCK_IDLE;
-
-    if( itemCurrentlyEdited || blockActive )
-        return false;
-
-    item = ModeditLocateAndDisplay();
+    BOARD_ITEM* item = PrepareItemForHotkey( true );
 
     if( item == NULL )
         return false;
-
-    SetCurItem( item );
 
     int evt_type = 0;       // Used to post a wxCommandEvent on demand
 
@@ -264,34 +282,16 @@ bool FOOTPRINT_EDIT_FRAME::OnHotkeyDeleteItem( int aIdCommand )
         break;
     }
 
-    if( evt_type != 0 )
-    {
-        wxCommandEvent evt( wxEVT_COMMAND_MENU_SELECTED );
-        evt.SetEventObject( this );
-        evt.SetId( evt_type );
-        wxPostEvent( this, evt );
-        return true;
-    }
-
-    return false;
+    return PostCommandMenuEvent( evt_type );
 }
 
 
 bool FOOTPRINT_EDIT_FRAME::OnHotkeyMoveItem( int aIdCommand )
 {
-    BOARD_ITEM* item = GetCurItem();
-    bool        itemCurrentlyEdited = item && item->GetFlags();
-    bool        blockActive = GetScreen()->m_BlockLocate.GetCommand() != BLOCK_IDLE;
-
-    if( itemCurrentlyEdited || blockActive )
-        return false;
-
-    item = ModeditLocateAndDisplay();
+    BOARD_ITEM* item = PrepareItemForHotkey( true );
 
     if( item == NULL )
         return false;
-
-    SetCurItem( item );
 
     int evt_type = 0;       // Used to post a wxCommandEvent on demand
 
@@ -319,36 +319,18 @@ bool FOOTPRINT_EDIT_FRAME::OnHotkeyMoveItem( int aIdCommand )
         break;
     }
 
-    if( evt_type != 0 )
-    {
-        wxCommandEvent evt( wxEVT_COMMAND_MENU_SELECTED );
-        evt.SetEventObject( this );
-        evt.SetId( evt_type );
-        wxPostEvent( this, evt );
-        return true;
-    }
-
-    return false;
+    return PostCommandMenuEvent( evt_type );
 }
 
 
 bool FOOTPRINT_EDIT_FRAME::OnHotkeyRotateItem( int aIdCommand )
 {
-    BOARD_ITEM* item = GetCurItem();
-    bool        itemCurrentlyEdited = item && item->GetFlags();
-    int         evt_type    = 0; // Used to post a wxCommandEvent on demand
-    bool        blockActive = GetScreen()->m_BlockLocate.GetCommand() != BLOCK_IDLE;
-
-    if( blockActive )
-        return false;
-
-    if( !itemCurrentlyEdited )
-        item = ModeditLocateAndDisplay();
+    BOARD_ITEM* item = PrepareItemForHotkey( false );
 
     if( item == NULL )
         return false;
 
-    SetCurItem( item );
+    int evt_type = 0;       // Used to post a wxCommandEvent on demand
 
     switch( item->Type() )
     {
@@ -362,14 +344,5 @@ bool FOOTPRINT_EDIT_FRAME::OnHotkeyRotateItem( int aIdCommand )
         break;
     }
 
-    if( evt_type != 0 )
-    {
-        wxCommandEvent evt( wxEVT_COMMAND_MENU_SELECTED );
-        evt.SetEventObject( this );
-        evt.SetId( evt_type );
-        wxPostEvent( this, evt );
-        return true;
-    }
-
-    return false;
+    return PostCommandMenuEvent( evt_type );
 }

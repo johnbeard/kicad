@@ -126,6 +126,9 @@ public:
      */
     bool OnHotKey( wxDC* aDC, int aHotKey, const wxPoint& aPosition, EDA_ITEM* aItem = NULL );
 
+    BOARD_ITEM* PrepareItemForHotkey( bool failIfCurrentlyEdited );
+    bool PostCommandMenuEvent( int evt_type );
+
     bool OnHotkeyEditItem( int aIdCommand );
     bool OnHotkeyDeleteItem( int aIdCommand );
     bool OnHotkeyMoveItem( int aIdCommand );
