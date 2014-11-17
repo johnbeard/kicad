@@ -42,6 +42,8 @@
 #include "selection_tool.h"
 #include "edit_tool.h"
 
+#include <dialogs/dialog_move_exact.h>
+
 EDIT_TOOL::EDIT_TOOL() :
     TOOL_INTERACTIVE( "pcbnew.InteractiveEdit" ), m_selectionTool( NULL ), m_editModules( false )
 {
@@ -71,6 +73,7 @@ bool EDIT_TOOL::Init()
     m_selectionTool->AddMenuItem( COMMON_ACTIONS::flip, SELECTION_CONDITIONS::NotEmpty );
     m_selectionTool->AddMenuItem( COMMON_ACTIONS::remove, SELECTION_CONDITIONS::NotEmpty );
     m_selectionTool->AddMenuItem( COMMON_ACTIONS::properties, SELECTION_CONDITIONS::NotEmpty );
+    m_selectionTool->AddMenuItem( COMMON_ACTIONS::moveExact, SELECTION_CONDITIONS::NotEmpty );
 
     m_offset.x = 0;
     m_offset.y = 0;
@@ -110,6 +113,9 @@ int EDIT_TOOL::Main( TOOL_EVENT& aEvent )
     controls->SetSnapping( true );
     controls->ForceCursorPosition( false );
 
+    // cumulative translation
+    wxPoint totalMovement( 0, 0 );
+
     // Main loop: keep receiving events
     while( OPT_TOOL_EVENT evt = Wait() )
     {
@@ -145,6 +151,30 @@ int EDIT_TOOL::Main( TOOL_EVENT& aEvent )
 
                 break;       // exit the loop, as there is no further processing for removed items
             }
+            else if( evt->IsAction( &COMMON_ACTIONS::moveExact ) )
+            {
+                // Can't do this, because the selection will then contain
+                // stale pointers and it will all go horribly wrong...
+                //editFrame->RestoreCopyFromUndoList( dummy );
+                //
+                // So, instead, reset the position manually
+                for( unsigned int i = 0; i < selection.items.GetCount(); ++i )
+                {
+                    BOARD_ITEM* item = selection.Item<BOARD_ITEM>( i );
+                    item->SetPosition( item->GetPosition() - totalMovement );
+
+                    // and what about flipping and rotation?
+                    // for now, they won't be undone, but maybe that is how
+                    // it should be, so you can flip and move exact in the
+                    // same action?
+                }
+
+                // This causes a double event, so we will get the dialogue
+                // correctly, somehow - why does Rotate not?
+                //MoveExact( aEvent );
+                break;      // exit the loop - we move exactly, so we have
+                            // finished moving
+            }
         }
 
         else if( evt->IsMotion() || evt->IsDrag( BUT_LEFT ) )
@@ -155,6 +185,8 @@ int EDIT_TOOL::Main( TOOL_EVENT& aEvent )
             {
                 wxPoint movement = wxPoint( m_cursor.x, m_cursor.y ) -
                                    selection.Item<BOARD_ITEM>( 0 )->GetPosition();
+
+                totalMovement += movement;
 
                 // Drag items to the current cursor position
                 for( unsigned int i = 0; i < selection.items.GetCount(); ++i )
@@ -203,6 +235,7 @@ int EDIT_TOOL::Main( TOOL_EVENT& aEvent )
 
         else if( evt->IsMouseUp( BUT_LEFT ) || evt->IsClick( BUT_LEFT ) )
             break; // Finish
+
     }
 
     m_dragging = false;
@@ -532,6 +565,107 @@ void EDIT_TOOL::remove( BOARD_ITEM* aItem )
 }
 
 
+int EDIT_TOOL::Duplicate( TOOL_EVENT& aEvent )
+{
+    const SELECTION& selection = m_selectionTool->GetSelection();
+
+    // Shall the selection be cleared at the end?
+    bool unselect = selection.Empty();
+
+    if( !makeSelection( selection ) || m_selectionTool->CheckLock() )
+    {
+        setTransitions();
+
+        return 0;
+    }
+
+    for( unsigned int i = 0; i < selection.items.GetCount(); ++i )
+    {
+        BOARD_ITEM* item = selection.Item<BOARD_ITEM>( i );
+
+        // TODO: duplicate....
+
+        if( !m_dragging )
+            item->ViewUpdate( KIGFX::VIEW_ITEM::LAYERS );
+    }
+
+    updateRatsnest( m_dragging );
+
+    if( m_dragging )
+        selection.group->ViewUpdate( KIGFX::VIEW_ITEM::GEOMETRY );
+    else
+        getModel<BOARD>()->GetRatsnest()->Recalculate();
+
+    if( unselect )
+        m_toolMgr->RunAction( COMMON_ACTIONS::selectionClear, true );
+
+    m_toolMgr->RunAction( COMMON_ACTIONS::pointEditorUpdate, true );
+
+    setTransitions();
+    return 0;
+}
+
+
+int EDIT_TOOL::MoveExact( TOOL_EVENT& aEvent )
+{
+    const SELECTION& selection = m_selectionTool->GetSelection();
+
+    // Shall the selection be cleared at the end?
+    bool unselect = selection.Empty();
+
+    if( !makeSelection( selection ) || m_selectionTool->CheckLock() )
+    {
+        setTransitions();
+
+        return 0;
+    }
+
+    wxPoint translation;
+    double rotation = 0;
+
+    PCB_BASE_FRAME* editFrame = getEditFrame<PCB_BASE_FRAME>();
+
+    DIALOG_MOVE_EXACT dialog( editFrame, translation, rotation );
+    int ret = dialog.ShowModal();
+
+    if( ret == DIALOG_MOVE_EXACT::MOVE_OK )
+    {
+        if( m_dragging )
+        {
+            editFrame->OnModify();
+            editFrame->SaveCopyInUndoList( selection.items, UR_MOVED );
+        }
+
+        for( unsigned int i = 0; i < selection.items.GetCount(); ++i )
+        {
+            BOARD_ITEM* item = selection.Item<BOARD_ITEM>( i );
+
+            item->Move( translation );
+            item->Rotate( item->GetPosition(), rotation );
+
+            if( !m_dragging )
+                item->ViewUpdate( KIGFX::VIEW_ITEM::GEOMETRY );
+        }
+
+        updateRatsnest( m_dragging );
+
+        if( m_dragging )
+            selection.group->ViewUpdate( KIGFX::VIEW_ITEM::GEOMETRY );
+        else
+            getModel<BOARD>()->GetRatsnest()->Recalculate();
+
+        if( unselect )
+            m_toolMgr->RunAction( COMMON_ACTIONS::selectionClear, true );
+
+        m_toolMgr->RunAction( COMMON_ACTIONS::pointEditorUpdate, true );
+    }
+
+    setTransitions();
+
+    return 0;
+}
+
+
 void EDIT_TOOL::setTransitions()
 {
     Go( &EDIT_TOOL::Main,       COMMON_ACTIONS::editActivate.MakeEvent() );
@@ -539,6 +673,8 @@ void EDIT_TOOL::setTransitions()
     Go( &EDIT_TOOL::Flip,       COMMON_ACTIONS::flip.MakeEvent() );
     Go( &EDIT_TOOL::Remove,     COMMON_ACTIONS::remove.MakeEvent() );
     Go( &EDIT_TOOL::Properties, COMMON_ACTIONS::properties.MakeEvent() );
+    Go( &EDIT_TOOL::Duplicate,  COMMON_ACTIONS::duplicate.MakeEvent() );
+    Go( &EDIT_TOOL::MoveExact,  COMMON_ACTIONS::moveExact.MakeEvent() );
 }
 
 

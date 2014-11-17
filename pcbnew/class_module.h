@@ -452,6 +452,8 @@ public:
     int GetPlacementCost90() const          { return m_CntRot90; }
     void SetPlacementCost90( int aCost )    { m_CntRot90 = aCost; }
 
+    BOARD_ITEM* DuplicateAndAddItem( const BOARD_ITEM* item );
+
     /**
      * Function Add3DModel
      * adds \a a3DModel definition to the end of the 3D model list.

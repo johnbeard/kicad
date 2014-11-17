@@ -92,6 +92,20 @@ public:
     int Remove( TOOL_EVENT& aEvent );
 
     /**
+     * Function Duplicate()
+     *
+     * Duplicates a component and starts a move action
+     */
+    int Duplicate( TOOL_EVENT& aEvent );
+
+    /**
+     * Function MoveExact()
+     *
+     * Invokes a dialog box to allow moving of the item by an exact amount.
+     */
+    int MoveExact( TOOL_EVENT& aEvent );
+
+    /**
      * Function EditModules()
      *
      * Toggles edit module mode. When enabled, one may select parts of modules individually
@@ -122,6 +136,7 @@ private:
 
     ///> Removes and frees a single BOARD_ITEM.
     void remove( BOARD_ITEM* aItem );
+
 
     ///> Sets up handlers for various events.
     void setTransitions();

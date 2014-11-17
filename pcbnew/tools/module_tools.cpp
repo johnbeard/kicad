@@ -74,6 +74,7 @@ bool MODULE_TOOLS::Init()
     }
 
     selectionTool->AddMenuItem( COMMON_ACTIONS::enumeratePads );
+    selectionTool->AddMenuItem( COMMON_ACTIONS::duplicate );
 
     setTransitions();
 
@@ -532,6 +533,64 @@ int MODULE_TOOLS::PasteItems( TOOL_EVENT& aEvent )
     return 0;
 }
 
+int MODULE_TOOLS::DuplicateItems ( TOOL_EVENT& aEvent )
+{
+    MODULE* module = m_board->m_Modules;
+    assert( module );
+
+    // first, check if we have a selection, or try to get one
+    SELECTION_TOOL* selTool = m_toolMgr->GetTool<SELECTION_TOOL>();
+
+    if ( selTool->GetSelection().Empty() )
+    {
+        m_toolMgr->RunAction( COMMON_ACTIONS::selectionCursor, true );
+    }
+
+    const SELECTION& selection = selTool->GetSelection();
+
+    // if we don't have a selection by now, this tool can't do anything
+    if( selection.Empty() || selTool->CheckLock() )
+    {
+        setTransitions();
+        return 0;
+    }
+
+    // we have a selection to work on now, so start the tool process
+    m_frame->SaveCopyInUndoList( module, UR_MODEDIT );
+
+    for ( int i = 0; i < selection.Size(); ++i )
+    {
+        BOARD_ITEM* item = selection.Item<BOARD_ITEM>( i );
+
+        if ( item )
+        {
+            BOARD_ITEM* new_item = module->DuplicateAndAddItem( item );
+
+            if ( new_item )
+            {
+                m_view->Add( new_item );
+
+                m_toolMgr->RunAction( COMMON_ACTIONS::selectItem, true, new_item);
+            }
+
+            m_toolMgr->RunAction( COMMON_ACTIONS::unselectItem, true, item);
+        }
+    }
+
+    m_frame->DisplayToolMsg( wxString::Format( _( "Duplicated %d item(s)" ),
+                             selection.Size() ) );
+
+    // pick up the selected item(s) and start moving
+    // this works well for "dropping" copies around
+    // TODO: moveExact doesn't work too well, because it will use the current
+    // position, not the original position
+    m_toolMgr->RunAction( COMMON_ACTIONS::editActivate, true );
+
+    setTransitions();
+
+    return 0;
+}
+
 
 int MODULE_TOOLS::ModuleTextOutlines( TOOL_EVENT& aEvent )
 {
@@ -608,6 +667,7 @@ void MODULE_TOOLS::setTransitions()
     Go( &MODULE_TOOLS::EnumeratePads,       COMMON_ACTIONS::enumeratePads.MakeEvent() );
     Go( &MODULE_TOOLS::CopyItems,           COMMON_ACTIONS::copyItems.MakeEvent() );
     Go( &MODULE_TOOLS::PasteItems,          COMMON_ACTIONS::pasteItems.MakeEvent() );
+    Go( &MODULE_TOOLS::DuplicateItems,      COMMON_ACTIONS::duplicate.MakeEvent() );
     Go( &MODULE_TOOLS::ModuleTextOutlines,  COMMON_ACTIONS::moduleTextOutlines.MakeEvent() );
     Go( &MODULE_TOOLS::ModuleEdgeOutlines,  COMMON_ACTIONS::moduleEdgeOutlines.MakeEvent() );
 }

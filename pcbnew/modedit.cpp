@@ -645,59 +645,27 @@ void FOOTPRINT_EDIT_FRAME::Process_Special_Functions( wxCommandEvent& event )
             SaveCopyInUndoList( GetBoard()->m_Modules, UR_MODEDIT );
 
             BOARD_ITEM* item = GetScreen()->GetCurItem();
-            BOARD_ITEM* new_item = NULL;
-
             MODULE* module = static_cast<MODULE*>( item->GetParent() );
 
             int move_cmd = 0;
 
-            switch ( item->Type() )
-            {
-            case PCB_PAD_T:
-                {
-                    D_PAD* new_pad = new D_PAD( *static_cast<D_PAD*>( item ) );
-
-                    module->Pads().PushBack( new_pad );
-                    new_item = new_pad;
-                    move_cmd = ID_POPUP_PCB_MOVE_PAD_REQUEST;
-                }
-                break;
-            case PCB_MODULE_TEXT_T:
-                {
-                    const TEXTE_MODULE* old_text = static_cast<TEXTE_MODULE*>( item );
-
-                    // do not duplicate value or reference fields
-                    // (there can only be one of each)
-                    if ( &module->Reference() != old_text
-                            && &module->Value() != old_text )
-                    {
-                        TEXTE_MODULE* new_text = new TEXTE_MODULE( *old_text );
-
-                        module->GraphicalItems().PushBack( new_text );
-                        new_item = new_text;
-                        move_cmd = ID_POPUP_PCB_MOVE_TEXTMODULE_REQUEST;
-                    }
-                }
-                break;
-            case PCB_MODULE_EDGE_T:
-                {
-                    EDGE_MODULE* new_edge = new EDGE_MODULE(
-                            *static_cast<EDGE_MODULE*>(item) );
-
-                    module->GraphicalItems().PushBack( new_edge );
-                    new_item = new_edge;
-                    move_cmd = ID_POPUP_PCB_MOVE_EDGE;
-                }
-                break;
-            default:
-                // Un-handled item for exact move
-                wxASSERT_MSG( false, "Duplication not supported for items of class "
-                        + item->GetClass() );
-                break;
-            }
+            BOARD_ITEM* new_item = module->DuplicateAndAddItem( item );
 
             if ( new_item )
             {
+                switch ( new_item->Type() )
+                {
+                case PCB_PAD_T:
+                    move_cmd = ID_POPUP_PCB_MOVE_PAD_REQUEST;
+                    break;
+                case PCB_MODULE_TEXT_T:
+                    move_cmd = ID_POPUP_PCB_MOVE_TEXTMODULE_REQUEST;
+                    break;
+                case PCB_MODULE_EDGE_T:
+                    move_cmd = ID_POPUP_PCB_MOVE_EDGE;
+                    break;
+                }
+
                 SetMsgPanel( new_item );
                 SetCurItem( new_item );
 
@@ -726,31 +694,8 @@ void FOOTPRINT_EDIT_FRAME::Process_Special_Functions( wxCommandEvent& event )
 
                 BOARD_ITEM* item = GetScreen()->GetCurItem();
 
-                switch ( item->Type() )
-                {
-                case PCB_PAD_T:
-                case PCB_MODULE_TEXT_T:
-
-                    // these items can use the common BOARD_ITEM::GetPosition
-                    // to get their "centre"
-                    item->Move( translation );
-                    item->Rotate( item->GetPosition(), rotation );
-                    break;
-
-                case PCB_MODULE_EDGE_T:
-                    {
-                        // EDGE_MODULEs have a different idea of "centre"
-                        EDGE_MODULE* edge = static_cast<EDGE_MODULE*>( item );
-                        edge->Move( translation );
-                        edge->Rotate( edge->GetCenter(), rotation );
-                    }
-                    break;
-                default:
-                    // Un-handled item for exact move
-                    wxASSERT_MSG( false, "Exact move not supported for items of class "
-                            + item->GetClass() );
-                    break;
-                }
+                item->Move( translation );
+                item->Rotate( item->GetPosition(), rotation );
                 m_canvas->Refresh();
             }
 

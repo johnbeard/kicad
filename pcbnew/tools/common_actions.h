@@ -65,6 +65,12 @@ public:
     /// Activation of the edit tool
     static TOOL_ACTION properties;
 
+    /// Activation of the exact move tool
+    static TOOL_ACTION moveExact;
+
+    /// Activation of the duplication tool
+    static TOOL_ACTION duplicate;
+
     /// Deleting a BOARD_ITEM
     static TOOL_ACTION remove;
 

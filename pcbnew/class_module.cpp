@@ -1112,3 +1112,50 @@ void MODULE::SetOrientation( double newangle )
     CalculateBoundingBox();
 }
 
+BOARD_ITEM* MODULE::DuplicateAndAddItem( const BOARD_ITEM* item )
+{
+    BOARD_ITEM* new_item = NULL;
+
+    switch ( item->Type() )
+    {
+    case PCB_PAD_T:
+        {
+            D_PAD* new_pad = new D_PAD( *static_cast<const D_PAD*>( item ) );
+
+            Pads().PushBack( new_pad );
+            new_item = new_pad;
+        }
+        break;
+    case PCB_MODULE_TEXT_T:
+        {
+            const TEXTE_MODULE* old_text = static_cast<const TEXTE_MODULE*>( item );
+
+            // do not duplicate value or reference fields
+            // (there can only be one of each)
+            if ( old_text->GetType() == TEXTE_MODULE::TEXT_is_DIVERS )
+            {
+                TEXTE_MODULE* new_text = new TEXTE_MODULE( *old_text );
+
+                GraphicalItems().PushBack( new_text );
+                new_item = new_text;
+            }
+        }
+        break;
+    case PCB_MODULE_EDGE_T:
+        {
+            EDGE_MODULE* new_edge = new EDGE_MODULE(
+                    *static_cast<const EDGE_MODULE*>(item) );
+
+            GraphicalItems().PushBack( new_edge );
+            new_item = new_edge;
+        }
+        break;
+    default:
+        // Un-handled item for duplication
+        wxASSERT_MSG( false, "Duplication not supported for items of class "
+                + item->GetClass() );
+        break;
+    }
+
+    return new_item;
+}

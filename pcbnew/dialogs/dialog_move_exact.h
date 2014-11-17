@@ -64,7 +64,7 @@ public:
     };
 
     // Constructor and destructor
-    DIALOG_MOVE_EXACT( FOOTPRINT_EDIT_FRAME* aParent, wxPoint& translation,
+    DIALOG_MOVE_EXACT( PCB_BASE_FRAME* aParent, wxPoint& translation,
                        double& rotation );
     ~DIALOG_MOVE_EXACT();
 
