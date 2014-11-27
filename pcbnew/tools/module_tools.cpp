@@ -82,44 +82,6 @@ bool MODULE_TOOLS::Init()
 }
 
 
-static wxString getNextPadName( MODULE* aModule )
-{
-    std::set<int> usedNumbers;
-
-    // Create a set of used pad numbers
-    for( D_PAD* pad = aModule->Pads(); pad; pad = pad->Next() )
-    {
-        wxString padName = pad->GetPadName();
-        int padNumber = 0;
-        int base = 1;
-
-        // Trim and extract the trailing numeric part
-        while( padName.Len() && padName.Last() >= '0' && padName.Last() <= '9' )
-        {
-            padNumber += ( padName.Last() - '0' ) * base;
-            padName.RemoveLast();
-            base *= 10;
-        }
-
-        usedNumbers.insert( padNumber );
-    }
-
-    int candidate = *usedNumbers.begin();
-
-    // Look for a gap in pad numbering
-    for( std::set<int>::iterator it = usedNumbers.begin(),
-            itEnd = usedNumbers.end(); it != itEnd; ++it )
-    {
-        if( *it - candidate > 1 )
-            break;
-
-        candidate = *it;
-    }
-
-    return wxString::Format( wxT( "%i" ), ++candidate );
-}
-
-
 int MODULE_TOOLS::PlacePad( TOOL_EVENT& aEvent )
 {
     m_frame->SetToolID( ID_MODEDIT_PAD_TOOL, wxCURSOR_PENCIL, _( "Add pads" ) );
@@ -190,14 +152,8 @@ int MODULE_TOOLS::PlacePad( TOOL_EVENT& aEvent )
             // ( pad position for module orient, 0, and relative to the module position)
             pad->SetLocalCoord();
 
-            /* NPTH pads take empty pad number (since they can't be connected),
-             * other pads get incremented from the last one edited */
-            wxString padName;
-
-            if( pad->GetAttribute() != PAD_HOLE_NOT_PLATED )
-                padName = getNextPadName( module );
-
-            pad->SetPadName( padName );
+            // Take the next available pad number
+            pad->IncrementPadName( true, true );
 
             // Handle the view aspect
             preview.Remove( pad );
@@ -541,7 +497,7 @@ int MODULE_TOOLS::DuplicateItems ( TOOL_EVENT& aEvent )
     // first, check if we have a selection, or try to get one
     SELECTION_TOOL* selTool = m_toolMgr->GetTool<SELECTION_TOOL>();
 
-    if ( selTool->GetSelection().Empty() )
+    if( selTool->GetSelection().Empty() )
     {
         m_toolMgr->RunAction( COMMON_ACTIONS::selectionCursor, true );
     }
@@ -558,22 +514,22 @@ int MODULE_TOOLS::DuplicateItems ( TOOL_EVENT& aEvent )
     // we have a selection to work on now, so start the tool process
     m_frame->SaveCopyInUndoList( module, UR_MODEDIT );
 
-    for ( int i = 0; i < selection.Size(); ++i )
+    for( int i = 0; i < selection.Size(); ++i )
     {
         BOARD_ITEM* item = selection.Item<BOARD_ITEM>( i );
 
-        if ( item )
+        if( item )
         {
             BOARD_ITEM* new_item = module->DuplicateAndAddItem( item );
 
-            if ( new_item )
+            if( new_item )
             {
                 m_view->Add( new_item );
 
-                m_toolMgr->RunAction( COMMON_ACTIONS::selectItem, true, new_item);
+                m_toolMgr->RunAction( COMMON_ACTIONS::selectItem, true, new_item );
             }
 
-            m_toolMgr->RunAction( COMMON_ACTIONS::unselectItem, true, item);
+            m_toolMgr->RunAction( COMMON_ACTIONS::unselectItem, true, item );
         }
     }
 

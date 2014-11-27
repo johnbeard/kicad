@@ -1122,6 +1122,9 @@ BOARD_ITEM* MODULE::DuplicateAndAddItem( const BOARD_ITEM* item )
         {
             D_PAD* new_pad = new D_PAD( *static_cast<const D_PAD*>( item ) );
 
+            // Take the next available pad number
+            new_pad->IncrementPadName( true, true );
+
             Pads().PushBack( new_pad );
             new_item = new_pad;
         }
@@ -1158,4 +1161,48 @@ BOARD_ITEM* MODULE::DuplicateAndAddItem( const BOARD_ITEM* item )
     }
 
     return new_item;
+}
+
+wxString MODULE::GetNextPadName( bool aFillSequenceGaps ) const
+{
+    std::set<int> usedNumbers;
+
+    // Create a set of used pad numbers
+    for( D_PAD* pad = Pads(); pad; pad = pad->Next() )
+    {
+        wxString padName = pad->GetPadName();
+        int padNumber = 0;
+        int base = 1;
+
+        // Trim and extract the trailing numeric part
+        while( padName.Len() && padName.Last() >= '0' && padName.Last() <= '9' )
+        {
+            padNumber += ( padName.Last() - '0' ) * base;
+            padName.RemoveLast();
+            base *= 10;
+        }
+
+        usedNumbers.insert( padNumber );
+    }
+
+    // By default go to the end of the sequence
+    int candidate = *usedNumbers.end();
+
+    // Filling in gaps in pad numbering
+    if( aFillSequenceGaps )
+    {
+        // start at the beginning
+        candidate = *usedNumbers.begin();
+
+        for( std::set<int>::iterator it = usedNumbers.begin(),
+            itEnd = usedNumbers.end(); it != itEnd; ++it )
+        {
+            if( *it - candidate > 1 )
+                break;
+
+            candidate = *it;
+        }
+    }
+
+    return wxString::Format( wxT( "%i" ), ++candidate );
 }
