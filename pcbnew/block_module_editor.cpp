@@ -782,21 +782,20 @@ void MoveMarkedItemsExactly( MODULE* module, const wxPoint& centre, const wxPoin
         switch( item->Type() )
         {
         case PCB_MODULE_TEXT_T:
-            {
-                TEXTE_MODULE* text = static_cast<TEXTE_MODULE*>( item );
+        {
+            TEXTE_MODULE* text = static_cast<TEXTE_MODULE*>( item );
 
-                text->RotateTransformWithModule( centre, rotation );
-                text->MoveTransformWithModule( translation );
-            }
+            text->RotateTransformWithModule( centre, rotation );
+            text->MoveTransformWithModule( translation );
             break;
+        }
         case PCB_MODULE_EDGE_T:
-            {
-                EDGE_MODULE* em = static_cast<EDGE_MODULE*>( item );
-                em->Rotate( centre, rotation );
-                em->Move( translation );
-            }
-        break;
-
+        {
+            EDGE_MODULE* em = static_cast<EDGE_MODULE*>( item );
+            em->Rotate( centre, rotation );
+            em->Move( translation );
+            break;
+        }
         default:
             ;
         }

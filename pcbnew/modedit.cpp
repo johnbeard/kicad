@@ -651,9 +651,9 @@ void FOOTPRINT_EDIT_FRAME::Process_Special_Functions( wxCommandEvent& event )
 
             BOARD_ITEM* new_item = module->DuplicateAndAddItem( item );
 
-            if ( new_item )
+            if( new_item )
             {
-                switch ( new_item->Type() )
+                switch( new_item->Type() )
                 {
                 case PCB_PAD_T:
                     move_cmd = ID_POPUP_PCB_MOVE_PAD_REQUEST;

@@ -151,6 +151,13 @@ int EDIT_TOOL::Main( TOOL_EVENT& aEvent )
 
                 break;       // exit the loop, as there is no further processing for removed items
             }
+            else if( evt->IsAction( &COMMON_ACTIONS::duplicate ) )
+            {
+                // On duplicate, stop moving this item
+                // The duplicate tool should then select the new item and start
+                // a new move procedure
+                break;
+            }
             else if( evt->IsAction( &COMMON_ACTIONS::moveExact ) )
             {
                 // Can't do this, because the selection will then contain
@@ -565,47 +572,6 @@ void EDIT_TOOL::remove( BOARD_ITEM* aItem )
 }
 
 
-int EDIT_TOOL::Duplicate( TOOL_EVENT& aEvent )
-{
-    const SELECTION& selection = m_selectionTool->GetSelection();
-
-    // Shall the selection be cleared at the end?
-    bool unselect = selection.Empty();
-
-    if( !makeSelection( selection ) || m_selectionTool->CheckLock() )
-    {
-        setTransitions();
-
-        return 0;
-    }
-
-    for( unsigned int i = 0; i < selection.items.GetCount(); ++i )
-    {
-        BOARD_ITEM* item = selection.Item<BOARD_ITEM>( i );
-
-        // TODO: duplicate....
-
-        if( !m_dragging )
-            item->ViewUpdate( KIGFX::VIEW_ITEM::LAYERS );
-    }
-
-    updateRatsnest( m_dragging );
-
-    if( m_dragging )
-        selection.group->ViewUpdate( KIGFX::VIEW_ITEM::GEOMETRY );
-    else
-        getModel<BOARD>()->GetRatsnest()->Recalculate();
-
-    if( unselect )
-        m_toolMgr->RunAction( COMMON_ACTIONS::selectionClear, true );
-
-    m_toolMgr->RunAction( COMMON_ACTIONS::pointEditorUpdate, true );
-
-    setTransitions();
-    return 0;
-}
-
-
 int EDIT_TOOL::MoveExact( TOOL_EVENT& aEvent )
 {
     const SELECTION& selection = m_selectionTool->GetSelection();
@@ -630,10 +596,11 @@ int EDIT_TOOL::MoveExact( TOOL_EVENT& aEvent )
 
     if( ret == DIALOG_MOVE_EXACT::MOVE_OK )
     {
-        if( m_dragging )
+        if( !m_dragging )
         {
             editFrame->OnModify();
-            editFrame->SaveCopyInUndoList( selection.items, UR_MOVED );
+            // record an action of move and rotate
+            editFrame->SaveCopyInUndoList( selection.items, UR_CHANGED );
         }
 
         for( unsigned int i = 0; i < selection.items.GetCount(); ++i )
@@ -673,7 +640,6 @@ void EDIT_TOOL::setTransitions()
     Go( &EDIT_TOOL::Flip,       COMMON_ACTIONS::flip.MakeEvent() );
     Go( &EDIT_TOOL::Remove,     COMMON_ACTIONS::remove.MakeEvent() );
     Go( &EDIT_TOOL::Properties, COMMON_ACTIONS::properties.MakeEvent() );
-    Go( &EDIT_TOOL::Duplicate,  COMMON_ACTIONS::duplicate.MakeEvent() );
     Go( &EDIT_TOOL::MoveExact,  COMMON_ACTIONS::moveExact.MakeEvent() );
 }
 

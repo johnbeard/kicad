@@ -70,9 +70,7 @@ void DIALOG_MOVE_EXACT::ToPolarDeg( double x, double y, double& r, double& q )
     // convert to polar coordinates
     r = hypot ( x, y );
 
-    q = ( x != 0 || y != 0) ?
-            RAD2DEG( atan2( y, x ) )
-            : 0;
+    q = ( r != 0) ? RAD2DEG( atan2( y, x ) ) : 0;
 }
 
 bool DIALOG_MOVE_EXACT::GetTranslationInIU ( wxPoint& val, bool polar )
@@ -82,10 +80,10 @@ bool DIALOG_MOVE_EXACT::GetTranslationInIU ( wxPoint& val, bool polar )
     bool ok = m_xEntry->GetValue().ToDouble( &ent1 );
     ok = ok && m_yEntry->GetValue().ToDouble( &ent2 );
 
-    if ( !ok )
+    if( !ok )
         return false;
 
-    if ( polar )
+    if( polar )
     {
         val.x = From_User_Unit( g_UserUnit, ent1 * cos( DEG2RAD( ent2 ) ) );
         val.y = From_User_Unit( g_UserUnit, ent1 * sin( DEG2RAD( ent2 ) ) );
@@ -109,10 +107,10 @@ void DIALOG_MOVE_EXACT::OnPolarChanged( wxCommandEvent& event )
     bool ok = GetTranslationInIU( val, !newPolar );
 
     // invalid entries - bail out
-    if ( !ok )
+    if( !ok )
         return;
 
-    if ( m_polarCoords->IsChecked() )
+    if( m_polarCoords->IsChecked() )
     {
         // convert to polar coordinates
         double r, q;
@@ -147,20 +145,20 @@ void DIALOG_MOVE_EXACT::OnClear( wxCommandEvent& event )
     wxObject* obj = event.GetEventObject();
     wxTextCtrl* entry = NULL;
 
-    if ( obj == m_clearX )
+    if( obj == m_clearX )
     {
         entry = m_xEntry;
     }
-    else if ( obj == m_clearY )
+    else if( obj == m_clearY )
     {
         entry = m_yEntry;
     }
-    else if ( obj == m_clearRot )
+    else if( obj == m_clearRot )
     {
         entry = m_rotEntry;
     }
 
-    if ( entry )
+    if( entry )
         entry->SetValue( "0" );
 }
 
@@ -176,7 +174,7 @@ void DIALOG_MOVE_EXACT::OnOkClick( wxCommandEvent& event )
     // for the output, we only deliver a Cartesian vector
     ok = ok && GetTranslationInIU( m_translation, m_polarCoords->IsChecked() );
 
-    if ( ok )
+    if( ok )
     {
         // save the settings
         m_options.polarCoords = m_polarCoords->GetValue();

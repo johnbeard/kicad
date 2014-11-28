@@ -512,6 +512,7 @@ int MODULE_TOOLS::DuplicateItems ( TOOL_EVENT& aEvent )
     }
 
     // we have a selection to work on now, so start the tool process
+    m_frame->OnModify();
     m_frame->SaveCopyInUndoList( module, UR_MODEDIT );
 
     for( int i = 0; i < selection.Size(); ++i )
@@ -520,16 +521,20 @@ int MODULE_TOOLS::DuplicateItems ( TOOL_EVENT& aEvent )
 
         if( item )
         {
+            // Unselect the item, so we won't pick it up again
+            // Do this first, so a single-item duplicate will correctly call
+            // SetCurItem and show the item properties
+            m_toolMgr->RunAction( COMMON_ACTIONS::unselectItem, true, item );
+
             BOARD_ITEM* new_item = module->DuplicateAndAddItem( item );
 
             if( new_item )
             {
                 m_view->Add( new_item );
 
+                // Select the new item, so we can pick it up
                 m_toolMgr->RunAction( COMMON_ACTIONS::selectItem, true, new_item );
             }
-
-            m_toolMgr->RunAction( COMMON_ACTIONS::unselectItem, true, item );
         }
     }
 
@@ -538,8 +543,6 @@ int MODULE_TOOLS::DuplicateItems ( TOOL_EVENT& aEvent )
 
     // pick up the selected item(s) and start moving
     // this works well for "dropping" copies around
-    // TODO: moveExact doesn't work too well, because it will use the current
-    // position, not the original position
     m_toolMgr->RunAction( COMMON_ACTIONS::editActivate, true );
 
     setTransitions();
