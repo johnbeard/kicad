@@ -116,6 +116,9 @@ int EDIT_TOOL::Main( TOOL_EVENT& aEvent )
     // cumulative translation
     wxPoint totalMovement( 0, 0 );
 
+    // make sure nothing is inhibiting undo points
+    bool inhibitUndo = m_toolMgr->IsUndoInhibited();
+
     // Main loop: keep receiving events
     while( OPT_TOOL_EVENT evt = Wait() )
     {
@@ -207,8 +210,11 @@ int EDIT_TOOL::Main( TOOL_EVENT& aEvent )
                     break;
 
                 // Save items, so changes can be undone
-                editFrame->OnModify();
-                editFrame->SaveCopyInUndoList( selection.items, UR_CHANGED );
+                if ( !inhibitUndo )
+                {
+                    editFrame->OnModify();
+                    editFrame->SaveCopyInUndoList( selection.items, UR_CHANGED );
+                }
 
                 if( selection.Size() == 1 )
                 {

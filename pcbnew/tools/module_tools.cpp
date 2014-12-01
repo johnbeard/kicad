@@ -512,8 +512,14 @@ int MODULE_TOOLS::DuplicateItems ( TOOL_EVENT& aEvent )
     }
 
     // we have a selection to work on now, so start the tool process
+
     m_frame->OnModify();
     m_frame->SaveCopyInUndoList( module, UR_MODEDIT );
+
+    // prevent other tools making undo points while the duplicate is going on
+    // so that if you cancel, you don't get a duplicate object hiding over
+    // the original
+    m_toolMgr->IncUndoInhibit();
 
     for( int i = 0; i < selection.Size(); ++i )
     {
@@ -544,6 +550,9 @@ int MODULE_TOOLS::DuplicateItems ( TOOL_EVENT& aEvent )
     // pick up the selected item(s) and start moving
     // this works well for "dropping" copies around
     m_toolMgr->RunAction( COMMON_ACTIONS::editActivate, true );
+
+    // and re-enable undos
+    m_toolMgr->DecUndoInhibit();
 
     setTransitions();
 
