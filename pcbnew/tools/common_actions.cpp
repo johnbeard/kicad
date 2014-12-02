@@ -301,7 +301,6 @@ TOOL_ACTION COMMON_ACTIONS::trackViaSizeChanged( "pcbnew.EditorControl.trackViaS
         AS_GLOBAL, 0,
         "", "", AF_NOTIFY );
 
-
 // Zone actions
 TOOL_ACTION COMMON_ACTIONS::zoneFill( "pcbnew.EditorControl.zoneFill",
         AS_GLOBAL, 0,
@@ -314,6 +313,12 @@ TOOL_ACTION COMMON_ACTIONS::zoneFillAll( "pcbnew.EditorControl.zoneFillAll",
 TOOL_ACTION COMMON_ACTIONS::zoneUnfill( "pcbnew.EditorControl.zoneUnfill",
         AS_GLOBAL, 0,
         "Unfill", "Unfill zone(s)" );
+
+
+// PCB editor module tools
+TOOL_ACTION COMMON_ACTIONS::editWithModedit( "pcbnew.EditorControl.editWithModedit",
+        AS_GLOBAL, MD_CTRL + int('E'),
+        "Edit with module editor", "Edit with module editor", AF_ACTIVATE );
 
 
 // Module editor tools

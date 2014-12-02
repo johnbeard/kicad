@@ -86,6 +86,7 @@ enum hotkey_id_commnand {
     HK_SWITCH_LAYER_TO_INNER13,
     HK_SWITCH_LAYER_TO_INNER14,
     HK_ADD_MODULE,
+    HK_EDIT_MODULE_WITH_MODEDIT,
     HK_SLIDE_TRACK,
     HK_MACRO_ID_BEGIN,
     HK_RECORD_MACROS_0,     // keep these id ordered from 0 to 9

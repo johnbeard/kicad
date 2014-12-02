@@ -508,6 +508,10 @@ bool PCB_EDIT_FRAME::OnHotKey( wxDC* aDC, int aHotkeyCode, const wxPoint& aPosit
         OnHotkeyEditItem( HK_EDIT_ITEM );
         break;
 
+    case HK_EDIT_MODULE_WITH_MODEDIT:      // Edit module with module editor
+        evt_type = ID_POPUP_PCB_EDIT_MODULE_WITH_MODEDIT;
+        break;
+
     // Footprint edition:
     case HK_LOCK_UNLOCK_FOOTPRINT: // toggle module "MODULE_is_LOCKED" status:
         // get any module, locked or not locked and toggle its locked status

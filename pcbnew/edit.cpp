@@ -839,6 +839,11 @@ void PCB_EDIT_FRAME::Process_Special_Functions( wxCommandEvent& event )
         break;
 
     case ID_POPUP_PCB_EDIT_MODULE_WITH_MODEDIT:
+
+        // If we don't have a current item, there's nothing we can do here
+        if ( !GetCurItem() )
+            break;
+
         // If the current Item is a pad, text module ...: Get its parent
         if( GetCurItem()->Type() != PCB_MODULE_T )
             SetCurItem( GetCurItem()->GetParent() );
@@ -852,16 +857,8 @@ void PCB_EDIT_FRAME::Process_Special_Functions( wxCommandEvent& event )
             OnModify();
         }
 
-        {
-            FOOTPRINT_EDIT_FRAME* editor = (FOOTPRINT_EDIT_FRAME*) Kiway().Player( FRAME_PCB_MODULE_EDITOR, true );
+        ShowModuleEditorForModule( static_cast<MODULE*>( GetCurItem() ) );
 
-            editor->Load_Module_From_BOARD( (MODULE*)GetCurItem() );
-            SetCurItem( NULL );     // the current module could be deleted by
-
-            editor->Show( true );
-
-            editor->Raise();        // Iconize( false );
-        }
         m_canvas->MoveCursorToCrossHair();
         break;
 

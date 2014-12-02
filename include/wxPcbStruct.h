@@ -1036,6 +1036,9 @@ public:
     // Footprint edition (see also PCB_BASE_FRAME)
     void InstallModuleOptionsFrame( MODULE* Module, wxDC* DC );
 
+    // Directly open module editor
+    void ShowModuleEditorForModule( MODULE* aModule );
+
     /**
      * Function StartMoveModule
      * Initialize a drag or move pad command

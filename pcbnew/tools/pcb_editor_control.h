@@ -56,6 +56,13 @@ public:
     int ZoneFillAll( TOOL_EVENT& aEvent );
     int ZoneUnfill( TOOL_EVENT& aEvent );
 
+    /**
+     * Function EditModuleWithModedit()
+     *
+     * Opens a currently selected module in modedit
+     */
+    int EditWithModedit( TOOL_EVENT& aEvent );
+
 private:
     ///> Sets up handlers for various events.
     void setTransitions();

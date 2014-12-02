@@ -65,6 +65,9 @@ public:
     /// Activation of the edit tool
     static TOOL_ACTION properties;
 
+    /// Edit a module in the module editor
+    static TOOL_ACTION editWithModedit;
+
     /// Deleting a BOARD_ITEM
     static TOOL_ACTION remove;
 

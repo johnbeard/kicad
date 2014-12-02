@@ -75,16 +75,22 @@ void PCB_EDIT_FRAME::InstallModuleOptionsFrame( MODULE* Module, wxDC* DC )
 
     if( retvalue == 2 )
     {
-        FOOTPRINT_EDIT_FRAME* editor = (FOOTPRINT_EDIT_FRAME*) Kiway().Player( FRAME_PCB_MODULE_EDITOR, true );
-
-        editor->Load_Module_From_BOARD( Module );
-        SetCurItem( NULL );
-
-        editor->Show( true );
-        editor->Raise();        // Iconize( false );
+        ShowModuleEditorForModule( Module );
     }
 }
 
+void PCB_EDIT_FRAME::ShowModuleEditorForModule( MODULE* aModule )
+{
+    FOOTPRINT_EDIT_FRAME* editor = (FOOTPRINT_EDIT_FRAME*) Kiway().Player(
+            FRAME_PCB_MODULE_EDITOR, true );
+
+    editor->Load_Module_From_BOARD( aModule );
+    SetCurItem( NULL );
+
+    editor->Show( true );
+    editor->Raise();
+    // Iconize( false );
+}
 
 void FOOTPRINT_EDIT_FRAME::RemoveStruct( EDA_ITEM* Item )
 {

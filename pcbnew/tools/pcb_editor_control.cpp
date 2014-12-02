@@ -29,6 +29,7 @@
 
 #include <wxPcbStruct.h>
 #include <class_board.h>
+#include <class_module.h>
 #include <class_zone.h>
 #include <class_draw_panel_gal.h>
 
@@ -219,6 +220,38 @@ int PCB_EDITOR_CONTROL::ZoneUnfill( TOOL_EVENT& aEvent )
 }
 
 
+int PCB_EDITOR_CONTROL::EditWithModedit( TOOL_EVENT& aEvent )
+{
+    SELECTION_TOOL* selTool = m_toolMgr->GetTool<SELECTION_TOOL>();
+    const SELECTION& selection = selTool->GetSelection();
+
+    // we can only edit one module at a time
+    if( selection.Size() != 1 )
+    {
+        setTransitions();
+        return 0;
+    }
+
+    BOARD_ITEM* item = selection.Item<BOARD_ITEM>( 0 );
+
+    MODULE* selectedModule = NULL;
+
+    if( item->Type() == PCB_MODULE_T )
+        selectedModule = static_cast<MODULE*>( item );
+    else
+        selectedModule = static_cast<MODULE*>( item->GetParent() );
+
+    wxASSERT_MSG( selectedModule, wxT("Failed to get a module to edit with modedit") );
+
+    m_toolMgr->RunAction( COMMON_ACTIONS::selectionClear, true );
+
+    m_frame->ShowModuleEditorForModule( selectedModule );
+
+    setTransitions();
+    return 0;
+}
+
+
 void PCB_EDITOR_CONTROL::setTransitions()
 {
     // Track & via size control
@@ -231,4 +264,7 @@ void PCB_EDITOR_CONTROL::setTransitions()
     Go( &PCB_EDITOR_CONTROL::ZoneFill,           COMMON_ACTIONS::zoneFill.MakeEvent() );
     Go( &PCB_EDITOR_CONTROL::ZoneFillAll,        COMMON_ACTIONS::zoneFillAll.MakeEvent() );
     Go( &PCB_EDITOR_CONTROL::ZoneUnfill,         COMMON_ACTIONS::zoneUnfill.MakeEvent() );
+
+    // Module editor
+    Go( &PCB_EDITOR_CONTROL::EditWithModedit,    COMMON_ACTIONS::editWithModedit.MakeEvent() );
 }
