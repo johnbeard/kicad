@@ -240,6 +240,7 @@ int EDIT_TOOL::Main( TOOL_EVENT& aEvent )
 
                 controls->SetAutoPan( true );
                 m_dragging = true;
+                m_toolMgr->IncUndoInhibit();
             }
 
             selection.group->ViewUpdate( KIGFX::VIEW_ITEM::GEOMETRY );
@@ -251,7 +252,11 @@ int EDIT_TOOL::Main( TOOL_EVENT& aEvent )
 
     }
 
+    if ( m_dragging )
+        m_toolMgr->DecUndoInhibit();
+
     m_dragging = false;
+
     m_offset.x = 0;
     m_offset.y = 0;
 
@@ -370,7 +375,8 @@ int EDIT_TOOL::Rotate( TOOL_EVENT& aEvent )
 
     wxPoint rotatePoint = getModificationPoint( selection );
 
-    if( !m_dragging )   // If it is being dragged, then it is already saved with UR_CHANGED flag
+    // If it is being dragged, then it is already saved with UR_CHANGED flag
+    if( !m_toolMgr->IsUndoInhibited() )
     {
         editFrame->OnModify();
         editFrame->SaveCopyInUndoList( selection.items, UR_ROTATED, rotatePoint );
@@ -424,7 +430,7 @@ int EDIT_TOOL::Flip( TOOL_EVENT& aEvent )
 
     wxPoint flipPoint = getModificationPoint( selection );
 
-    if( !m_dragging )   // If it is being dragged, then it is already saved with UR_CHANGED flag
+    if( !m_toolMgr->IsUndoInhibited() )   // If it is being dragged, then it is already saved with UR_CHANGED flag
     {
         editFrame->OnModify();
         editFrame->SaveCopyInUndoList( selection.items, UR_FLIPPED, flipPoint );
@@ -602,7 +608,7 @@ int EDIT_TOOL::MoveExact( TOOL_EVENT& aEvent )
 
     if( ret == DIALOG_MOVE_EXACT::MOVE_OK )
     {
-        if( !m_dragging )
+        if( !m_toolMgr->IsUndoInhibited() )
         {
             editFrame->OnModify();
             // record an action of move and rotate
