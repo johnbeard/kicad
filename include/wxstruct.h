@@ -249,6 +249,16 @@ public:
     virtual void SaveProjectSettings( bool aAskForSave ) {};
 
     /**
+     * Function ImportFrameSettings
+     * Copy relevant settings from another frame
+     *
+     * Override this to call the relevant getter/setters for your particular
+     * frame type.
+     * @param aSrc the frame to copy settings from
+     */
+    virtual void ImportFrameSettings( const wxWindow& aSrc ) {}
+
+    /**
      * Function OnSelectPreferredEditor
      * Open a dialog to select the editor that will used in KiCad
      * to edit or display files (reports ... )

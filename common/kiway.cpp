@@ -298,6 +298,9 @@ KIWAY_PLAYER* KIWAY::Player( FRAME_T aFrameType, bool doCreate )
                     );
             wxASSERT( frame );
 
+            // import any relevant settings from the parent
+            frame->ImportFrameSettings( *m_top );
+
             return m_player[aFrameType] = frame;
         }
     }

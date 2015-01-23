@@ -1252,3 +1252,19 @@ void EDA_DRAW_FRAME::GeneralControlKeyMovement( int aHotKey, wxPoint *aPos,
     }
 }
 
+
+void EDA_DRAW_FRAME::ImportFrameSettings( const wxWindow& aSrc )
+{
+    // import drawing settings from a EDA_DRAW_FRAME source
+    if ( const EDA_DRAW_FRAME* srcFrame = dynamic_cast<const EDA_DRAW_FRAME*>( &aSrc ) )
+    {
+        const EDA_DRAW_PANEL* srcCanvas = srcFrame->GetCanvas();
+        EDA_DRAW_PANEL* canvas = GetCanvas();
+
+        // transfer settings to the child frame
+        canvas->SetEnableZoomNoCenter( srcCanvas->GetEnableZoomNoCenter() );
+        canvas->SetMiddleButtonPanLimited( srcCanvas->GetMiddleButtonPanLimited() );
+        canvas->SetEnableAutoPan( srcCanvas->GetEnableAutoPan() );
+        canvas->SetEnableMiddleButtonPan( srcCanvas->GetEnableMiddleButtonPan() );
+    }
+}

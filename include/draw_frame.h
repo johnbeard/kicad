@@ -282,7 +282,7 @@ public:
     bool ShowPageLimits() const { return m_showPageLimits; }
     void SetShowPageLimits( bool aShow ) { m_showPageLimits = aShow; }
 
-    EDA_DRAW_PANEL* GetCanvas() { return m_canvas; }
+    EDA_DRAW_PANEL* GetCanvas() const { return m_canvas; }
 
     virtual wxString GetScreenDesc() const;
 
@@ -641,6 +641,11 @@ public:
     void LoadSettings( wxConfigBase* aCfg );    // override virtual
 
     void SaveSettings( wxConfigBase* aCfg );    // override virtual
+
+    /**
+     * Transfer draw panel window user settings from a parent to a child
+     */
+    void ImportFrameSettings( const wxWindow& aSrc ); // override virtual
 
     /**
      * Append a message to the message panel.
