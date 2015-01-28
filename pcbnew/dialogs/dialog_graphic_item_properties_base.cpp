@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Oct  8 2012)
+// C++ code generated with wxFormBuilder (version Jun  6 2014)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -20,6 +20,24 @@ DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE::DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE( wxWind
 	
 	wxBoxSizer* bUpperSizer;
 	bUpperSizer = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_staticline2 = new wxStaticLine( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL );
+	bUpperSizer->Add( m_staticline2, 0, wxEXPAND | wxALL, 5 );
+	
+	wxBoxSizer* bSizer5;
+	bSizer5 = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizer4;
+	bSizer4 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_checkBoxRelative = new wxCheckBox( this, wxID_ANY, _("Relative co-ordinates"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer4->Add( m_checkBoxRelative, 5, wxALL, 5 );
+	
+	m_checkBoxPolar = new wxCheckBox( this, wxID_ANY, _("Polar co-ordinates"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer4->Add( m_checkBoxPolar, 5, wxALL, 5 );
+	
+	
+	bSizer5->Add( bSizer4, 0, wxEXPAND, 5 );
 	
 	wxFlexGridSizer* fgUpperLeftGridSizer;
 	fgUpperLeftGridSizer = new wxFlexGridSizer( 4, 3, 0, 0 );
@@ -76,10 +94,10 @@ DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE::DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE( wxWind
 	fgUpperLeftGridSizer->Add( m_EndPointYUnit, 0, wxTOP|wxBOTTOM|wxRIGHT|wxALIGN_CENTER_VERTICAL, 5 );
 	
 	
-	bUpperSizer->Add( fgUpperLeftGridSizer, 1, wxEXPAND, 5 );
+	bSizer5->Add( fgUpperLeftGridSizer, 1, wxEXPAND, 5 );
 	
-	m_staticline2 = new wxStaticLine( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL );
-	bUpperSizer->Add( m_staticline2, 0, wxEXPAND | wxALL, 5 );
+	
+	bUpperSizer->Add( bSizer5, 1, wxEXPAND, 5 );
 	
 	wxBoxSizer* bUpperRightSizer;
 	bUpperRightSizer = new wxBoxSizer( wxVERTICAL );
@@ -165,6 +183,8 @@ DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE::DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE( wxWind
 	
 	// Connect Events
 	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE::OnClose ) );
+	m_checkBoxRelative->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE::OnCoordinateCheckboxChanged ), NULL, this );
+	m_checkBoxPolar->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE::OnCoordinateCheckboxChanged ), NULL, this );
 	m_StandardButtonsSizerCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE::OnCancelClick ), NULL, this );
 	m_StandardButtonsSizerOK->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE::OnOkClick ), NULL, this );
 }
@@ -173,6 +193,8 @@ DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE::~DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE()
 {
 	// Disconnect Events
 	this->Disconnect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE::OnClose ) );
+	m_checkBoxRelative->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE::OnCoordinateCheckboxChanged ), NULL, this );
+	m_checkBoxPolar->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE::OnCoordinateCheckboxChanged ), NULL, this );
 	m_StandardButtonsSizerCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE::OnCancelClick ), NULL, this );
 	m_StandardButtonsSizerOK->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( DIALOG_GRAPHIC_ITEM_PROPERTIES_BASE::OnOkClick ), NULL, this );
 	
