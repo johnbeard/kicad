@@ -869,6 +869,11 @@ void FOOTPRINT_EDIT_FRAME::moveExact()
 
 void FOOTPRINT_EDIT_FRAME::duplicateItems( bool aIncrement )
 {
+#if 1
+    BOARD_ITEM* item = GetScreen()->GetCurItem();
+
+    PCB_BASE_EDIT_FRAME::duplicateItem( item, aIncrement );
+#else
     SaveCopyInUndoList( GetBoard()->m_Modules, UR_MODEDIT );
 
     BOARD_ITEM* item = GetScreen()->GetCurItem();
@@ -907,6 +912,7 @@ void FOOTPRINT_EDIT_FRAME::duplicateItems( bool aIncrement )
             PostCommandMenuEvent( move_cmd );
         }
     }
+#endif
 }
 
 
