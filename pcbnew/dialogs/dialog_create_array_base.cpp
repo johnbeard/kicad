@@ -215,45 +215,52 @@ DIALOG_CREATE_ARRAY_BASE::DIALOG_CREATE_ARRAY_BASE( wxWindow* parent, wxWindowID
 	m_unitLabelCentreY->Wrap( -1 );
 	gbSizer2->Add( m_unitLabelCentreY, wxGBPosition( 1, 2 ), wxGBSpan( 1, 1 ), wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 	
+	m_labelCircRelativeCentre = new wxStaticText( m_circularPanel, wxID_ANY, _("Relative:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_labelCircRelativeCentre->Wrap( -1 );
+	gbSizer2->Add( m_labelCircRelativeCentre, wxGBPosition( 2, 0 ), wxGBSpan( 1, 1 ), wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+	
+	m_entryCircRelativeCentreCb = new wxCheckBox( m_circularPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	gbSizer2->Add( m_entryCircRelativeCentreCb, wxGBPosition( 2, 1 ), wxGBSpan( 1, 1 ), wxALL, 5 );
+	
 	m_labelCircRadius = new wxStaticText( m_circularPanel, wxID_ANY, _("Radius:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_labelCircRadius->Wrap( -1 );
-	gbSizer2->Add( m_labelCircRadius, wxGBPosition( 2, 0 ), wxGBSpan( 1, 1 ), wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
+	gbSizer2->Add( m_labelCircRadius, wxGBPosition( 3, 0 ), wxGBSpan( 1, 1 ), wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT|wxALL, 5 );
 	
 	m_labelCircRadiusValue = new wxStaticText( m_circularPanel, wxID_ANY, _("0 mm"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_labelCircRadiusValue->Wrap( -1 );
-	gbSizer2->Add( m_labelCircRadiusValue, wxGBPosition( 2, 1 ), wxGBSpan( 1, 1 ), wxALL, 5 );
+	gbSizer2->Add( m_labelCircRadiusValue, wxGBPosition( 3, 1 ), wxGBSpan( 1, 1 ), wxALL, 5 );
 	
 	m_labelCircAngle = new wxStaticText( m_circularPanel, wxID_ANY, _("Angle:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_labelCircAngle->Wrap( -1 );
-	gbSizer2->Add( m_labelCircAngle, wxGBPosition( 3, 0 ), wxGBSpan( 1, 1 ), wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	gbSizer2->Add( m_labelCircAngle, wxGBPosition( 4, 0 ), wxGBSpan( 1, 1 ), wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
 	m_entryCircAngle = new wxTextCtrl( m_circularPanel, wxID_ANY, _("0"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_entryCircAngle->SetToolTip( _("Positive angles represent an anti-clockwise rotation. An angle of 0 will produce a full circle divided evenly into \"Count\" portions.") );
 	
-	gbSizer2->Add( m_entryCircAngle, wxGBPosition( 3, 1 ), wxGBSpan( 1, 1 ), wxALL, 5 );
+	gbSizer2->Add( m_entryCircAngle, wxGBPosition( 4, 1 ), wxGBSpan( 1, 1 ), wxALL, 5 );
 	
 	m_unitLabelCircAngle = new wxStaticText( m_circularPanel, wxID_ANY, _("deg"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_unitLabelCircAngle->Wrap( -1 );
-	gbSizer2->Add( m_unitLabelCircAngle, wxGBPosition( 3, 2 ), wxGBSpan( 1, 1 ), wxALL|wxALIGN_CENTER_VERTICAL, 5 );
+	gbSizer2->Add( m_unitLabelCircAngle, wxGBPosition( 4, 2 ), wxGBSpan( 1, 1 ), wxALL|wxALIGN_CENTER_VERTICAL, 5 );
 	
 	m_labelCircCount = new wxStaticText( m_circularPanel, wxID_ANY, _("Count:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_labelCircCount->Wrap( -1 );
-	gbSizer2->Add( m_labelCircCount, wxGBPosition( 4, 0 ), wxGBSpan( 1, 1 ), wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	gbSizer2->Add( m_labelCircCount, wxGBPosition( 5, 0 ), wxGBSpan( 1, 1 ), wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
 	m_entryCircCount = new wxTextCtrl( m_circularPanel, wxID_ANY, _("4"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_entryCircCount->SetToolTip( _("How many items in the array.") );
 	
-	gbSizer2->Add( m_entryCircCount, wxGBPosition( 4, 1 ), wxGBSpan( 1, 1 ), wxALL, 5 );
+	gbSizer2->Add( m_entryCircCount, wxGBPosition( 5, 1 ), wxGBSpan( 1, 1 ), wxALL, 5 );
 	
 	m_labelCircRotate = new wxStaticText( m_circularPanel, wxID_ANY, _("Rotate:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_labelCircRotate->Wrap( -1 );
-	gbSizer2->Add( m_labelCircRotate, wxGBPosition( 5, 0 ), wxGBSpan( 1, 1 ), wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
+	gbSizer2->Add( m_labelCircRotate, wxGBPosition( 6, 0 ), wxGBSpan( 1, 1 ), wxALL|wxALIGN_CENTER_VERTICAL|wxALIGN_RIGHT, 5 );
 	
 	m_entryRotateItemsCb = new wxCheckBox( m_circularPanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	m_entryRotateItemsCb->SetValue(true); 
 	m_entryRotateItemsCb->SetToolTip( _("Rotate the item as well as move it - multi-selections will be rotated together") );
 	
-	gbSizer2->Add( m_entryRotateItemsCb, wxGBPosition( 5, 1 ), wxGBSpan( 1, 1 ), wxALL, 5 );
+	gbSizer2->Add( m_entryRotateItemsCb, wxGBPosition( 6, 1 ), wxGBSpan( 1, 1 ), wxALL, 5 );
 	
 	
 	bSizer4->Add( gbSizer2, 0, wxALL|wxEXPAND, 5 );
@@ -332,6 +339,7 @@ DIALOG_CREATE_ARRAY_BASE::DIALOG_CREATE_ARRAY_BASE( wxWindow* parent, wxWindowID
 	m_radioBoxGridNumberingScheme->Connect( wxEVT_COMMAND_RADIOBOX_SELECTED, wxCommandEventHandler( DIALOG_CREATE_ARRAY_BASE::OnParameterChanged ), NULL, this );
 	m_entryCentreX->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( DIALOG_CREATE_ARRAY_BASE::OnParameterChanged ), NULL, this );
 	m_entryCentreY->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( DIALOG_CREATE_ARRAY_BASE::OnParameterChanged ), NULL, this );
+	m_entryCircRelativeCentreCb->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( DIALOG_CREATE_ARRAY_BASE::OnParameterChanged ), NULL, this );
 	m_entryCircAngle->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( DIALOG_CREATE_ARRAY_BASE::OnParameterChanged ), NULL, this );
 	m_entryCircCount->Connect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( DIALOG_CREATE_ARRAY_BASE::OnParameterChanged ), NULL, this );
 	m_checkBoxCircRestartNumbering->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( DIALOG_CREATE_ARRAY_BASE::OnParameterChanged ), NULL, this );
@@ -353,6 +361,7 @@ DIALOG_CREATE_ARRAY_BASE::~DIALOG_CREATE_ARRAY_BASE()
 	m_radioBoxGridNumberingScheme->Disconnect( wxEVT_COMMAND_RADIOBOX_SELECTED, wxCommandEventHandler( DIALOG_CREATE_ARRAY_BASE::OnParameterChanged ), NULL, this );
 	m_entryCentreX->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( DIALOG_CREATE_ARRAY_BASE::OnParameterChanged ), NULL, this );
 	m_entryCentreY->Disconnect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( DIALOG_CREATE_ARRAY_BASE::OnParameterChanged ), NULL, this );
+	m_entryCircRelativeCentreCb->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( DIALOG_CREATE_ARRAY_BASE::OnParameterChanged ), NULL, this );
 	m_entryCircAngle->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( DIALOG_CREATE_ARRAY_BASE::OnParameterChanged ), NULL, this );
 	m_entryCircCount->Disconnect( wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler( DIALOG_CREATE_ARRAY_BASE::OnParameterChanged ), NULL, this );
 	m_checkBoxCircRestartNumbering->Disconnect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( DIALOG_CREATE_ARRAY_BASE::OnParameterChanged ), NULL, this );

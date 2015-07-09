@@ -79,6 +79,7 @@ DIALOG_CREATE_ARRAY::DIALOG_CREATE_ARRAY( PCB_BASE_FRAME* aParent, wxPoint aOrig
 
     Add( m_entryCentreX, m_options.m_circCentreX );
     Add( m_entryCentreY, m_options.m_circCentreY );
+    Add( m_entryCircRelativeCentreCb, m_options.m_circRelativeCentre );
     Add( m_entryCircAngle, m_options.m_circAngle );
     Add( m_entryCircCount, m_options.m_circCount );
     Add( m_entryRotateItemsCb, m_options.m_circRotate );
@@ -132,7 +133,8 @@ void DIALOG_CREATE_ARRAY::OnParameterChanged( wxCommandEvent& event )
         setControlEnablement();
     }
 
-    if( evObj == m_entryCentreX || evObj == m_entryCentreY )
+    if( evObj == m_entryCentreX || evObj == m_entryCentreY
+        || evObj == m_entryCircRelativeCentreCb )
     {
         calculateCircularArrayProperties();
     }
@@ -289,6 +291,8 @@ void DIALOG_CREATE_ARRAY::OnOkClick( wxCommandEvent& event )
         newCirc->m_centre.x = DoubleValueFromString( g_UserUnit, m_entryCentreX->GetValue() );
         newCirc->m_centre.y = DoubleValueFromString( g_UserUnit, m_entryCentreY->GetValue() );
 
+        newCirc->m_relativeCentre = m_entryCircRelativeCentreCb->GetValue();
+
         newCirc->m_angle = DoubleValueFromString( DEGREES, m_entryCircAngle->GetValue() );
         ok = ok && m_entryCircCount->GetValue().ToLong( &newCirc->m_nPts );
 
@@ -371,7 +375,12 @@ void DIALOG_CREATE_ARRAY::calculateCircularArrayProperties()
     centre.y = DoubleValueFromString( g_UserUnit, m_entryCentreY->GetValue() );
 
     // Find the radius, etc of the circle
-    centre -= m_originalItemPosition;
+
+    // If the centre is not relative, the radius is between the original item
+    // and the given point, otherwise we don't need to consider the original
+    // location - the radius is just the length of the vector
+    if ( !m_entryCircRelativeCentreCb->GetValue() )
+        centre -= m_originalItemPosition;
 
     const double radius = VECTOR2I(centre.x, centre.y).EuclideanNorm();
     m_labelCircRadiusValue->SetLabelText( StringFromValue( g_UserUnit, int(radius), true ) );
@@ -523,7 +532,12 @@ void DIALOG_CREATE_ARRAY::ARRAY_CIRCULAR_OPTIONS::TransformItem( int n, BOARD_IT
         // n'th step
         angle = m_angle * n;
 
-    item->Rotate( m_centre, angle );
+    wxPoint centre = m_centre;
+
+    if ( m_relativeCentre )
+        centre += item->GetCenter();
+
+    item->Rotate( centre, angle );
 
     // take off the rotation (but not the translation) if needed
     if( !m_rotateItems )

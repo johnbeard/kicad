@@ -89,6 +89,8 @@ class DIALOG_CREATE_ARRAY_BASE : public DIALOG_SHIM
 		wxStaticText* m_labelCentreY;
 		wxTextCtrl* m_entryCentreY;
 		wxStaticText* m_unitLabelCentreY;
+		wxStaticText* m_labelCircRelativeCentre;
+		wxCheckBox* m_entryCircRelativeCentreCb;
 		wxStaticText* m_labelCircRadius;
 		wxStaticText* m_labelCircRadiusValue;
 		wxStaticText* m_labelCircAngle;

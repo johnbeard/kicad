@@ -289,6 +289,7 @@ private:
             ARRAY_OPTIONS( ARRAY_CIRCULAR ),
             m_nPts( 0 ),
             m_angle( 0.0f ),
+            m_relativeCentre( false ),
             m_rotateItems( false ),
             m_numberingType( NUMBERING_NUMERIC ),
             m_numberingOffset( 0 ),
@@ -298,6 +299,7 @@ private:
         long m_nPts;
         double m_angle;
         wxPoint m_centre;
+        bool m_relativeCentre;
         bool m_rotateItems;
         ARRAY_NUMBERING_TYPE_T m_numberingType;
         long m_numberingOffset;
@@ -346,6 +348,7 @@ private:
             m_gridPriAxisNumberingStep( 1 ),
             m_gridSecAxisNumberingStep( 1 ),
             m_circRotate( false ),
+            m_circRelativeCentre( false ),
             m_circNumberingStep( 1 ),
             m_arrayTypeTab( 0 )
         {}
@@ -366,7 +369,7 @@ private:
 
         std::string m_circCentreX, m_circCentreY,
                     m_circAngle, m_circCount, m_circNumberingOffset;
-        bool m_circRotate;
+        bool m_circRotate, m_circRelativeCentre;
         int m_circNumberingStep;
 
         int m_arrayTypeTab;
