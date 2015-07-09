@@ -40,7 +40,8 @@ private:
         CFG_CTRL_CHECKBOX,
         CFG_CTRL_RADIOBOX,
         CFG_CTRL_CHOICE,
-        CFG_CTRL_TAB
+        CFG_CTRL_TAB,
+        CFG_CTRL_SPINBOX,
     };
 
     struct CONFIG_CTRL_T
@@ -93,6 +94,13 @@ protected:
         ctrls.push_back( ctrlInfo );
     }
 
+    void Add( wxSpinCtrl* ctrl, int& dest )
+    {
+        CONFIG_CTRL_T ctrlInfo = { ctrl, CFG_CTRL_SPINBOX, (void*) &dest };
+
+        ctrls.push_back( ctrlInfo );
+    }
+
     void ReadConfigFromControls()
     {
         for( std::vector<CONFIG_CTRL_T>::const_iterator iter = ctrls.begin(), iend = ctrls.end();
@@ -118,6 +126,10 @@ protected:
 
             case CFG_CTRL_TAB:
                 *(int*) iter->dest = static_cast<wxNotebook*>( iter->control )->GetSelection();
+                break;
+
+            case CFG_CTRL_SPINBOX:
+                *(int*) iter->dest = static_cast<wxSpinCtrl*>( iter->control )->GetValue();
                 break;
 
             default:
@@ -157,6 +169,10 @@ protected:
 
             case CFG_CTRL_TAB:
                 static_cast<wxNotebook*>( iter->control )->SetSelection( *(int*) iter->dest );
+                break;
+
+            case CFG_CTRL_SPINBOX:
+                static_cast<wxSpinCtrl*>( iter->control )->SetValue( *(int*) iter->dest );
                 break;
 
             default:
@@ -243,7 +259,9 @@ protected:
             m_numberingOffsetX( 0 ),
             m_numberingOffsetY( 0 ),
             m_priAxisNumType( NUMBERING_NUMERIC ),
-            m_secAxisNumType( NUMBERING_NUMERIC )
+            m_secAxisNumType( NUMBERING_NUMERIC ),
+            m_priAxisNumStep( 1 ),
+            m_secAxisNumStep( 1 )
         {}
 
         long    m_nx, m_ny;
@@ -255,6 +273,7 @@ protected:
         bool    m_2dArrayNumbering;
         int     m_numberingOffsetX, m_numberingOffsetY;
         ARRAY_NUMBERING_TYPE_T m_priAxisNumType, m_secAxisNumType;
+        long    m_priAxisNumStep, m_secAxisNumStep;
 
         void        TransformItem( int n, BOARD_ITEM* item, const wxPoint& rotPoint ) const;    // override virtual
         int         GetArraySize() const;                                                       // override virtual
@@ -272,7 +291,8 @@ private:
             m_angle( 0.0f ),
             m_rotateItems( false ),
             m_numberingType( NUMBERING_NUMERIC ),
-            m_numberingOffset( 0 )
+            m_numberingOffset( 0 ),
+            m_numberingStep( 1 )
         {}
 
         long m_nPts;
@@ -281,6 +301,7 @@ private:
         bool m_rotateItems;
         ARRAY_NUMBERING_TYPE_T m_numberingType;
         long m_numberingOffset;
+        int m_numberingStep;
 
         void        TransformItem( int n, BOARD_ITEM* item, const wxPoint& rotPoint ) const;    // override virtual
         int         GetArraySize() const;                                                       // override virtual
@@ -322,7 +343,10 @@ private:
             m_grid2dArrayNumbering( 0 ),
             m_gridPriAxisNumScheme( 0 ),
             m_gridSecAxisNumScheme( 0 ),
+            m_gridPriAxisNumberingStep( 1 ),
+            m_gridSecAxisNumberingStep( 1 ),
             m_circRotate( false ),
+            m_circNumberingStep( 1 ),
             m_arrayTypeTab( 0 )
         {}
 
@@ -338,10 +362,12 @@ private:
         int     m_grid2dArrayNumbering;
         int     m_gridPriAxisNumScheme, m_gridSecAxisNumScheme;
         std::string m_gridPriNumberingOffset, m_gridSecNumberingOffset;
+        int     m_gridPriAxisNumberingStep, m_gridSecAxisNumberingStep;
 
         std::string m_circCentreX, m_circCentreY,
                     m_circAngle, m_circCount, m_circNumberingOffset;
         bool m_circRotate;
+        int m_circNumberingStep;
 
         int m_arrayTypeTab;
     };

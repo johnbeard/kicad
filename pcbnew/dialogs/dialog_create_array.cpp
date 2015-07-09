@@ -83,6 +83,7 @@ DIALOG_CREATE_ARRAY::DIALOG_CREATE_ARRAY( PCB_BASE_FRAME* aParent, wxPoint aOrig
     Add( m_entryCircCount, m_options.m_circCount );
     Add( m_entryRotateItemsCb, m_options.m_circRotate );
     Add( m_entryCircNumberingStart, m_options.m_circNumberingOffset );
+    Add( m_spinCtrlCircNumberingStep, m_options.m_circNumberingStep );
 
     Add( m_gridTypeNotebook, m_options.m_arrayTypeTab );
 
@@ -92,6 +93,8 @@ DIALOG_CREATE_ARRAY::DIALOG_CREATE_ARRAY( PCB_BASE_FRAME* aParent, wxPoint aOrig
 
     Add( m_entryGridPriNumberingOffset, m_options.m_gridPriNumberingOffset );
     Add( m_entryGridSecNumberingOffset, m_options.m_gridSecNumberingOffset );
+    Add( m_spinCtrlGridPriAxisNumberingStep, m_options.m_gridPriAxisNumberingStep );
+    Add( m_spinCtrlGridSecAxisNumberingStep, m_options.m_gridSecAxisNumberingStep );
 
     RestoreConfigToControls();
 
@@ -123,7 +126,8 @@ void DIALOG_CREATE_ARRAY::OnParameterChanged( wxCommandEvent& event )
 
     // some controls result in a change of enablement
     if( evObj == m_radioBoxGridNumberingScheme
-        || evObj == m_checkBoxGridRestartNumbering )
+        || evObj == m_checkBoxGridRestartNumbering
+        || evObj == m_checkBoxCircRestartNumbering )
     {
         setControlEnablement();
     }
@@ -259,10 +263,15 @@ void DIALOG_CREATE_ARRAY::OnOkClick( wxCommandEvent& event )
                 m_entryGridPriNumberingOffset->GetValue().ToStdString(),
                 newGrid->m_priAxisNumType, newGrid->m_numberingOffsetX );
 
+        newGrid->m_priAxisNumStep = m_spinCtrlGridPriAxisNumberingStep->GetValue();
+
         if( newGrid->m_2dArrayNumbering )
+        {
             ok = ok && getNumberingOffset(
                     m_entryGridSecNumberingOffset->GetValue().ToStdString(),
                     newGrid->m_secAxisNumType, newGrid->m_numberingOffsetY );
+            newGrid->m_secAxisNumStep = m_spinCtrlGridSecAxisNumberingStep->GetValue();
+        }
 
         newGrid->m_shouldRenumber = m_checkBoxGridRestartNumbering->GetValue();
 
@@ -295,6 +304,8 @@ void DIALOG_CREATE_ARRAY::OnOkClick( wxCommandEvent& event )
             newCirc->m_numberingType =
                 (ARRAY_NUMBERING_TYPE_T) m_choiceCircNumberingType->GetSelection();
 
+        newCirc->m_numberingStep = m_spinCtrlCircNumberingStep->GetValue();
+
         ok = ok && m_entryCircNumberingStart->GetValue().ToLong( &newCirc->m_numberingOffset );
 
         // Only use settings if all values are good
@@ -318,7 +329,6 @@ void DIALOG_CREATE_ARRAY::OnOkClick( wxCommandEvent& event )
     }
 }
 
-
 void DIALOG_CREATE_ARRAY::setControlEnablement()
 {
     const bool renumber = m_checkBoxGridRestartNumbering->GetValue();
@@ -341,9 +351,14 @@ void DIALOG_CREATE_ARRAY::setControlEnablement()
     m_entryGridPriNumberingOffset->Enable( renumber );
     m_entryGridSecNumberingOffset->Enable( renumber && num2d );
 
+    // We can always set the step on one axis, the other needs a 2d grid
+    m_spinCtrlGridSecAxisNumberingStep->Enable( renumber && num2d );
+
 
     // Circular array options
     const bool circRenumber = m_checkBoxCircRestartNumbering->GetValue();
+    m_labelCircNumStart->Enable( circRenumber );
+    m_labelCircNumbering->Enable( circRenumber );
     m_choiceCircNumberingType->Enable( circRenumber );
 }
 
@@ -468,12 +483,22 @@ wxString DIALOG_CREATE_ARRAY::ARRAY_GRID_OPTIONS::GetItemNumber( int n ) const
     {
         wxPoint coords = getGridCoords( n );
 
-        itemNum += getCoordinateNumber( coords.x + m_numberingOffsetX, m_priAxisNumType );
-        itemNum += getCoordinateNumber( coords.y + m_numberingOffsetY, m_secAxisNumType );
+        itemNum += getCoordinateNumber(
+                coords.x * m_priAxisNumStep + m_numberingOffsetX,
+                m_priAxisNumType
+        );
+
+        itemNum += getCoordinateNumber(
+                coords.y * m_secAxisNumStep + m_numberingOffsetY,
+                m_secAxisNumType
+        );
     }
     else
     {
-        itemNum += getCoordinateNumber( n + m_numberingOffsetX, m_priAxisNumType );
+        itemNum += getCoordinateNumber(
+                n * m_priAxisNumStep + m_numberingOffsetX,
+                m_priAxisNumType
+        );
     }
 
     return itemNum;
@@ -508,5 +533,6 @@ void DIALOG_CREATE_ARRAY::ARRAY_CIRCULAR_OPTIONS::TransformItem( int n, BOARD_IT
 
 wxString DIALOG_CREATE_ARRAY::ARRAY_CIRCULAR_OPTIONS::GetItemNumber( int aN ) const
 {
-    return getCoordinateNumber( aN + m_numberingOffset, m_numberingType );
+    return getCoordinateNumber( aN * m_numberingStep + m_numberingOffset,
+            m_numberingType );
 }

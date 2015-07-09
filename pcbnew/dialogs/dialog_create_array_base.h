@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version Jun  5 2014)
+// C++ code generated with wxFormBuilder (version Jun  6 2014)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO "NOT" EDIT THIS FILE!
@@ -25,6 +25,7 @@ class DIALOG_SHIM;
 #include <wx/gbsizer.h>
 #include <wx/checkbox.h>
 #include <wx/choice.h>
+#include <wx/spinctrl.h>
 #include <wx/sizer.h>
 #include <wx/panel.h>
 #include <wx/bitmap.h>
@@ -78,6 +79,9 @@ class DIALOG_CREATE_ARRAY_BASE : public DIALOG_SHIM
 		wxStaticText* m_labelGridNumberingOffset;
 		wxTextCtrl* m_entryGridPriNumberingOffset;
 		wxTextCtrl* m_entryGridSecNumberingOffset;
+		wxStaticText* m_labelGridNumberingStep;
+		wxSpinCtrl* m_spinCtrlGridPriAxisNumberingStep;
+		wxSpinCtrl* m_spinCtrlGridSecAxisNumberingStep;
 		wxPanel* m_circularPanel;
 		wxStaticText* m_labelCentreX;
 		wxTextCtrl* m_entryCentreX;
@@ -99,6 +103,8 @@ class DIALOG_CREATE_ARRAY_BASE : public DIALOG_SHIM
 		wxChoice* m_choiceCircNumberingType;
 		wxStaticText* m_labelCircNumStart;
 		wxTextCtrl* m_entryCircNumberingStart;
+		wxStaticText* m_labelCircNumberingStep;
+		wxSpinCtrl* m_spinCtrlCircNumberingStep;
 		wxStdDialogButtonSizer* m_stdButtons;
 		wxButton* m_stdButtonsOK;
 		wxButton* m_stdButtonsCancel;
