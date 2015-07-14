@@ -32,6 +32,31 @@
 
 class CONFIG_SAVE_RESTORE_WINDOW
 {
+protected:
+    /*!
+     * Struct RECORD_T
+     *
+     * Base class for a save/restore window - this provides the "valid" flag
+     * and any other common methods.
+     */
+    struct RECORD_T
+    {
+        RECORD_T() :
+            m_configValid( false )
+        {}
+
+        void SetValid()
+        {
+            m_configValid = true;
+        }
+
+        bool IsConfigValid() const
+        {
+            return m_configValid;
+        }
+
+        bool m_configValid;
+    };
 private:
 
     enum CONFIG_CTRL_TYPE_T
@@ -52,11 +77,12 @@ private:
     };
 
     std::vector<CONFIG_CTRL_T> ctrls;
-    bool& valid;
+    RECORD_T& m_record;
 
 protected:
-    CONFIG_SAVE_RESTORE_WINDOW( bool& validFlag ) :
-        valid( validFlag )
+
+    CONFIG_SAVE_RESTORE_WINDOW( RECORD_T& aRecord ) :
+        m_record( aRecord )
     {}
 
     void Add( wxRadioBox* ctrl, int& dest )
@@ -73,7 +99,7 @@ protected:
         ctrls.push_back( ctrlInfo );
     }
 
-    void Add( wxTextCtrl* ctrl, std::string& dest )
+    void Add( wxTextCtrl* ctrl, wxString& dest )
     {
         CONFIG_CTRL_T ctrlInfo = { ctrl, CFG_CTRL_TEXT, (void*) &dest };
 
@@ -113,7 +139,7 @@ protected:
                 break;
 
             case CFG_CTRL_TEXT:
-                *(std::string*) iter->dest = static_cast<wxTextCtrl*>( iter->control )->GetValue();
+                *(wxString*) iter->dest = static_cast<wxTextCtrl*>( iter->control )->GetValue();
                 break;
 
             case CFG_CTRL_CHOICE:
@@ -138,12 +164,12 @@ protected:
             }
         }
 
-        valid = true;
+        m_record.SetValid();
     }
 
     void RestoreConfigToControls()
     {
-        if( !valid )
+        if( !m_record.IsConfigValid() )
             return;
 
         for( std::vector<CONFIG_CTRL_T>::const_iterator iter = ctrls.begin(), iend = ctrls.end();
@@ -156,7 +182,7 @@ protected:
                 break;
 
             case CFG_CTRL_TEXT:
-                static_cast<wxTextCtrl*>( iter->control )->SetValue( *(std::string*) iter->dest );
+                static_cast<wxTextCtrl*>( iter->control )->SetValue( *(wxString*) iter->dest );
                 break;
 
             case CFG_CTRL_CHOICE:
@@ -210,7 +236,11 @@ public:
     };
 
     /**
-     * Persistent dialog options
+     * Struct ARRAY_OPTIONS
+     *
+     * This is the base class which describes some grid and provides the
+     * laying out of array items according to some given parameters, which
+     * will mostly depend on the array type, with a few common ones.
      */
     struct ARRAY_OPTIONS
     {
@@ -242,10 +272,42 @@ public:
             return m_shouldRenumber;
         }
 
-protected:
-        static std::string getCoordinateNumber( int n, ARRAY_NUMBERING_TYPE_T type );
+        /*!
+         * Struct AXIS_T
+         * Describes a single axis of an array. Arrays can have one or more
+         * axes (grids have two, circle have one, for example)
+         */
+        struct AXIS_T
+        {
+            ARRAY_NUMBERING_TYPE_T m_type;
+            int m_offset;
+            int m_step;
+
+            AXIS_T() :
+                m_type( NUMBERING_NUMERIC ),
+                m_offset( 0 ),
+                m_step ( 1 )
+            {}
+
+            /*!
+             * Function GetCoordinateNumberForIndex
+             *
+             * Get the coordinate number for a give axis index. This applies
+             * the offset and stepping internally, and returns a string in the
+             * correct alphabet
+             *
+             * @param n the index of the coordinate to get a number for
+             * @return wxString of the coordinate
+             */
+            wxString GetCoordinateNumberForIndex( int n ) const;
+        };
     };
 
+
+    /*!
+     * Struct ARRAY_GRID_OPTIONS
+     * Parameters and layout for 2D grid arrays
+     */
     struct ARRAY_GRID_OPTIONS : public ARRAY_OPTIONS
     {
         ARRAY_GRID_OPTIONS() :
@@ -255,13 +317,7 @@ protected:
             m_reverseNumberingAlternate( false ),
             m_stagger( 0 ),
             m_stagger_rows( true ),
-            m_2dArrayNumbering( false ),
-            m_numberingOffsetX( 0 ),
-            m_numberingOffsetY( 0 ),
-            m_priAxisNumType( NUMBERING_NUMERIC ),
-            m_secAxisNumType( NUMBERING_NUMERIC ),
-            m_priAxisNumStep( 1 ),
-            m_secAxisNumStep( 1 )
+            m_2dArrayNumbering( false )
         {}
 
         long    m_nx, m_ny;
@@ -271,9 +327,7 @@ protected:
         long    m_stagger;
         bool    m_stagger_rows;
         bool    m_2dArrayNumbering;
-        int     m_numberingOffsetX, m_numberingOffsetY;
-        ARRAY_NUMBERING_TYPE_T m_priAxisNumType, m_secAxisNumType;
-        long    m_priAxisNumStep, m_secAxisNumStep;
+        AXIS_T  m_priAxis, m_secAxis;
 
         void        TransformItem( int n, BOARD_ITEM* item, const wxPoint& rotPoint ) const;    // override virtual
         int         GetArraySize() const;                                                       // override virtual
@@ -283,6 +337,11 @@ private:
         wxPoint getGridCoords( int n ) const;
     };
 
+    /*!
+     * Struct ARRAY_CIRCULAR_OPTIONS
+     *
+     * Parameters and layout for circular arrays
+     */
     struct ARRAY_CIRCULAR_OPTIONS : public ARRAY_OPTIONS
     {
         ARRAY_CIRCULAR_OPTIONS() :
@@ -290,10 +349,7 @@ private:
             m_nPts( 0 ),
             m_angle( 0.0f ),
             m_relativeCentre( false ),
-            m_rotateItems( false ),
-            m_numberingType( NUMBERING_NUMERIC ),
-            m_numberingOffset( 0 ),
-            m_numberingStep( 1 )
+            m_rotateItems( false )
         {}
 
         long m_nPts;
@@ -301,9 +357,7 @@ private:
         wxPoint m_centre;
         bool m_relativeCentre;
         bool m_rotateItems;
-        ARRAY_NUMBERING_TYPE_T m_numberingType;
-        long m_numberingOffset;
-        int m_numberingStep;
+        AXIS_T m_axis;
 
         void        TransformItem( int n, BOARD_ITEM* item, const wxPoint& rotPoint ) const;    // override virtual
         int         GetArraySize() const;                                                       // override virtual
@@ -317,12 +371,12 @@ private:
 private:
 
     /**
-     * The settings object returned to the caller.
+     * The settings object returned to the caller by this dialog.
      * We update the caller's object and never have ownership
      */
     ARRAY_OPTIONS** m_settings;
 
-    /*
+    /*!
      * The position of the original item(s), used for finding radius, etc
      */
     const wxPoint m_originalItemPosition;
@@ -333,12 +387,26 @@ private:
 
     // Internal callback handlers
     void setControlEnablement();
+
+    // Calculate derived properties of a circular grid (eg radius)
     void calculateCircularArrayProperties();
 
-    struct CREATE_ARRAY_DIALOG_ENTRIES
+    /*!
+     * Fill an axis description from a set of controls
+     * @return true if the values made sense
+     */
+    bool fillAxisFromControls( ARRAY_OPTIONS::AXIS_T& axis,
+            wxChoice* alphabetSelector,
+            wxTextCtrl* offsetEntry,
+            wxSpinCtrl* stepEntry );
+
+    /*!
+     * Persistent settings for the create array dialog - these are
+     * save on close and reloaded on next dialog open
+     */
+    struct CREATE_ARRAY_DIALOG_ENTRIES: public CONFIG_SAVE_RESTORE_WINDOW::RECORD_T
     {
         CREATE_ARRAY_DIALOG_ENTRIES() :
-            m_optionsSet( false ),
             m_gridStaggerType( 0 ),
             m_gridNumberingAxis( 0 ),
             m_gridNumberingReverseAlternate( false ),
@@ -353,30 +421,31 @@ private:
             m_arrayTypeTab( 0 )
         {}
 
-        bool m_optionsSet;
+        wxString m_gridNx, m_gridNy,
+                 m_gridDx, m_gridDy,
+                 m_gridOffsetX, m_gridOffsetY,
+                 m_gridStagger;
 
-        std::string m_gridNx, m_gridNy,
-                    m_gridDx, m_gridDy,
-                    m_gridOffsetX, m_gridOffsetY,
-                    m_gridStagger;
+        int      m_gridStaggerType, m_gridNumberingAxis;
+        bool     m_gridNumberingReverseAlternate;
+        int      m_grid2dArrayNumbering;
+        int      m_gridPriAxisNumScheme, m_gridSecAxisNumScheme;
+        wxString m_gridPriNumberingOffset, m_gridSecNumberingOffset;
+        int      m_gridPriAxisNumberingStep, m_gridSecAxisNumberingStep;
 
-        int m_gridStaggerType, m_gridNumberingAxis;
-        bool    m_gridNumberingReverseAlternate;
-        int     m_grid2dArrayNumbering;
-        int     m_gridPriAxisNumScheme, m_gridSecAxisNumScheme;
-        std::string m_gridPriNumberingOffset, m_gridSecNumberingOffset;
-        int     m_gridPriAxisNumberingStep, m_gridSecAxisNumberingStep;
+        wxString m_circCentreX, m_circCentreY,
+                 m_circAngle, m_circCount, m_circNumberingOffset;
+        bool     m_circRotate, m_circRelativeCentre;
+        int      m_circNumberingStep;
 
-        std::string m_circCentreX, m_circCentreY,
-                    m_circAngle, m_circCount, m_circNumberingOffset;
-        bool m_circRotate, m_circRelativeCentre;
-        int m_circNumberingStep;
-
-        int m_arrayTypeTab;
+        int      m_arrayTypeTab;
     };
 
+    /*!
+     * The static dialog state, which is used to save and restore the
+     * dialog settings
+     */
     static CREATE_ARRAY_DIALOG_ENTRIES m_options;
-
 };
 
 #endif      // __DIALOG_CREATE_ARRAY__
