@@ -1619,7 +1619,9 @@ void PCB_BASE_EDIT_FRAME::createArray()
 
     const wxPoint rotPoint = item->GetCenter();
 
-    DIALOG_CREATE_ARRAY dialog( this, rotPoint, &array_opts );
+    const bool enableArrayNumbering = editingModule;
+
+    DIALOG_CREATE_ARRAY dialog( this, enableArrayNumbering, rotPoint, &array_opts );
     int ret = dialog.ShowModal();
 
     if( ret == wxID_OK && array_opts != NULL )

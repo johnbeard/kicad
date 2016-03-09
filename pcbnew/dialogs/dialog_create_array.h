@@ -289,7 +289,9 @@ private:
     };
 
     // Constructor and destructor
-    DIALOG_CREATE_ARRAY( PCB_BASE_FRAME* aParent, wxPoint aOrigPos, ARRAY_OPTIONS** settings );
+    DIALOG_CREATE_ARRAY( PCB_BASE_FRAME* aParent, bool enableNumbering,
+                         wxPoint aOrigPos, ARRAY_OPTIONS** settings );
+
     virtual ~DIALOG_CREATE_ARRAY() {};
 
 private:
@@ -348,6 +350,10 @@ private:
         int m_circNumberingScheme;
     };
 
+    // some uses of arrays might not allow component renumbering
+    bool m_numberingEnabled;
+
+    // saved array options
     static CREATE_ARRAY_DIALOG_ENTRIES m_options;
 
 };

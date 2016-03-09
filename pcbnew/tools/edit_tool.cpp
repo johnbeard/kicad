@@ -821,7 +821,11 @@ int EDIT_TOOL::CreateArray( const TOOL_EVENT& aEvent )
     VECTOR2I rp = selection.GetCenter();
     const wxPoint rotPoint( rp.x, rp.y );
 
-    DIALOG_CREATE_ARRAY dialog( editFrame, rotPoint, &array_opts );
+    // only allow renumbering in modedit, since renumbering in pcbnew
+    // needs to be done in sync with the netlist
+    const bool enableNumbering = m_editModules;
+
+    DIALOG_CREATE_ARRAY dialog( editFrame, enableNumbering, rotPoint, &array_opts );
     int ret = dialog.ShowModal();
 
     if( ret == wxID_OK && array_opts != NULL )

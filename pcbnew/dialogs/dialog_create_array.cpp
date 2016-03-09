@@ -37,12 +37,15 @@
 DIALOG_CREATE_ARRAY::CREATE_ARRAY_DIALOG_ENTRIES DIALOG_CREATE_ARRAY::m_options;
 
 
-DIALOG_CREATE_ARRAY::DIALOG_CREATE_ARRAY( PCB_BASE_FRAME* aParent, wxPoint aOrigPos,
+DIALOG_CREATE_ARRAY::DIALOG_CREATE_ARRAY( PCB_BASE_FRAME* aParent,
+										  bool enableNumbering,
+										  wxPoint aOrigPos,
                                           ARRAY_OPTIONS** aSettings ) :
     DIALOG_CREATE_ARRAY_BASE( aParent ),
     CONFIG_SAVE_RESTORE_WINDOW( m_options.m_optionsSet ),
     m_settings( aSettings ),
-    m_originalItemPosition( aOrigPos )
+    m_originalItemPosition( aOrigPos ),
+    m_numberingEnabled(enableNumbering)
 {
     // Set up numbering scheme drop downs
     //
@@ -223,32 +226,39 @@ void DIALOG_CREATE_ARRAY::OnOkClick( wxCommandEvent& event )
         newGrid->m_horizontalThenVertical = m_radioBoxGridNumberingAxis->GetSelection() == 0;
         newGrid->m_reverseNumberingAlternate = m_checkBoxGridReverseNumbering->GetValue();
 
-        newGrid->m_2dArrayNumbering = m_radioBoxGridNumberingScheme->GetSelection() != 0;
-
-        // this is only correct if you set the choice up according to the enum size and order
-        ok = ok && m_choicePriAxisNumbering->GetSelection() <= NUMBERING_TYPE_MAX
-             && m_choiceSecAxisNumbering->GetSelection() <= NUMBERING_TYPE_MAX;
-
-        // mind undefined casts to enums (should not be able to happen)
-        if( ok )
+        if ( !m_numberingEnabled )
         {
-            newGrid->m_priAxisNumType =
-                (ARRAY_NUMBERING_TYPE_T) m_choicePriAxisNumbering->GetSelection();
-            newGrid->m_secAxisNumType =
-                (ARRAY_NUMBERING_TYPE_T) m_choiceSecAxisNumbering->GetSelection();
+            newGrid->m_shouldRenumber = false;
         }
+        else
+        {
+            newGrid->m_2dArrayNumbering = m_radioBoxGridNumberingScheme->GetSelection() != 0;
 
-        // Work out the offsets for the numbering
-        ok = ok && getNumberingOffset(
-                m_entryGridPriNumberingOffset->GetValue().ToStdString(),
-                newGrid->m_priAxisNumType, newGrid->m_numberingOffsetX );
+            // this is only correct if you set the choice up according to the enum size and order
+            ok = ok && m_choicePriAxisNumbering->GetSelection() <= NUMBERING_TYPE_MAX
+                    && m_choiceSecAxisNumbering->GetSelection() <= NUMBERING_TYPE_MAX;
 
-        if( newGrid->m_2dArrayNumbering )
+            // mind undefined casts to enums (should not be able to happen)
+            if( ok )
+            {
+                newGrid->m_priAxisNumType =
+                        (ARRAY_NUMBERING_TYPE_T) m_choicePriAxisNumbering->GetSelection();
+                newGrid->m_secAxisNumType =
+                        (ARRAY_NUMBERING_TYPE_T) m_choiceSecAxisNumbering->GetSelection();
+            }
+
+            // Work out the offsets for the numbering
             ok = ok && getNumberingOffset(
-                    m_entryGridSecNumberingOffset->GetValue().ToStdString(),
-                    newGrid->m_secAxisNumType, newGrid->m_numberingOffsetY );
+                    m_entryGridPriNumberingOffset->GetValue().ToStdString(),
+                    newGrid->m_priAxisNumType, newGrid->m_numberingOffsetX );
 
-        newGrid->m_shouldRenumber = m_rbGridStartNumberingOpt->GetSelection() == 1;
+            if( newGrid->m_2dArrayNumbering )
+                ok = ok && getNumberingOffset(
+                        m_entryGridSecNumberingOffset->GetValue().ToStdString(),
+                        newGrid->m_secAxisNumType, newGrid->m_numberingOffsetY );
+
+            newGrid->m_shouldRenumber = m_rbGridStartNumberingOpt->GetSelection() == 1;
+        }
 
         // Only use settings if all values are good
         if( ok )
@@ -268,10 +278,18 @@ void DIALOG_CREATE_ARRAY::OnOkClick( wxCommandEvent& event )
         ok = ok && m_entryCircCount->GetValue().ToLong( &newCirc->m_nPts );
 
         newCirc->m_rotateItems = m_entryRotateItemsCb->GetValue();
-        newCirc->m_shouldRenumber = m_rbCircStartNumberingOpt->GetSelection() == 1;
-        newCirc->m_numberingType = NUMBERING_NUMERIC;
 
-        ok = ok && m_entryCircNumberingStart->GetValue().ToLong( &newCirc->m_numberingOffset );
+        if ( !m_numberingEnabled )
+        {
+            newCirc->m_shouldRenumber = false;
+        }
+        else
+        {
+            newCirc->m_shouldRenumber = m_rbCircStartNumberingOpt->GetSelection() == 1;
+            newCirc->m_numberingType = NUMBERING_NUMERIC;
+
+            ok = ok && m_entryCircNumberingStart->GetValue().ToLong( &newCirc->m_numberingOffset );
+        }
 
         // Only use settings if all values are good
         if( ok )
@@ -299,27 +317,35 @@ void DIALOG_CREATE_ARRAY::OnOkClick( wxCommandEvent& event )
 
 void DIALOG_CREATE_ARRAY::setControlEnablement()
 {
-    const bool renumber = m_rbGridStartNumberingOpt->GetSelection() == 1;
 
-    // If we're not renumbering, we can't set the numbering scheme
-    // or axis numbering types
-    m_radioBoxGridNumberingScheme->Enable( renumber );
-    m_labelPriAxisNumbering->Enable( renumber );
-    m_choicePriAxisNumbering->Enable( renumber );
+    // hide numbering controls if we don't need them
+    m_gridPadNumberingSizer->ShowItems( m_numberingEnabled );
+    m_circPadNumberingSizer->ShowItems( m_numberingEnabled );
 
-    // Disable the secondary axis numbering option if the
-    // numbering scheme doesn't have two axes
-    const bool num2d = m_radioBoxGridNumberingScheme->GetSelection() != 0;
+    if ( m_numberingEnabled )
+    {
+        const bool renumber = m_rbGridStartNumberingOpt->GetSelection() == 1;
 
-    m_labelSecAxisNumbering->Enable( renumber && num2d );
-    m_choiceSecAxisNumbering->Enable( renumber && num2d );
+        // If we're not renumbering, we can't set the numbering scheme
+        // or axis numbering types
+        m_radioBoxGridNumberingScheme->Enable( renumber );
+        m_labelPriAxisNumbering->Enable( renumber );
+        m_choicePriAxisNumbering->Enable( renumber );
 
-    // We can only set an offset if we renumber
-    m_labelGridNumberingOffset->Enable( renumber );
-    m_entryGridPriNumberingOffset->Enable( renumber );
-    m_entryGridSecNumberingOffset->Enable( renumber && num2d );
+        // Disable the secondary axis numbering option if the
+        // numbering scheme doesn't have two axes
+        const bool num2d = m_radioBoxGridNumberingScheme->GetSelection() != 0;
 
-    m_entryCircNumberingStart->Enable( m_rbCircStartNumberingOpt->GetSelection() == 1 );
+        m_labelSecAxisNumbering->Enable( renumber && num2d );
+        m_choiceSecAxisNumbering->Enable( renumber && num2d );
+
+        // We can only set an offset if we renumber
+        m_labelGridNumberingOffset->Enable( renumber );
+        m_entryGridPriNumberingOffset->Enable( renumber );
+        m_entryGridSecNumberingOffset->Enable( renumber && num2d );
+
+        m_entryCircNumberingStart->Enable( m_rbCircStartNumberingOpt->GetSelection() == 1 );
+    }
 }
 
 
