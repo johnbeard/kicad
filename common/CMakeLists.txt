@@ -180,6 +180,7 @@ set( COMMON_SRCS
     ${COMMON_DLG_SRCS}
     ${COMMON_WIDGET_SRCS}
     ${COMMON_PAGE_LAYOUT_SRCS}
+    app_signal_handler.cpp
     base_struct.cpp
     basicframe.cpp
     bezier_curves.cpp
