@@ -295,6 +295,7 @@ set( PCBNEW_CLASS_SRCS
     tools/zoom_tool.cpp
     tools/tools_common.cpp
     tools/tool_menu.cpp
+    tools/useless_tool.cpp
 
     tools/grid_menu.cpp
     tools/zoom_menu.cpp

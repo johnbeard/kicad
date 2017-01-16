@@ -297,6 +297,10 @@ public:
     static TOOL_ACTION lock;
     static TOOL_ACTION unlock;
 
+    // Useless tools
+    static TOOL_ACTION uselessMoveItemLeft;
+    static TOOL_ACTION uselessFixedCircle;
+
     // Miscellaneous
     static TOOL_ACTION selectionTool;
     static TOOL_ACTION zoomTool;

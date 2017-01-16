@@ -495,6 +495,18 @@ TOOL_ACTION COMMON_ACTIONS::panLeft( "pcbnew.Control.panLeft",
 TOOL_ACTION COMMON_ACTIONS::panRight( "pcbnew.Control.panRight",
         AS_GLOBAL, MD_SHIFT + WXK_RIGHT, "", "" , NULL, AF_NONE, (void*) CURSOR_RIGHT );
 
+// useless tools
+TOOL_ACTION COMMON_ACTIONS::uselessMoveItemLeft(
+        "pcbnew.UselessTool.MoveItemLeft",
+        AS_GLOBAL, MD_CTRL + MD_SHIFT + int( 'L' ),
+        _( "Move item left" ), _( "Select and move item left" ) );
+
+TOOL_ACTION COMMON_ACTIONS::uselessFixedCircle(
+        "pcbnew.UselessTool.FixedCircle",
+        AS_GLOBAL, MD_CTRL + MD_SHIFT + int( 'C' ),
+        _( "Fixed circle" ), _( "Add a fixed size circle in a fixed place" ),
+        add_circle_xpm );
+
 // Miscellaneous
 TOOL_ACTION COMMON_ACTIONS::selectionTool( "pcbnew.Control.selectionTool",
         AS_GLOBAL, 0,
