@@ -40,6 +40,7 @@
 #include <html_messagebox.h>
 #include <wildcards_and_files_ext.h>
 #include <fp_lib_table.h>
+#include <global_fp_lib_loader.h>
 #include <netlist_reader.h>
 
 #include <cvpcb_mainframe.h>
@@ -114,7 +115,8 @@ END_EVENT_TABLE()
 
 CVPCB_MAINFRAME::CVPCB_MAINFRAME( KIWAY* aKiway, wxWindow* aParent ) :
     KIWAY_PLAYER( aKiway, aParent, FRAME_CVPCB, wxT( "CvPCB" ), wxDefaultPosition,
-        wxDefaultSize, KICAD_DEFAULT_DRAWFRAME_STYLE, CVPCB_MAINFRAME_NAME )
+        wxDefaultSize, KICAD_DEFAULT_DRAWFRAME_STYLE, CVPCB_MAINFRAME_NAME ),
+        m_startActions( *this )
 {
     m_compListBox           = NULL;
     m_footprintListBox      = NULL;
@@ -199,6 +201,10 @@ CVPCB_MAINFRAME::CVPCB_MAINFRAME( KIWAY* aKiway, wxWindow* aParent ) :
                           Right().BestSize( (int) ( m_FrameSize.x * 0.30 ), m_FrameSize.y ) );
 
     m_auimgr.Update();
+
+    m_startActions.AddAction(
+        std::make_unique<GLOBAL_LIB_LOADER>( *this, ID_CVPCB_LIB_TABLE_EDIT )
+    );
 }
 
 
@@ -719,8 +725,6 @@ bool CVPCB_MAINFRAME::LoadFootprintFiles()
     // Check if there are footprint libraries in the footprint library table.
     if( !fptbl || !fptbl->GetLogicalLibs().size() )
     {
-        wxMessageBox( _( "No PCB footprint libraries are listed in the current footprint "
-                         "library table." ), _( "Configuration Error" ), wxOK | wxICON_ERROR );
         return false;
     }
 

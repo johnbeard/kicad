@@ -103,6 +103,44 @@ class FP_LIB_TABLE : public LIB_TABLE
 {
 public:
 
+    /**
+     * Class SETUP_UI_PROVIDER
+     *
+     * Interface class to implement to provide UI prompts to the
+     * user to guide the FP library init process, and report errors
+     *
+     * This decouples the UI from the internal logic.
+     */
+    class SETUP_UI_PROVIDER
+    {
+    public:
+
+        enum class INIT_ACTION
+        {
+            CREATE_EMPTY,       ///< Create a new, blank, FP lib table
+            COPY_EXAMPLE,       ///< Attempt to copy the example table
+            EXIT,               ///< Do no init, just quit and let the user do it themselves
+        };
+
+        /**
+         * Show an error message to the user
+         */
+        virtual void ShowError( const wxString& msg ) = 0;
+
+        /**
+         * Prompt the user to choose an init action
+         *
+         * @return: the relevant INIT_ACTION for the user's choice
+         *          with EXIT being the default in case of no explicit
+         *          choice
+         */
+        virtual INIT_ACTION PromptForInitAction() = 0;
+
+    protected:
+        /* Protected: Not managed by base pointer */
+        virtual ~SETUP_UI_PROVIDER() {}
+    };
+
     virtual void Parse( LIB_TABLE_LEXER* aLexer ) throw() override;
 
     virtual void Format( OUTPUTFORMATTER* out, int nestLevel ) const throw() override;
@@ -245,12 +283,17 @@ public:
      * time being.
      *
      * @param aTable the #FP_LIB_TABLE object to load.
+     * @param aNeedsInit bool flag, set true if this function created
+     *        a new table that the user should configure
+     * @param aUiProvider the UI provider to prompt/alert the user
      * @return true if the global library table exists and is loaded properly.
-     * @throw IO_ERROR if an error occurs attempting to load the footprint library
-     *                 table.
+     *         false if there is an error during load, or the user rejects
+     *         initialising a new table
      */
-    static bool LoadGlobalTable( FP_LIB_TABLE& aTable )
-        throw (IO_ERROR, PARSE_ERROR, boost::interprocess::lock_exception );
+    static bool LoadGlobalTable( FP_LIB_TABLE& aTable,
+                                 bool& aNeedsInit,
+                                 SETUP_UI_PROVIDER& aUiProvider )
+        throw ( boost::interprocess::lock_exception );
 
     /**
      * Function GetGlobalTableFileName

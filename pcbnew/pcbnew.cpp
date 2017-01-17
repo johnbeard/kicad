@@ -295,36 +295,6 @@ bool IFACE::OnKifaceStart( PGM_BASE* aProgram, int aCtlBits )
     // display the real hotkeys in menus or tool tips
     ReadHotkeyConfig( PCB_EDIT_FRAME_NAME, g_Board_Editor_Hokeys_Descr );
 
-    try
-    {
-        // The global table is not related to a specific project.  All projects
-        // will use the same global table.  So the KIFACE::OnKifaceStart() contract
-        // of avoiding anything project specific is not violated here.
-
-        if( !FP_LIB_TABLE::LoadGlobalTable( GFootprintTable ) )
-        {
-            DisplayInfoMessage( NULL, _(
-                "You have run Pcbnew for the first time using the "
-                "new footprint library table method for finding footprints.\n"
-                "Pcbnew has either copied the default "
-                "table or created an empty table in the kicad configuration folder.\n"
-                "You must first configure the library "
-                "table to include all footprint libraries you want to use.\n"
-                "See the \"Footprint Library  Table\" section of "
-                "the CvPcb or Pcbnew documentation for more information." ) );
-        }
-    }
-    catch( const IO_ERROR& ioe )
-    {
-        wxString msg = wxString::Format( _(
-            "An error occurred attempting to load the global footprint library "
-            "table:\n\n%s" ),
-            GetChars( ioe.What() )
-            );
-        DisplayError( NULL, msg );
-        return false;
-    }
-
 #if defined(KICAD_SCRIPTING)
     scriptingSetup();
 #endif

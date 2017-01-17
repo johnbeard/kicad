@@ -357,40 +357,109 @@ const wxString FP_LIB_TABLE::GlobalPathEnvVariableName()
 }
 
 
-bool FP_LIB_TABLE::LoadGlobalTable( FP_LIB_TABLE& aTable )
-    throw (IO_ERROR, PARSE_ERROR, boost::interprocess::lock_exception )
+static bool loadGlobalTable( const wxFileName& fn, FP_LIB_TABLE& aTable,
+                bool& aNeedsInit,
+                FP_LIB_TABLE::SETUP_UI_PROVIDER& aUiProvider )
+        throw (IO_ERROR, PARSE_ERROR, boost::interprocess::lock_exception )
 {
-    bool        tableExists = true;
-    wxFileName  fn = GetGlobalTableFileName();
+    aNeedsInit = false;
 
-    if( !fn.FileExists() )
+    while( !fn.FileExists() )
     {
-        tableExists = false;
+        FP_LIB_TABLE::SETUP_UI_PROVIDER::INIT_ACTION action = aUiProvider.PromptForInitAction();
 
-        if( !fn.DirExists() && !fn.Mkdir( 0x777, wxPATH_MKDIR_FULL ) )
+        // user rejects default init actions
+        if( action == FP_LIB_TABLE::SETUP_UI_PROVIDER::INIT_ACTION::EXIT )
         {
-            THROW_IO_ERROR( wxString::Format( _( "Cannot create global library table path '%s'." ),
-                                              GetChars( fn.GetPath() ) ) );
+            break;
         }
 
-        // Attempt to copy the default global file table from the KiCad
-        // template folder to the user's home configuration path.
-        wxString fileName = Kiface().KifaceSearch().FindValidPath( global_tbl_name );
-
-        // The fallback is to create an empty global footprint table for the user to populate.
-        if( fileName.IsEmpty() || !::wxCopyFile( fileName, fn.GetFullPath(), false ) )
+        // attempt to make the containing directory - needed
+        // for both copy and create actions. if this fails, we won't be able
+        // to do any initialisation
+        if( !fn.DirExists() && !fn.Mkdir( 0x777, wxPATH_MKDIR_FULL ) )
         {
-            FP_LIB_TABLE    emptyTable;
+            aUiProvider.ShowError( wxString::Format( _( "Cannot create global library table path '%s'." ),
+                                                     GetChars( fn.GetPath() ) ) );
+            break;
+        }
 
+        if ( action == FP_LIB_TABLE::SETUP_UI_PROVIDER::INIT_ACTION::COPY_EXAMPLE )
+        {
+            // Attempt to copy the default global file table from the KiCad
+            // template folder to the user's home configuration path.
+            wxString fileName = Kiface().KifaceSearch().FindValidPath( global_tbl_name );
+
+            if( fileName.IsEmpty() )
+            {
+                aUiProvider.ShowError( _( "Failed to find example footprint library table to copy." ) );
+            }
+            else if (!::wxCopyFile( fileName, fn.GetFullPath(), false ) )
+            {
+                aUiProvider.ShowError( _( "Failed to copy example footprint library table." ) );
+            }
+            else
+            {
+                // success, but the user still needs to configure
+                aNeedsInit = true;
+            }
+        }
+        else
+        {
+            // create an empty table
+            FP_LIB_TABLE    emptyTable;
             emptyTable.Save( fn.GetFullPath() );
+
+            if( !fn.FileExists() )
+            {
+                aUiProvider.ShowError( _( "Failed to create empty footprint library table" ) );
+                // ask user what to do now
+            }
+            else
+            {
+                // success, but the user still needs to configure
+                aNeedsInit = true;
+            }
         }
     }
 
-    aTable.Load( fn.GetFullPath() );
+    bool loadedOk = false;
 
-    return tableExists;
+    if ( fn.FileExists() )
+    {
+        aTable.Load( fn.GetFullPath() ); // IO_ERROR thrown on error
+        loadedOk = true;
+    }
+
+    return loadedOk;
 }
 
+
+bool FP_LIB_TABLE::LoadGlobalTable( FP_LIB_TABLE& aTable,
+                                    bool& aNeedsInit,
+                                    SETUP_UI_PROVIDER& aUiProvider )
+    throw ( boost::interprocess::lock_exception )
+{
+    wxFileName  fn = FP_LIB_TABLE::GetGlobalTableFileName();
+
+    bool loaded = false;
+    try
+    {
+        loaded = loadGlobalTable( fn, aTable, aNeedsInit, aUiProvider );
+    }
+    catch( const IO_ERROR& ioe ) // Also PARSE_ERROR
+    {
+        wxString msg = wxString::Format( _(
+                    "An error occurred attempting to load the global footprint library "
+                    "table:\n\n%s" ),
+                GetChars( ioe.What() )
+        );
+
+        aUiProvider.ShowError( msg );
+    }
+
+    return loaded;
+}
 
 wxString FP_LIB_TABLE::GetGlobalTableFileName()
 {
@@ -401,3 +470,4 @@ wxString FP_LIB_TABLE::GetGlobalTableFileName()
 
     return fn.GetFullPath();
 }
+;

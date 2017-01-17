@@ -37,6 +37,7 @@
 #include <wxBasePcbFrame.h>
 #include <config_params.h>
 #include <autosel.h>
+#include <frame_startup_actions.h>
 
 
 /*  Forward declarations of all top-level window classes. */
@@ -303,6 +304,8 @@ private:
     int buildEquivalenceList( FOOTPRINT_EQUIVALENCE_LIST& aList, wxString * aErrorMessages = NULL );
 
     void refreshAfterComponentSearch (COMPONENT* component);
+
+    FRAME_STARTUP_ACTIONS m_startActions;
 
     DECLARE_EVENT_TABLE()
 };
