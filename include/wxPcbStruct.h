@@ -65,6 +65,7 @@ class REPORTER;
 struct PARSE_ERROR;
 class IO_ERROR;
 class FP_LIB_TABLE;
+class FRAME_STARTUP_ACTIONS;
 
 namespace PCB { struct IFACE; }     // KIFACE_I is in pcbnew.cpp
 
@@ -88,6 +89,7 @@ class PCB_EDIT_FRAME : public PCB_BASE_EDIT_FRAME
     /// The auxiliary right vertical tool bar used to access the microwave tools.
     wxAuiToolBar* m_microWaveToolBar;
 
+    std::unique_ptr<FRAME_STARTUP_ACTIONS> m_startActions;
 
 protected:
     PCB_LAYER_WIDGET* m_Layers;

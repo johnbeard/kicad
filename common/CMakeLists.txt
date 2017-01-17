@@ -220,12 +220,14 @@ set( COMMON_SRCS
     eda_pattern_match.cpp
     exceptions.cpp
     filter_reader.cpp
+    frame_startup_actions.cpp
     lib_id.cpp
     lib_table_keywords.cpp
 #    findkicadhelppath.cpp.notused      deprecated, use searchhelpfilefullpath.cpp
     gbr_metadata.cpp
     gestfich.cpp
     getrunningmicrosecs.cpp
+    global_fp_lib_loader.cpp
     grid_tricks.cpp
     gr_basic.cpp
     hotkeys_basic.cpp

@@ -41,6 +41,7 @@
 #include <3d_viewer/eda_3d_viewer.h>
 #include <msgpanel.h>
 #include <fp_lib_table.h>
+#include <global_fp_lib_loader.h>
 
 #include <pcbnew.h>
 #include <pcbnew_id.h>
@@ -487,6 +488,14 @@ PCB_EDIT_FRAME::PCB_EDIT_FRAME( KIWAY* aKiway, wxWindow* aParent ) :
 
     if( !appK2S.FileExists() )
         GetMenuBar()->FindItem( ID_GEN_EXPORT_FILE_STEP )->Enable( false );
+
+    m_startActions = std::unique_ptr<FRAME_STARTUP_ACTIONS>(
+        new FRAME_STARTUP_ACTIONS( *this )
+    );
+
+    m_startActions->AddAction( std::unique_ptr<GLOBAL_LIB_LOADER>(
+        new GLOBAL_LIB_LOADER( *this, ID_PCB_LIB_TABLE_EDIT )
+    ) );
 }
 
 

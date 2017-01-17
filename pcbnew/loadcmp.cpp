@@ -46,6 +46,7 @@ using namespace std::placeholders;
 #include <macros.h>
 #include <fp_lib_table.h>
 #include <lib_id.h>
+#include <pcbnew_id.h>
 
 #include <class_board.h>
 #include <class_module.h>
@@ -55,6 +56,7 @@ using namespace std::placeholders;
 #include <module_editor_frame.h>
 #include <footprint_info.h>
 #include <dialog_get_component.h>
+#include <global_fp_lib_loader.h>
 #include <modview_frame.h>
 #include <wildcards_and_files_ext.h>
 #include <class_pcb_layer_widget.h>
@@ -358,7 +360,6 @@ wxString PCB_BASE_FRAME::SelectFootprint( EDA_DRAW_FRAME* aWindow,
 
     wxString        fpname;
     wxString        msg;
-    wxArrayString   libraries;
 
     std::vector< wxArrayString > rows;
 
@@ -374,17 +375,7 @@ wxString PCB_BASE_FRAME::SelectFootprint( EDA_DRAW_FRAME* aWindow,
 
     if( MList.GetCount() == 0 )
     {
-        wxString tmp;
-
-        for( unsigned i = 0;  i < libraries.GetCount();  i++ )
-        {
-            tmp += libraries[i] + wxT( "\n" );
-        }
-
-        msg.Printf( _( "No footprints could be read from library file(s):\n\n%s\nin any of "
-                       "the library search paths.  Verify your system is configured properly "
-                       "so the footprint libraries can be found." ), GetChars( tmp ) );
-        DisplayError( aWindow, msg );
+        GLOBAL_LIB_LOADER::ShowNoFootprintsDialog( *aWindow, true, ID_PCB_LIB_TABLE_EDIT );
         return wxEmptyString;
     }
 
