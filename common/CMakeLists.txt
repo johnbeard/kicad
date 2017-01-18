@@ -143,6 +143,7 @@ set( COMMON_ABOUT_DLG_SRCS
     )
 
 set( COMMON_DLG_SRCS
+    dialogs/dialog_multibutton.cpp
     dialogs/dialog_display_info_HTML_base.cpp
     dialogs/dialog_exit_base.cpp
     dialogs/dialog_image_editor.cpp
