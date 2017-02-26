@@ -46,6 +46,7 @@
 #include <scoped_set_reset.h>
 #include <bitmaps.h>
 #include <hotkeys.h>
+#include <painter.h>
 
 #include <class_board.h>
 #include <class_edge_mod.h>
@@ -56,6 +57,7 @@
 
 #include <tools/selection_tool.h>
 #include <tools/tool_event_utils.h>
+#include <tools/zone_create_helper.h>
 
 using SCOPED_DRAW_MODE = SCOPED_SET_RESET<DRAWING_TOOL::MODE>;
 
@@ -119,6 +121,22 @@ TOOL_ACTION PCB_ACTIONS::arcPosture( "pcbnew.InteractiveDrawing.arcPosture",
         AS_CONTEXT, TOOL_ACTION::LegacyHotKey( HK_SWITCH_TRACK_POSTURE ),
         _( "Switch Arc Posture" ), _( "Switch the arc posture" ) );
 
+
+/*
+ * Contextual actions only usable in other DRAWING_TOOL actions
+ */
+
+static TOOL_ACTION deleteLastCorner( "pcbnew.InteractiveDrawing.deleteLastCorner",
+        AS_CONTEXT, WXK_BACK,
+        _( "Delete last corner" ), _( "Delete the last corner of a zone in progress" ),
+        delete_xpm );
+
+static TOOL_ACTION closeZoneOutline( "pcbnew.InteractiveDrawing.closeZoneOutline",
+        AS_CONTEXT, 0,
+        _( "Close Zone Outline" ), _( "Close the outline of a zone in progress" ),
+        checked_ok_xpm );
+
+
 DRAWING_TOOL::DRAWING_TOOL() :
     PCB_TOOL( "pcbnew.InteractiveDrawing" ),
     m_view( nullptr ), m_controls( nullptr ),
@@ -140,13 +158,26 @@ bool DRAWING_TOOL::Init()
         return m_mode != MODE::NONE;
     };
 
+    auto zoneActiveFunctor = [this ] ( const SELECTION& aSel ) {
+        return m_mode == MODE::ZONE;
+    };
+
     auto& ctxMenu = m_menu.GetMenu();
 
     // cancel current toool goes in main context menu at the top if present
     ctxMenu.AddItem( ACTIONS::cancelInteractive, activeToolFunctor, 1000 );
     ctxMenu.AddSeparator( activeToolFunctor, 1000 );
 
-    // Drawing type-specific options will be added by the PCB control tool
+    // Add top-level menu items for specific drawing types (eg zones)
+    // these items related to active interactive tools
+    ctxMenu.AddItem( closeZoneOutline, zoneActiveFunctor, 1000 );
+    ctxMenu.AddItem( deleteLastCorner, zoneActiveFunctor, 1000 );
+    ctxMenu.AddSeparator( zoneActiveFunctor, 1000 );
+
+    // Type-specific sub-menus will be added for us by other tools
+    // For example, zone fill/unfill is provided by the PCB control tool
+
+    // Finally, add the standard zoom/grid items
     m_menu.AddStandardSubMenus( *getEditFrame<PCB_BASE_FRAME>() );
 
     return true;
@@ -411,7 +442,6 @@ int DRAWING_TOOL::PlaceText( const TOOL_EVENT& aEvent )
                 text = NULL;
             }
         }
-
         else if( text && evt->IsMotion() )
         {
             text->SetPosition( wxPoint( cursorPos.x, cursorPos.y ) );
@@ -1205,62 +1235,6 @@ bool DRAWING_TOOL::drawArc( DRAWSEGMENT*& aGraphic )
 }
 
 
-std::unique_ptr<ZONE_CONTAINER> DRAWING_TOOL::createNewZone( bool aKeepout )
-{
-    const auto& board = *getModel<BOARD>();
-
-    // Get the current default settings for zones
-    ZONE_SETTINGS zoneInfo = m_frame->GetZoneSettings();
-    zoneInfo.m_CurrentZone_Layer = m_frame->GetScreen()->m_Active_Layer;
-    zoneInfo.m_NetcodeSelection = board.GetHighLightNetCode();
-    zoneInfo.SetIsKeepout( aKeepout );
-
-    m_controls->SetAutoPan( true );
-    m_controls->CaptureCursor( true );
-
-    // Show options dialog
-    ZONE_EDIT_T dialogResult;
-
-    if( aKeepout )
-        dialogResult = InvokeKeepoutAreaEditor( m_frame, &zoneInfo );
-    else
-    {
-        if( IsCopperLayer( zoneInfo.m_CurrentZone_Layer ) )
-            dialogResult = InvokeCopperZonesEditor( m_frame, &zoneInfo );
-        else
-            dialogResult = InvokeNonCopperZonesEditor( m_frame, NULL, &zoneInfo );
-    }
-
-    if( dialogResult == ZONE_ABORT )
-    {
-        m_controls->SetAutoPan( false );
-        m_controls->CaptureCursor( false );
-        return nullptr;
-    }
-
-    auto newZone = std::make_unique<ZONE_CONTAINER>( m_board );
-
-    // Apply the selected settings
-    zoneInfo.ExportSetting( *newZone );
-
-    return newZone;
-}
-
-
-std::unique_ptr<ZONE_CONTAINER> DRAWING_TOOL::createZoneFromExisting(
-        const ZONE_CONTAINER& aSrcZone )
-{
-    auto newZone = std::make_unique<ZONE_CONTAINER>( m_board );
-
-    ZONE_SETTINGS zoneSettings;
-    zoneSettings << aSrcZone;
-
-    zoneSettings.ExportSetting( *newZone );
-
-    return newZone;
-}
-
-
 bool DRAWING_TOOL::getSourceZoneForAction( ZONE_MODE aMode, ZONE_CONTAINER*& aZone )
 {
     aZone = nullptr;
@@ -1289,230 +1263,129 @@ bool DRAWING_TOOL::getSourceZoneForAction( ZONE_MODE aMode, ZONE_CONTAINER*& aZo
 }
 
 
-void DRAWING_TOOL::performZoneCutout( ZONE_CONTAINER& aExistingZone, ZONE_CONTAINER& aCutout )
+void DRAWING_TOOL::runPolygonEventLoop( POLYGON_GEOM_MANAGER& polyGeomMgr )
 {
-    // Copy cutout corners into existing zone
-    for( int ii = 0; ii < aCutout.GetNumCorners(); ii++ )
+    auto& controls = *getViewControls();
+    bool started = false;
+
+    while( OPT_TOOL_EVENT evt = Wait() )
     {
-        aExistingZone.AppendCorner( aCutout.GetCornerPosition( ii ) );
-    }
+        VECTOR2I cursorPos = controls.GetCursorPosition();
 
-    // Close the current corner list
-    aExistingZone.Outline()->CloseLastContour();
+        if( TOOL_EVT_UTILS::IsCancelInteractive( *evt ) )
+        {
+            // pre-empted by another tool, give up
+            // cancelled without an inprogress polygon, give up
+            if( !polyGeomMgr.IsPolygonInProgress() || evt->IsActivate() )
+            {
+                break;
+            }
 
-    m_board->OnAreaPolygonModified( nullptr, &aExistingZone );
+            polyGeomMgr.Reset();
+            // start again
+            started = false;
 
-    // Re-fill if needed
-    if( aExistingZone.IsFilled() )
-    {
-        SELECTION_TOOL* selTool = m_toolMgr->GetTool<SELECTION_TOOL>();
+            controls.SetAutoPan( false );
+            controls.CaptureCursor( false );
+        }
 
-        auto& selection = selTool->GetSelection();
+        else if( evt->IsClick( BUT_RIGHT ) )
+        {
+            m_menu.ShowContextMenu();
+        }
 
-        selection.Clear();
-        selection.Add( &aExistingZone );
+        // events that lock in nodes
+        else if( evt->IsClick( BUT_LEFT )
+                || evt->IsDblClick( BUT_LEFT )
+                || evt->IsAction( &closeZoneOutline ) )
+        {
+            // Check if it is double click / closing line (so we have to finish the zone)
+            const bool endPolygon = evt->IsDblClick( BUT_LEFT )
+                            || evt->IsAction( &closeZoneOutline )
+                            || polyGeomMgr.NewPointClosesOutline( cursorPos );
 
-        m_toolMgr->RunAction( PCB_ACTIONS::zoneFill, true );
-    }
+            if( endPolygon )
+            {
+                polyGeomMgr.SetFinished();
+                polyGeomMgr.Reset();
+
+                // ready to start again
+                started = false;
+                controls.SetAutoPan( false );
+                controls.CaptureCursor( false );
+            }
+            else // adding a corner
+            {
+                polyGeomMgr.AddPoint( cursorPos );
+
+                if( !started )
+                {
+                    started = true;
+                    controls.SetAutoPan( true );
+                    controls.CaptureCursor( true );
+                }
+            }
+        }
+
+        else if( evt->IsAction( &deleteLastCorner ) )
+        {
+            polyGeomMgr.DeleteLastCorner();
+
+            if( !polyGeomMgr.IsPolygonInProgress() )
+            {
+                // report finished as an empty shape
+                polyGeomMgr.SetFinished();
+
+                // start again
+                started = false;
+                controls.SetAutoPan( false );
+                controls.CaptureCursor( false );
+            }
+        }
+
+        else if( polyGeomMgr.IsPolygonInProgress()
+                    && ( evt->IsMotion() || evt->IsDrag( BUT_LEFT ) ) )
+        {
+            bool draw45 = evt->Modifier( MD_CTRL );
+            polyGeomMgr.SetLeaderMode( draw45 ? POLYGON_GEOM_MANAGER::LEADER_MODE::DEG45
+                                              : POLYGON_GEOM_MANAGER::LEADER_MODE::DIRECT );
+            polyGeomMgr.SetCursorPosition( cursorPos );
+        }
+    } // end while
 }
 
 
 int DRAWING_TOOL::drawZone( bool aKeepout, ZONE_MODE aMode )
 {
-    std::unique_ptr<ZONE_CONTAINER> zone;
-    DRAWSEGMENT line45;
-    DRAWSEGMENT* helperLine = NULL;  // we will need more than one helper line
-    BOARD_COMMIT commit( m_frame );
+    // get a source zone, if we need one
     ZONE_CONTAINER* sourceZone = nullptr;
 
-    // get a source zone, if we need one
     if( !getSourceZoneForAction( aMode, sourceZone ) )
         return 0;
 
-    // Add a VIEW_GROUP that serves as a preview for the new item
-    SELECTION preview;
-    m_view->Add( &preview );
+    ZONE_CREATE_HELPER::PARAMS params;
+
+    params.m_keepout = aKeepout;
+    params.m_mode = aMode;
+    params.m_sourceZone = sourceZone;
+
+    ZONE_CREATE_HELPER zoneTool( *this, params );
+
+    // the geometry manager which handles the zone geometry, and
+    // hands the calculated points over to the zone creator tool
+    POLYGON_GEOM_MANAGER polyGeomMgr( zoneTool );
+
+    Activate(); // register for events
+
+    auto& controls = *getViewControls();
 
     m_toolMgr->RunAction( PCB_ACTIONS::selectionClear, true );
-    m_controls->ShowCursor( true );
-    m_controls->SetSnapping( true );
 
-    Activate();
+    controls.ShowCursor( true );
+    controls.SetSnapping( true );
 
-    VECTOR2I origin;
-    int numPoints = 0;
-    bool direction45 = false;       // 45 degrees only mode
+    runPolygonEventLoop( polyGeomMgr );
 
-    // Main loop: keep receiving events
-    while( OPT_TOOL_EVENT evt = Wait() )
-    {
-        VECTOR2I cursorPos = m_controls->GetCursorPosition();
-
-        // Enable 45 degrees lines only mode by holding control
-        if( direction45 != ( evt->Modifier( MD_CTRL ) && numPoints > 0 ) )
-        {
-            direction45 = evt->Modifier( MD_CTRL );
-
-            if( direction45 )
-            {
-                preview.Add( &line45 );
-                make45DegLine( helperLine, &line45 );
-            }
-            else
-            {
-                preview.Remove( &line45 );
-                helperLine->SetEnd( wxPoint( cursorPos.x, cursorPos.y ) );
-            }
-
-            m_view->Update( &preview );
-        }
-
-        if( TOOL_EVT_UTILS::IsCancelInteractive( *evt ) )
-        {
-            if( numPoints > 0 )         // cancel the current zone
-            {
-                zone = nullptr;
-                m_controls->SetAutoPan( false );
-                m_controls->CaptureCursor( false );
-
-                if( direction45 )
-                {
-                    preview.Remove( &line45 );
-                    direction45 = false;
-                }
-
-                preview.FreeItems();
-                m_view->Update( &preview );
-
-                numPoints = 0;
-            }
-            else                        // there is no zone currently drawn - just stop the tool
-                break;
-
-            if( evt->IsActivate() )  // now finish unconditionally
-                break;
-        }
-        else if( evt->IsClick( BUT_RIGHT ) )
-        {
-            m_menu.ShowContextMenu();
-        }
-        else if( evt->IsClick( BUT_LEFT ) || evt->IsDblClick( BUT_LEFT ) )
-        {
-            // Check if it is double click / closing line (so we have to finish the zone)
-            if( evt->IsDblClick( BUT_LEFT ) || ( numPoints > 0 && cursorPos == origin ) )
-            {
-                if( numPoints > 2 )     // valid zone consists of more than 2 points
-                {
-                    assert( zone->GetNumCorners() > 2 );
-
-                    // Finish the zone
-                    if( direction45 )
-                        zone->AppendCorner( cursorPos == origin ? line45.GetStart() : line45.GetEnd() );
-
-                    zone->Outline()->CloseLastContour();
-                    zone->Outline()->RemoveNullSegments();
-                    zone->Outline()->Hatch();
-
-                    if( !aKeepout )
-                        static_cast<PCB_EDIT_FRAME*>( m_frame )->Fill_Zone( zone.get() );
-
-                    if( aMode == ZONE_MODE::CUTOUT )
-                    {
-                        // For cutouts, subtract from the source
-                        commit.Modify( sourceZone );
-
-                        performZoneCutout( *sourceZone, *zone );
-
-                        commit.Push( _( "Add a zone cutout" ) );
-                    }
-                    else
-                    {
-                        // Add the zone as a new board item
-                        commit.Add( zone.release() );
-                        commit.Push( _( "Draw a zone" ) );
-                    }
-                }
-
-                // if kept, this was released. if still not null,
-                // this zone is now unwanted and can be removed
-                zone = nullptr;
-
-                numPoints = 0;
-                m_controls->SetAutoPan( false );
-                m_controls->CaptureCursor( false );
-
-                if( direction45 )
-                {
-                    preview.Remove( &line45 );
-                    direction45 = false;
-                }
-
-                preview.FreeItems();
-                m_view->Update( &preview );
-            }
-            else
-            {
-                if( numPoints == 0 )        // it's the first click
-                {
-                    if( sourceZone )
-                    {
-                        zone = createZoneFromExisting( *sourceZone );
-                    }
-                    else
-                    {
-                        zone = createNewZone( aKeepout );
-                    }
-
-                    if( !zone )
-                    {
-                        continue;
-                    }
-
-                    m_frame->GetGalCanvas()->SetTopLayer( zone->GetLayer() );
-
-                    // Add the first point
-                    zone->Outline()->Start( zone->GetLayer(),
-                                            cursorPos.x, cursorPos.y,
-                                            zone->GetHatchStyle() );
-                    origin = cursorPos;
-
-                    // Helper line represents the currently drawn line of the zone polygon
-                    helperLine = new DRAWSEGMENT;
-                    helperLine->SetShape( S_SEGMENT );
-                    helperLine->SetWidth( 1 );
-                    helperLine->SetLayer( zone->GetLayer() );
-                    helperLine->SetStart( wxPoint( cursorPos.x, cursorPos.y ) );
-                    helperLine->SetEnd( wxPoint( cursorPos.x, cursorPos.y ) );
-                    line45 = *helperLine;
-
-                    preview.Add( helperLine );
-                }
-                else
-                {
-                    zone->AppendCorner( helperLine->GetEnd() );
-                    helperLine = new DRAWSEGMENT( *helperLine );
-                    helperLine->SetStart( helperLine->GetEnd() );
-                    preview.Add( helperLine );
-                }
-
-                ++numPoints;
-                m_view->Update( &preview );
-            }
-        }
-
-        else if( evt->IsMotion() && numPoints > 0 )
-        {
-            // 45 degree lines
-            if( direction45 )
-                make45DegLine( helperLine, &line45 );
-            else
-                helperLine->SetEnd( wxPoint( cursorPos.x, cursorPos.y ) );
-
-            m_view->Update( &preview );
-        }
-    }
-
-    m_view->Remove( &preview );
     m_frame->SetToolID( ID_NO_TOOL_SELECTED, wxCURSOR_DEFAULT, wxEmptyString );
 
     return 0;

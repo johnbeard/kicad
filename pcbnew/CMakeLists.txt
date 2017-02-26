@@ -264,6 +264,7 @@ set( PCBNEW_CLASS_SRCS
     pcb_draw_panel_gal.cpp
     plot_board_layers.cpp
     plot_brditems_plotter.cpp
+    polygon_geom_manager.cpp
     print_board_functions.cpp
     printout_controler.cpp
     ratsnest.cpp
@@ -306,6 +307,7 @@ set( PCBNEW_CLASS_SRCS
     tools/pad_tool.cpp
     tools/picker_tool.cpp
     tools/zoom_tool.cpp
+    tools/zone_create_helper.cpp
     tools/tools_common.cpp
     tools/tool_event_utils.cpp
 
