@@ -726,6 +726,7 @@ void ROUTER_TOOL::performRouting()
         if( evt->IsMotion() )
         {
             m_router->SetOrthoMode( evt->Modifier( MD_CTRL ) );
+            wxLogTrace("PNS", "Motion event");
             updateEndItem( *evt );
             m_router->Move( m_endSnapPoint, m_endItem );
         }
@@ -748,7 +749,9 @@ void ROUTER_TOOL::performRouting()
         }
         else if( evt->IsAction( &ACT_SwitchPosture ) )
         {
+            wxLogTrace("PNS", "ACT_SwitchPosture");
             m_router->FlipPosture();
+            wxLogTrace("PNS", "updating end item" );
             updateEndItem( *evt );
             m_router->Move( m_endSnapPoint, m_endItem );        // refresh
         }

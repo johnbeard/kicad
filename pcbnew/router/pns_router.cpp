@@ -321,6 +321,8 @@ void ROUTER::movePlacing( const VECTOR2I& aP, ITEM* aEndItem )
 {
     m_iface->EraseView();
 
+    wxLogTrace( "PNS", "movePlacing" );
+
     m_placer->Move( aP, aEndItem );
     ITEM_SET current = m_placer->Traces();
 

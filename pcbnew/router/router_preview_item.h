@@ -79,6 +79,7 @@ public:
 
     void ShowTrackClearance( bool aEnabled )
     {
+        wxLogTrace("PNS", "Setting show track clearance %d", aEnabled);
         m_showTrackClearance = aEnabled;
     }
 

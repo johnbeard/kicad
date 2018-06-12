@@ -177,11 +177,15 @@ void ROUTER_PREVIEW_ITEM::ViewDraw( int aLayer, KIGFX::VIEW* aView ) const
         {
         case SH_LINE_CHAIN:
         {
+            
+            wxLogTrace("PNS", "draw sh chain, show %d, clr %d", 
+                    m_showTrackClearance, m_clearance);
             const SHAPE_LINE_CHAIN* l = (const SHAPE_LINE_CHAIN*) m_shape;
             drawLineChain( *l, gal );
 
             if( m_showTrackClearance && m_clearance > 0 )
             {
+                
                 gal->SetLayerDepth( ClearanceOverlayDepth );
                 gal->SetStrokeColor( COLOR4D( DARKDARKGRAY ) );
                 gal->SetFillColor( COLOR4D( DARKDARKGRAY ) );
@@ -193,6 +197,8 @@ void ROUTER_PREVIEW_ITEM::ViewDraw( int aLayer, KIGFX::VIEW* aView ) const
 
         case SH_SEGMENT:
         {
+                        wxLogTrace("PNS", "draw segmnet");
+
             const SHAPE_SEGMENT* s = (const SHAPE_SEGMENT*) m_shape;
             gal->DrawSegment( s->GetSeg().A, s->GetSeg().B, s->GetWidth() );
 

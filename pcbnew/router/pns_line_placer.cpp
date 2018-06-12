@@ -159,6 +159,9 @@ bool LINE_PLACER::handlePullback()
     SHAPE_LINE_CHAIN& head = m_head.Line();
     SHAPE_LINE_CHAIN& tail = m_tail.Line();
 
+    wxLogTrace( "PNS", "handlePulback head %d, tail %d",
+            head.SegmentCount(), tail.SegmentCount() );
+
     if( head.PointCount() < 2 )
         return false;
 
@@ -224,8 +227,10 @@ bool LINE_PLACER::reduceTail( const VECTOR2I& aEnd )
         return false;
 
     // Don't attempt this for too short tails
-    if( n < 2 )
+    if( n < 2 ) {
+        wxLogTrace("PNS", "Can't reduce tail");
         return false;
+    }
 
     // Start from the segment farthest from the end of the tail
     // int start_index = std::max(n - 1 - ReductionDepth, 0);
@@ -354,6 +359,8 @@ bool LINE_PLACER::mergeHead()
 
 bool LINE_PLACER::rhWalkOnly( const VECTOR2I& aP, LINE& aNewHead )
 {
+    wxLogTrace( "PNS", "rhWalkOnly to %s, aNewHead %d, m_head %d",
+        aP.Format().c_str(), aNewHead.SegmentCount(), m_head.SegmentCount() );
     LINE initTrack( m_head );
     LINE walkFull;
     int effort = 0;
@@ -366,8 +373,15 @@ bool LINE_PLACER::rhWalkOnly( const VECTOR2I& aP, LINE& aNewHead )
     walkaround.SetSolidsOnly( false );
     walkaround.SetIterationLimit( Settings().WalkaroundIterationLimit() );
 
+    wxLogTrace( "PNS", "walkaround.Route pre: initTrack %d, walkFull %d",
+        initTrack.SegmentCount(), walkFull.SegmentCount() );
+
     WALKAROUND::WALKAROUND_STATUS wf = walkaround.Route( initTrack, walkFull, false );
 
+
+    wxLogTrace( "PNS", "walkaround.Route done: initTrack %d, walkFull %d",
+        initTrack.SegmentCount(), walkFull.SegmentCount() );
+    
     switch( Settings().OptimizerEffort() )
     {
     case OE_LOW:
@@ -385,11 +399,13 @@ bool LINE_PLACER::rhWalkOnly( const VECTOR2I& aP, LINE& aNewHead )
 
     if( wf == WALKAROUND::STUCK )
     {
+        wxLogTrace( "PNS", "WALKAROUND::STUCK" ); 
         walkFull = walkFull.ClipToNearestObstacle( m_currentNode );
         rv = true;
     }
     else if( m_placingVia && viaOk )
     {
+        wxLogTrace("PNS", "WALKAROUND append via");
         walkFull.AppendVia( makeVia( walkFull.CPoint( -1 ) ) );
     }
 
@@ -398,11 +414,15 @@ bool LINE_PLACER::rhWalkOnly( const VECTOR2I& aP, LINE& aNewHead )
     if( m_currentNode->CheckColliding( &walkFull ) )
     {
         aNewHead = m_head;
+        wxLogTrace( "PNS", "Colliding, return false" ); 
         return false;
     }
 
     m_head = walkFull;
     aNewHead = walkFull;
+
+    wxLogTrace( "PNS", "rhWalkOnly to %s, m_head %d",
+        aP.Format().c_str(), m_head.SegmentCount() );
 
     return rv;
 }
@@ -625,6 +645,8 @@ bool LINE_PLACER::rhShoveOnly( const VECTOR2I& aP, LINE& aNewHead )
 
 bool LINE_PLACER::routeHead( const VECTOR2I& aP, LINE& aNewHead )
 {
+    wxLogTrace( "PNS", "Routing head mode: %d", m_currentMode );
+
     switch( m_currentMode )
     {
     case RM_MarkObstacles:
@@ -643,6 +665,8 @@ bool LINE_PLACER::routeHead( const VECTOR2I& aP, LINE& aNewHead )
 
 bool LINE_PLACER::optimizeTailHeadTransition()
 {
+    wxLogTrace("PNS", "optimizeTailHeadTransition, tail %d", 
+                m_tail.SegmentCount() );
     LINE linetmp = Trace();
 
     if( OPTIMIZER::Optimize( &linetmp, OPTIMIZER::FANOUT_CLEANUP, m_currentNode ) )
@@ -784,8 +808,13 @@ const ITEM_SET LINE_PLACER::Traces()
 
 void LINE_PLACER::FlipPosture()
 {
+    wxLogTrace("PNS", "Flipping direction: INIT_DIR %s, DIR %s",
+        m_initial_direction.Format().c_str(), m_direction.Format().c_str() );
     m_initial_direction = m_initial_direction.Right();
     m_direction = m_direction.Right();
+
+    wxLogTrace("PNS", "Flipped direction: INIT_DIR %s, DIR %s",
+        m_initial_direction.Format().c_str(), m_direction.Format().c_str() );
 }
 
 
@@ -917,6 +946,10 @@ bool LINE_PLACER::Move( const VECTOR2I& aP, ITEM* aEndItem )
     VECTOR2I p = aP;
     int eiDepth = -1;
 
+    wxLogTrace("PNS", "LINE_PLACER::Move %s, end item %p, m_head %d", 
+        aP.Format(),
+        aEndItem, m_head.SegmentCount() );
+
     if( aEndItem && aEndItem->Owner() )
         eiDepth = static_cast<NODE*>( aEndItem->Owner() )->Depth();
 
@@ -927,6 +960,8 @@ bool LINE_PLACER::Move( const VECTOR2I& aP, ITEM* aEndItem )
     }
 
     route( p );
+
+    wxLogTrace("PNS", "LINE_PLACER::Move route done");
 
     current = Trace();
 
@@ -1187,6 +1222,8 @@ bool LINE_PLACER::buildInitialLine( const VECTOR2I& aP, LINE& aHead, bool aInver
     }
 
     aHead.SetShape( l );
+
+    wxLogTrace("PNS", "buildInitialLine: %d segs", l.SegmentCount() );
 
     if( !m_placingVia )
         return true;

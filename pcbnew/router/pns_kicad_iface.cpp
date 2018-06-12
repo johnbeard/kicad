@@ -1031,6 +1031,7 @@ void PNS_KICAD_IFACE::DisplayItem( const PNS::ITEM* aItem, int aColor, int aClea
     if( aColor >= 0 )
         pitem->SetColor( KIGFX::COLOR4D( aColor ) );
 
+    wxLogTrace("PNS", " Clearance: %d, dopts %p", aClearance, m_dispOptions);
     if( aClearance >= 0 )
     {
         pitem->SetClearance( aClearance );

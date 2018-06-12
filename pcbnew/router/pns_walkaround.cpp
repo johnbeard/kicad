@@ -147,6 +147,8 @@ WALKAROUND::WALKAROUND_STATUS WALKAROUND::singleStep( LINE& aPath,
 WALKAROUND::WALKAROUND_STATUS WALKAROUND::Route( const LINE& aInitialPath,
         LINE& aWalkPath, bool aOptimize )
 {
+    wxLogTrace("PNS", "Walkaround route: init path %d segs, walk path %d segs, opt: %d",
+        aInitialPath.LinkCount(), aWalkPath.LinkCount(), aOptimize );
     LINE path_cw( aInitialPath ), path_ccw( aInitialPath );
     WALKAROUND_STATUS s_cw = IN_PROGRESS, s_ccw = IN_PROGRESS;
     SHAPE_LINE_CHAIN best_path;
@@ -272,6 +274,9 @@ WALKAROUND::WALKAROUND_STATUS WALKAROUND::Route( const LINE& aInitialPath,
         if( aOptimize )
             OPTIMIZER::Optimize( &aWalkPath, OPTIMIZER::MERGE_OBTUSE, m_world );
     }
+
+    wxLogTrace("PNS", "Walkaround route done, walk path %d segs, opt: %d",
+        aWalkPath.LinkCount(), aOptimize );
 
     return st;
 }
