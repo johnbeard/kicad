@@ -531,7 +531,7 @@ class FootprintWizardDrawingAids:
         @param cy: the y co-ordinate of the arc centre
         @param sx: the x co-ordinate of the arc start point
         @param sy: the y co-ordinate of the arc start point
-        @param a: the arc's central angle (in deci-degrees)
+        @param a: the arc's central angle (in degrees)
         """
         circle = pcbnew.EDGE_MODULE(self.module)
         circle.SetWidth(self.dc['lineThickness'])
@@ -546,7 +546,8 @@ class FootprintWizardDrawingAids:
         if cmp(self.dc['transform'][0], 0) != cmp(self.dc['transform'][4], 0):
             a = -a
 
-        circle.SetAngle(a)
+        # convert degrees to deci-degrees
+        circle.SetAngle(a * 10)
         circle.SetStartEnd(center, start)
         self.module.Add(circle)
 
@@ -685,8 +686,7 @@ class FootprintWizardDrawingAids:
         sx = math.sin(angle_intercept) * r
         sy = -math.cos(angle_intercept) * r
 
-        # NOTE: this may be out by a factor of ten one day
-        arc_angle = (math.pi * 2 - angle_intercept * 2) * (1800/math.pi)
+        arc_angle = (math.pi * 2 - angle_intercept * 2) * (180/math.pi)
 
         self.Arc(x, y, sx, sy, arc_angle)
 
@@ -811,15 +811,14 @@ class FootprintWizardDrawingAids:
         self.VLine(-x_left, y_top + rad, y_inner)
 
         # corner arcs
-        ninety_deg = 90 * 10  # deci-degs
         cx = x - w / 2 + rad
         cy = y - h / 2 + rad
 
         # top left
-        self.Arc(+cx, +cy, +x_left, +cy, +ninety_deg)
-        self.Arc(-cx, +cy, -x_left, +cy, -ninety_deg)
-        self.Arc(+cx, -cy, +x_left, -cy, -ninety_deg)
-        self.Arc(-cx, -cy, -x_left, -cy, +ninety_deg)
+        self.Arc(+cx, +cy, +x_left, +cy, +90)
+        self.Arc(-cx, +cy, -x_left, +cy, -90)
+        self.Arc(+cx, -cy, +x_left, -cy, -90)
+        self.Arc(-cx, -cy, -x_left, -cy, +90)
 
     def ChamferedBox(self, x, y, w, h, chamfer_x, chamfer_y):
         """!
