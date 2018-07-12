@@ -953,6 +953,7 @@ add_subdirectory( kicad )               # should follow pcbnew, eeschema
 add_subdirectory( tools )
 add_subdirectory( utils )
 add_subdirectory( qa )
+add_subdirectory( version )
 
 # Resources
 if ( KICAD_INSTALL_DEMOS )

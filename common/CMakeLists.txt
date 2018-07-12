@@ -124,28 +124,6 @@ install( TARGETS lib_kicad
 endif()
 
 
-# KiCad build version string defaults to "no-vcs-found" which forces the build version header
-# command to look for git to create the version string header when the .git path is found in
-# the source path.
-set( KICAD_BRANCH_NAME "" CACHE STRING "KiCad repository name." )
-set( KICAD_VERSION_EXTRA "" CACHE STRING
-    "User defined configuration string to append to KiCad version." )
-
-# Generate version header file.
-add_custom_target(
-    version_header ALL
-    COMMAND ${CMAKE_COMMAND}
-        -DKICAD_VERSION=${KICAD_VERSION}
-        -DKICAD_BRANCH_NAME=${KICAD_BRANCH_NAME}
-        -DKICAD_VERSION_EXTRA=${KICAD_VERSION_EXTRA}
-        -DOUTPUT_FILE=${CMAKE_BINARY_DIR}/kicad_build_version.h
-        -DSRC_PATH=${PROJECT_SOURCE_DIR}
-        -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}
-        -P ${CMAKE_MODULE_PATH}/WriteVersionHeader.cmake
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMENT "Generating version string header"
-    )
-
 set( COMMON_ABOUT_DLG_SRCS
     dialog_about/AboutDialog_main.cpp
     dialog_about/dialog_about.cpp
@@ -236,7 +214,6 @@ set( COMMON_SRCS
     bitmap.cpp
     bitmap_base.cpp
     block_commande.cpp
-    build_version.cpp
     colors_design_settings.cpp
     colors.cpp
     commit.cpp
@@ -366,14 +343,13 @@ set( COMMON_SRCS
     libeval/numeric_evaluator.cpp
     )
 add_library( common STATIC ${COMMON_SRCS} )
-add_dependencies( common version_header )
 target_link_libraries( common
+    version
     gal
     ${Boost_LIBRARIES}
     ${CURL_LIBRARIES}
     ${OPENSSL_LIBRARIES}        # empty on Apple
     )
-
 
 set( PCB_COMMON_SRCS
     base_screen.cpp
