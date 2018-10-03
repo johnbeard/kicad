@@ -408,6 +408,11 @@ public:
 protected:
     bool saveCurrentPageLayout();
 
+    /**
+     * Return the hotkey prefs for layout editing
+     */
+    HOTKEY_PREFS_CONFIG getHotkeyPrefsConfigs() override;
+
     DECLARE_EVENT_TABLE()
 };
 

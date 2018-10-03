@@ -1303,6 +1303,11 @@ private:
      */
     void addJunctionMenuEntries( wxMenu* aMenu, SCH_JUNCTION* aJunction );
 
+    /**
+     * Return the hotkey prefs for the schematic editor
+     */
+    HOTKEY_PREFS_CONFIG getHotkeyPrefsConfigs() override;
+
 public:
     void Key( wxDC* DC, int hotkey, EDA_ITEM* DrawStruct );
 

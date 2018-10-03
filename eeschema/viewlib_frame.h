@@ -148,6 +148,13 @@ public:
 
     const BOX2I GetDocumentExtents() const override;
 
+protected:
+
+    /**
+     * Get hotkey prefs config for the library viewer
+     */
+    HOTKEY_PREFS_CONFIG getHotkeyPrefsConfigs() override;
+
 private:
     /**
      * Called when the frame is activated to reload the libraries and component lists

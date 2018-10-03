@@ -41,6 +41,16 @@
 #define GROUP wxT("/pl_editor")
 
 
+EDA_BASE_FRAME::HOTKEY_PREFS_CONFIG PL_EDITOR_FRAME::getHotkeyPrefsConfigs()
+{
+    return {
+        PlEditorHokeysDescr,
+        PlEditorHokeysDescr,
+        _( "pl_editor" )
+    };
+}
+
+
 void PL_EDITOR_FRAME::Process_Config( wxCommandEvent& event )
 {
     int      id = event.GetId();
@@ -66,11 +76,11 @@ void PL_EDITOR_FRAME::Process_Config( wxCommandEvent& event )
         break;
 
     case wxID_PREFERENCES:
-        ShowPreferences( PlEditorHokeysDescr, PlEditorHokeysDescr, wxT( "pl_editor" ) );
+        ShowPreferences();
         break;
 
     case ID_PREFERENCES_HOTKEY_SHOW_CURRENT_LIST:
-        DisplayHotkeyList( this, PlEditorHokeysDescr );
+        DisplayHotkeyList();
         break;
 
     default:

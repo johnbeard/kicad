@@ -132,7 +132,7 @@ void LIB_EDIT_FRAME::Process_Config( wxCommandEvent& event )
     {
     case ID_PREFERENCES_HOTKEY_SHOW_CURRENT_LIST:
         // Display current hotkey list for LibEdit.
-        DisplayHotkeyList( this, g_Libedit_Hokeys_Descr );
+        DisplayHotkeyList();
         break;
 
     default:
@@ -182,7 +182,7 @@ void SCH_EDIT_FRAME::Process_Config( wxCommandEvent& event )
 
     case ID_PREFERENCES_HOTKEY_SHOW_CURRENT_LIST:
         // Display current hotkey list for eeschema.
-        DisplayHotkeyList( this, g_Schematic_Hokeys_Descr );
+        DisplayHotkeyList();
         break;
 
     default:
@@ -191,9 +191,19 @@ void SCH_EDIT_FRAME::Process_Config( wxCommandEvent& event )
 }
 
 
+EDA_BASE_FRAME::HOTKEY_PREFS_CONFIG SCH_EDIT_FRAME::getHotkeyPrefsConfigs()
+{
+    return {
+        g_Eeschema_Hokeys_Descr,
+        g_Schematic_Hokeys_Descr,
+        _( "eeschema" )
+    };
+}
+
+
 void SCH_EDIT_FRAME::OnPreferencesOptions( wxCommandEvent& event )
 {
-    if( ShowPreferences( g_Eeschema_Hokeys_Descr, g_Schematic_Hokeys_Descr, wxT( "eeschema" ) ) )
+    if( ShowPreferences() )
     {
         SaveSettings( config() );  // save values shared by eeschema applications.
         m_canvas->Refresh( true );
@@ -572,9 +582,19 @@ void LIB_EDIT_FRAME::SaveSettings( wxConfigBase* aCfg )
 }
 
 
+EDA_BASE_FRAME::HOTKEY_PREFS_CONFIG LIB_EDIT_FRAME::getHotkeyPrefsConfigs()
+{
+    return {
+        g_Eeschema_Hokeys_Descr,
+        g_Libedit_Hokeys_Descr,
+        _( "eeschema" )
+    };
+}
+
+
 void LIB_EDIT_FRAME::OnPreferencesOptions( wxCommandEvent& event )
 {
-    if( ShowPreferences( g_Eeschema_Hokeys_Descr, g_Libedit_Hokeys_Descr, wxT( "eeschema" ) ) )
+    if( ShowPreferences() )
     {
         SaveSettings( config() );  // save values shared by eeschema applications.
         m_canvas->Refresh( true );

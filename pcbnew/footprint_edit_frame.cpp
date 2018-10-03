@@ -935,6 +935,16 @@ void FOOTPRINT_EDIT_FRAME::OnUpdateLayerAlpha( wxUpdateUIEvent & )
 }
 
 
+EDA_BASE_FRAME::HOTKEY_PREFS_CONFIG FOOTPRINT_EDIT_FRAME::getHotkeyPrefsConfigs()
+{
+    return {
+        g_Pcbnew_Editor_Hotkeys_Descr,
+        g_Module_Editor_Hotkeys_Descr,
+        _( "pcbnew" )
+    };
+}
+
+
 void FOOTPRINT_EDIT_FRAME::ProcessPreferences( wxCommandEvent& event )
 {
     int id = event.GetId();
@@ -944,7 +954,7 @@ void FOOTPRINT_EDIT_FRAME::ProcessPreferences( wxCommandEvent& event )
     // Hotkey IDs
     case ID_PREFERENCES_HOTKEY_SHOW_CURRENT_LIST:
         // Display current hotkey list for the footprint editor.
-        DisplayHotkeyList( this, g_Module_Editor_Hotkeys_Descr );
+        DisplayHotkeyList();
         break;
 
     case ID_PCB_LIB_TABLE_EDIT:
@@ -952,7 +962,7 @@ void FOOTPRINT_EDIT_FRAME::ProcessPreferences( wxCommandEvent& event )
         break;
 
     case wxID_PREFERENCES:
-        ShowPreferences( g_Pcbnew_Editor_Hotkeys_Descr, g_Module_Editor_Hotkeys_Descr, wxT( "pcbnew" ) );
+        ShowPreferences();
         break;
 
     default:

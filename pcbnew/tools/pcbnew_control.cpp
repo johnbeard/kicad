@@ -978,7 +978,7 @@ int PCBNEW_CONTROL::AppendBoard( PLUGIN& pi, wxString& fileName )
 
 int PCBNEW_CONTROL::ShowHelp( const TOOL_EVENT& aEvent )
 {
-    DisplayHotkeyList( m_frame, m_frame->GetHotkeyConfig() );
+    m_frame->DisplayHotkeyList();
 
     return 0;
 }

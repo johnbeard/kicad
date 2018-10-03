@@ -583,7 +583,7 @@ bool FOOTPRINT_VIEWER_FRAME::OnHotKey( wxDC* aDC, int aHotKey, const wxPoint& aP
         return false;
 
     case HK_HELP:                   // Display Current hotkey list
-        DisplayHotkeyList( this, g_Module_Viewer_Hotkeys_Descr );
+        DisplayHotkeyList();
         break;
 
     case HK_RESET_LOCAL_COORD:      // set local (relative) coordinate origin
@@ -644,6 +644,16 @@ EDA_HOTKEY* FOOTPRINT_WIZARD_FRAME::GetHotKeyDescription( int aCommand ) const
 }
 
 
+EDA_BASE_FRAME::HOTKEY_PREFS_CONFIG FOOTPRINT_WIZARD_FRAME::getHotkeyPrefsConfigs()
+{
+    return {
+        g_Pcbnew_Editor_Hotkeys_Descr,
+        g_Module_Viewer_Hotkeys_Descr,
+        _( "pcbnew" )
+    };
+}
+
+
 bool FOOTPRINT_WIZARD_FRAME::OnHotKey( wxDC* aDC, int aHotKey, const wxPoint& aPosition,
                                        EDA_ITEM* aItem )
 {
@@ -670,7 +680,7 @@ bool FOOTPRINT_WIZARD_FRAME::OnHotKey( wxDC* aDC, int aHotKey, const wxPoint& aP
         return false;
 
     case HK_HELP:                   // Display Current hotkey list
-        DisplayHotkeyList( this, g_Module_Viewer_Hotkeys_Descr );
+        DisplayHotkeyList();
         break;
 
     case HK_RESET_LOCAL_COORD:      // set local (relative) coordinate origin

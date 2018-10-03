@@ -440,17 +440,6 @@ int KeyCodeFromKeyName( const wxString& keyname )
 }
 
 
-/* DisplayHotkeyList
- * Displays the current hotkey list
- * aList = a EDA_HOTKEY_CONFIG list(Null terminated)
- */
-void DisplayHotkeyList( EDA_BASE_FRAME* aFrame, struct EDA_HOTKEY_CONFIG* aDescList )
-{
-    DIALOG_LIST_HOTKEYS dlg( aFrame, aDescList );
-    dlg.ShowModal();
-}
-
-
 /**
  * Function GetDescriptorFromHotkey
  * Return a EDA_HOTKEY * pointer from a key code for OnHotKey() function

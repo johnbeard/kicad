@@ -169,7 +169,7 @@ bool GERBVIEW_FRAME::OnHotKey( wxDC* aDC, int aHotkeyCode, const wxPoint& aPosit
         return false;
 
     case HK_HELP:       // Display Current hotkey list
-        DisplayHotkeyList( this, GerbviewHokeysDescr );
+        DisplayHotkeyList();
         break;
 
     case HK_ZOOM_IN:

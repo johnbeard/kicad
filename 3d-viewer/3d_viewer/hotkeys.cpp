@@ -93,7 +93,11 @@ struct EDA_HOTKEY_CONFIG g_3DViewer_Hokeys_Descr[] =
 };
 
 
-void EDA_3D_VIEWER::DisplayHotKeys()
+EDA_BASE_FRAME::HOTKEY_PREFS_CONFIG EDA_3D_VIEWER::getHotkeyPrefsConfigs()
 {
-    DisplayHotkeyList( this, g_3DViewer_Hokeys_Descr );
+    return {
+        g_3DViewer_Hokeys_Descr,
+        g_3DViewer_Hokeys_Descr,
+        _( "3d-viewer" )
+    };
 }

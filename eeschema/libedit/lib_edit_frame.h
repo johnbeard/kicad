@@ -615,6 +615,11 @@ private:
 
     void refreshSchematic();
 
+    /**
+     * Return the hotkey prefs for the schematic library editor
+     */
+    HOTKEY_PREFS_CONFIG getHotkeyPrefsConfigs() override;
+
 public:
     /**
      * Selects the currently active library and loads the symbol from \a aLibId.

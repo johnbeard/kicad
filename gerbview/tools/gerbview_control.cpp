@@ -251,8 +251,7 @@ int GERBVIEW_CONTROL::SwitchUnits( const TOOL_EVENT& aEvent )
 
 int GERBVIEW_CONTROL::ShowHelp( const TOOL_EVENT& aEvent )
 {
-    DisplayHotkeyList( m_frame, m_frame->GetHotkeyConfig() );
-
+    m_frame->DisplayHotkeyList();
     return 0;
 }
 

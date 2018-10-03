@@ -196,6 +196,21 @@ protected:
 
     virtual wxString help_name();
 
+    struct HOTKEY_PREFS_CONFIG
+    {
+        EDA_HOTKEY_CONFIG*  m_hotkeys;
+        EDA_HOTKEY_CONFIG*  m_show_hotkeys;
+        wxString            m_hotkeys_nickname;
+    };
+
+    /**
+     * Get variables needed to configure the hotkeys preferences
+     *
+     * Default implementation is null-valued, which indicates the frame doesn't
+     * specify hotkey prefs configs.
+     */
+    virtual HOTKEY_PREFS_CONFIG getHotkeyPrefsConfigs();
+
 public:
     EDA_BASE_FRAME( wxWindow* aParent, FRAME_T aFrameType,
         const wxString& aTitle, const wxPoint& aPos, const wxSize& aSize,
@@ -224,8 +239,17 @@ public:
 
     void GetKicadAbout( wxCommandEvent& event );
 
-    bool ShowPreferences( EDA_HOTKEY_CONFIG* aHotkeys, EDA_HOTKEY_CONFIG* aShowHotkeys,
-                          const wxString& aHotkeysNickname );
+    /**
+     * Show the preferences dialog for this frame
+     *
+     * @return true if settings accepted, false if cancelled
+     */
+    bool ShowPreferences();
+
+    /**
+     * Show a list of currently-relevant hotkeys
+     */
+    void DisplayHotkeyList();
 
     void PrintMsg( const wxString& text );
 

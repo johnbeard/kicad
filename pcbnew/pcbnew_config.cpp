@@ -60,6 +60,16 @@
 #include <widgets/paged_dialog.h>
 
 
+EDA_BASE_FRAME::HOTKEY_PREFS_CONFIG PCB_EDIT_FRAME::getHotkeyPrefsConfigs()
+{
+    return {
+        g_Pcbnew_Editor_Hotkeys_Descr,
+        g_Board_Editor_Hotkeys_Descr,
+        _( "pcbnew" )
+    };
+}
+
+
 void PCB_EDIT_FRAME::Process_Config( wxCommandEvent& event )
 {
     int id = event.GetId();
@@ -77,11 +87,11 @@ void PCB_EDIT_FRAME::Process_Config( wxCommandEvent& event )
         break;
 
     case wxID_PREFERENCES:
-        ShowPreferences( g_Pcbnew_Editor_Hotkeys_Descr, g_Board_Editor_Hotkeys_Descr, wxT( "pcbnew" ) );
+        ShowPreferences();
         break;
 
     case ID_PREFERENCES_HOTKEY_SHOW_CURRENT_LIST:
-        DisplayHotkeyList( this, g_Board_Editor_Hotkeys_Descr );
+        DisplayHotkeyList();
         break;
 
     default:

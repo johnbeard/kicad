@@ -284,6 +284,13 @@ public:
 
     DECLARE_EVENT_TABLE()
 
+protected:
+
+    /**
+     * Return the hotkey prefs for the manager
+     */
+    HOTKEY_PREFS_CONFIG getHotkeyPrefsConfigs() override;
+
 private:
     wxConfigBase*       config() override;
 

@@ -706,6 +706,13 @@ public:
     void CommonSettingsChanged() override;
 
     DECLARE_EVENT_TABLE()
+
+protected:
+
+    /**
+     * Return the hotkey prefs for gerbview
+     */
+    HOTKEY_PREFS_CONFIG getHotkeyPrefsConfigs() override;
 };
 
 #endif /* WX_GERBER_STRUCT_H */

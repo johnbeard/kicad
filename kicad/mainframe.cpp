@@ -537,7 +537,7 @@ void KICAD_MANAGER_FRAME::PrintPrjInfo()
 
 void KICAD_MANAGER_FRAME::OnShowHotkeys( wxCommandEvent& event )
 {
-    DisplayHotkeyList( this, m_manager_Hokeys_Descr );
+    DisplayHotkeyList();
 }
 
 
@@ -562,7 +562,17 @@ void KICAD_MANAGER_FRAME::OnEditFpLibTable( wxCommandEvent& aEvent )
 }
 
 
+EDA_BASE_FRAME::HOTKEY_PREFS_CONFIG KICAD_MANAGER_FRAME::getHotkeyPrefsConfigs()
+{
+    return {
+        m_manager_Hokeys_Descr,
+        m_manager_Hokeys_Descr,
+        _( "kicad" )
+    };
+}
+
+
 void KICAD_MANAGER_FRAME::OnPreferences( wxCommandEvent& aEvent )
 {
-    ShowPreferences( m_manager_Hokeys_Descr, m_manager_Hokeys_Descr, wxT( "kicad" ) );
+    ShowPreferences();
 }

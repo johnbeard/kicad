@@ -233,6 +233,11 @@ private:
      */
     void                Update3D_Frame( bool aForceReloadFootprint = true );
 
+    /**
+     * Get the hotkey prefs configs for the footprint viewer
+     */
+    HOTKEY_PREFS_CONFIG getHotkeyPrefsConfigs() override;
+
     /*
      * Virtual functions, not used here, but needed by PCB_BASE_FRAME
      * (virtual pure functions )

@@ -523,9 +523,7 @@ void EDA_3D_VIEWER::Process_Special_Functions( wxCommandEvent &event )
         return;
 
     case ID_MENU3D_HELP_HOTKEY_SHOW_CURRENT_LIST:
-    {
-        DisplayHotKeys();
-    }
+        DisplayHotkeyList();
         return;
 
     default:

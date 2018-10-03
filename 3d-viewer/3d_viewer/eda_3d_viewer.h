@@ -184,8 +184,6 @@ class EDA_3D_VIEWER : public KIWAY_PLAYER
 
     void CreateMenuBar();
 
-    void DisplayHotKeys();
-
     /**
      *  Set the state of toggle menus according to the current display options
      */
@@ -216,6 +214,11 @@ class EDA_3D_VIEWER : public KIWAY_PLAYER
      * @brief RenderEngineChanged - Update toolbar icon and call canvas RenderEngineChanged
      */
     void RenderEngineChanged();
+
+    /**
+     * Get hotkey prefs config for the 3D viewer
+     */
+    HOTKEY_PREFS_CONFIG getHotkeyPrefsConfigs() override;
 
     DECLARE_EVENT_TABLE()
 

@@ -115,6 +115,11 @@ protected:
      */
     virtual void OnSwitchCanvas( wxCommandEvent& aEvent ) override;
 
+    /**
+     * Return the hotkey prefs for board editing
+     */
+    HOTKEY_PREFS_CONFIG getHotkeyPrefsConfigs() override;
+
 #if defined(KICAD_SCRIPTING) && defined(KICAD_SCRIPTING_ACTION_MENU)
     /**
      * Function RebuildActionPluginMenus

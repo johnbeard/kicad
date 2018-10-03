@@ -41,6 +41,7 @@
 #include <trace_helpers.h>
 #include <panel_hotkeys_editor.h>
 #include <dialogs/panel_common_settings.h>
+#include <dialogs/dialog_hotkey_list.h>
 #include <widgets/paged_dialog.h>
 
 
@@ -510,15 +511,32 @@ void EDA_BASE_FRAME::GetKicadAbout( wxCommandEvent& event )
 }
 
 
-bool EDA_BASE_FRAME::ShowPreferences( EDA_HOTKEY_CONFIG* aHotkeys, EDA_HOTKEY_CONFIG* aShowHotkeys,
-                                      const wxString& aHotkeysNickname )
+EDA_BASE_FRAME::HOTKEY_PREFS_CONFIG EDA_BASE_FRAME::getHotkeyPrefsConfigs()
+{
+    // zero/default init - no hotkey config provided
+    HOTKEY_PREFS_CONFIG prefs_config {};
+    return prefs_config;
+}
+
+
+bool EDA_BASE_FRAME::ShowPreferences()
 {
     PAGED_DIALOG dlg( this, _( "Preferences" ) );
     wxTreebook* book = dlg.GetTreebook();
 
     book->AddPage( new PANEL_COMMON_SETTINGS( &dlg, book ), _( "Common" ) );
-    book->AddPage( new PANEL_HOTKEYS_EDITOR( this, book, false,
-        aHotkeys, aShowHotkeys, aHotkeysNickname ), _( "Hotkeys" ) );
+
+    const auto prefs_config = getHotkeyPrefsConfigs();
+
+    if( prefs_config.m_hotkeys != nullptr )
+    {
+        // This frame provides useful hotkey config data, so show the hotkey
+        // panel in the dialog
+        book->AddPage( new PANEL_HOTKEYS_EDITOR( this, book, false,
+                prefs_config.m_hotkeys, prefs_config.m_show_hotkeys,
+                prefs_config.m_hotkeys_nickname ),
+            _( "Hotkeys" ) );
+    }
 
     for( unsigned i = 0; i < KIWAY_PLAYER_COUNT;  ++i )
     {
@@ -535,6 +553,22 @@ bool EDA_BASE_FRAME::ShowPreferences( EDA_HOTKEY_CONFIG* aHotkeys, EDA_HOTKEY_CO
     }
 
     return false;
+}
+
+
+void EDA_BASE_FRAME::DisplayHotkeyList()
+{
+    const auto prefs_config = getHotkeyPrefsConfigs();
+
+    wxASSERT_MSG( prefs_config.m_show_hotkeys,
+        "Attemping to show hotkey list but the frame doesn't provide a hotkey list" );
+
+    if( prefs_config.m_show_hotkeys )
+    {
+        // Show the list with only the "shown" hotkeys
+        DIALOG_LIST_HOTKEYS dlg( this, prefs_config.m_show_hotkeys );
+        dlg.ShowModal();
+    }
 }
 
 

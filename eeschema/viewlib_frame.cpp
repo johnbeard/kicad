@@ -743,6 +743,7 @@ void LIB_VIEW_FRAME::SetFilter( const SCHLIB_FILTER* aFilter )
     ReCreateListLib();
 }
 
+
 const BOX2I LIB_VIEW_FRAME::GetDocumentExtents() const
 {
     LIB_ALIAS*  alias = getSelectedAlias();
@@ -758,4 +759,14 @@ const BOX2I LIB_VIEW_FRAME::GetDocumentExtents() const
         return BOX2I( bbox.GetOrigin(), VECTOR2I( bbox.GetWidth(), bbox.GetHeight() ) );
 
     }
+}
+
+
+EDA_BASE_FRAME::HOTKEY_PREFS_CONFIG LIB_VIEW_FRAME::getHotkeyPrefsConfigs()
+{
+    return {
+        g_Eeschema_Hokeys_Descr,
+        g_Viewlib_Hokeys_Descr,
+        _( "eeschema" )
+    };
 }

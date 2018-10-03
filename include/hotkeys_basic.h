@@ -200,14 +200,6 @@ wxString AddHotkeyName( const wxString&           aText,
                         HOTKEY_ACTION_TYPE        aShortCutType = IS_HOTKEY );
 
 /**
- * Function DisplayHotkeyList
- * Displays the current hotkey list
- * @param aFrame = current active frame
- * @param aList = pointer to a EDA_HOTKEY_CONFIG list (Null terminated)
- */
-void DisplayHotkeyList( EDA_BASE_FRAME* aFrame, struct EDA_HOTKEY_CONFIG* aList );
-
-/**
  * Function GetDescriptorFromHotkey
  * Returns a EDA_HOTKEY* pointer from a key code for OnHotKey() function
  * @param aKey = key code (ascii value, or wxWidgets value for function keys

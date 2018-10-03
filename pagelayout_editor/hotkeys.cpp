@@ -253,7 +253,7 @@ bool PL_EDITOR_FRAME::OnHotKey( wxDC* aDC, int aHotkeyCode,
         break;
 
     case HK_HELP:       // Display Current hotkey list
-        DisplayHotkeyList( this, PlEditorHokeysDescr );
+        DisplayHotkeyList();
         break;
 
     case HK_SET_GRID_ORIGIN:

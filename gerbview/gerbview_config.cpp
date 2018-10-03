@@ -39,6 +39,17 @@
 #include <dialogs/panel_gerbview_settings.h>
 #include <dialogs/panel_gerbview_display_options.h>
 
+
+EDA_BASE_FRAME::HOTKEY_PREFS_CONFIG GERBVIEW_FRAME::getHotkeyPrefsConfigs()
+{
+    return {
+        GerbviewHokeysDescr,
+        GerbviewHokeysDescr,
+        _( "gerbview" )
+    };
+}
+
+
 void GERBVIEW_FRAME::Process_Config( wxCommandEvent& event )
 {
     int      id = event.GetId();
@@ -46,12 +57,12 @@ void GERBVIEW_FRAME::Process_Config( wxCommandEvent& event )
     switch( id )
     {
     case wxID_PREFERENCES:
-        ShowPreferences( GerbviewHokeysDescr, GerbviewHokeysDescr, wxT( "gerbview" ) );
+        ShowPreferences();
         break;
 
     case ID_PREFERENCES_HOTKEY_SHOW_CURRENT_LIST:
         // Display current hotkey list for GerbView.
-        DisplayHotkeyList( this, GerbviewHokeysDescr );
+        DisplayHotkeyList();
         break;
 
     default:
