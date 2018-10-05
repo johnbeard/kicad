@@ -32,7 +32,15 @@ add_executable( qa_common
     # The main test entry points
     test_module.cpp
 
+    # stuff from common due to...units?
+    ../../common/eda_text.cpp
+
+    # stuff from common which is needed...why?
+    ../../common/colors.cpp
+    ../../common/observable.cpp
+
     test_hotkey_store.cpp
+    test_title_block.cpp
     test_utf8.cpp
 
     geometry/test_fillet.cpp
@@ -43,6 +51,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_SOURCE_DIR}/polygon
     ${Boost_INCLUDE_DIR}
+    ${INC_AFTER}
 )
 
 target_link_libraries( qa_common
@@ -51,6 +60,11 @@ target_link_libraries( qa_common
     bitmaps
     ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
     ${wxWidgets_LIBRARIES}
+)
+
+# we need to pretend to be something to appease the units code
+target_compile_definitions( qa_common
+    PRIVATE GERBVIEW
 )
 
 add_test( NAME common
