@@ -231,7 +231,6 @@ set( EESCHEMA_SRCS
 
 
 set( EESCHEMA_COMMON_SRCS
-    ../common/dialogs/dialog_page_settings.cpp
     ../common/base_screen.cpp
     ../common/base_units.cpp
     ../common/eda_text.cpp

@@ -71,6 +71,7 @@
 #include <worksheet_shape_builder.h>
 #include <page_info.h>
 #include <title_block.h>
+#include <dialog_page_settings.h>
 
 /**
  * Definition for enabling and disabling scroll bar setting trace output.  See the
@@ -1560,6 +1561,7 @@ bool EDA_DRAW_FRAME::isBusy() const
            || ( screen->m_BlockLocate.GetState() != STATE_NO_BLOCK );
 }
 
+
 void EDA_DRAW_FRAME::RedrawScreen( const wxPoint& aCenterPoint, bool aWarpPointer )
 {
     if( IsGalCanvasActive() )
@@ -2060,4 +2062,39 @@ const BOX2I EDA_DRAW_FRAME::GetDocumentExtents() const
     BOX2I rv;
     rv.SetMaximum();
     return rv;
+}
+
+
+void EDA_DRAW_FRAME::Process_PageSettings( wxCommandEvent& event )
+{
+    FRAME_T smallSizeFrames[] =
+    {
+        FRAME_PCB, FRAME_PCB_MODULE_EDITOR, FRAME_PCB_MODULE_VIEWER,
+        FRAME_PCB_MODULE_VIEWER_MODAL, FRAME_PCB_FOOTPRINT_WIZARD,
+        FRAME_PCB_FOOTPRINT_PREVIEW,
+        FRAME_CVPCB_DISPLAY
+    };
+
+    // Fix the max page size: it is MAX_PAGE_SIZE_EDITORS
+    // or MAX_PAGE_SIZE_PCBNEW for Pcbnew draw frames, due to the small internal
+    // units that do not allow too large draw areas
+    wxSize maxPageSize( MAX_PAGE_SIZE_EDITORS_MILS, MAX_PAGE_SIZE_EDITORS_MILS );
+
+    for( unsigned ii = 0; ii < DIM( smallSizeFrames ); ii++ )
+    {
+        if( IsType( smallSizeFrames[ii] ) )
+        {
+            maxPageSize.x = maxPageSize.y = MAX_PAGE_SIZE_PCBNEW_MILS;
+            break;
+        }
+    }
+
+    DIALOG_PAGES_SETTINGS dlg( this, maxPageSize );
+    dlg.SetWksFileName( BASE_SCREEN::m_PageLayoutDescrFileName );
+
+    if( dlg.ShowModal() == wxID_OK )
+    {
+        if( m_canvas )
+            m_canvas->Refresh();
+    }
 }

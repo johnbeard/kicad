@@ -219,6 +219,11 @@ public:
 
     SCH_SCREEN* GetScreen() const override;
 
+    /**
+     * Schematics can have multiple sheets, report this.
+     */
+    bool CanHaveMultipleSheets() const override { return true; }
+
     void OnCloseWindow( wxCloseEvent& Event );
 
     bool GetForceHVLines() const { return m_forceHVLines; }

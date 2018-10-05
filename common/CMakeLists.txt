@@ -185,6 +185,7 @@ set( COMMON_DLG_SRCS
     dialogs/dialog_image_editor_base.cpp
     dialogs/dialog_list_selector_base.cpp
     dialogs/dialog_page_settings_base.cpp
+    dialogs/dialog_page_settings.cpp
     dialogs/dialog_text_entry_base.cpp
     dialogs/dialog_text_entry.cpp
     dialogs/panel_common_settings.cpp

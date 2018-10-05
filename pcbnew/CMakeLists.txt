@@ -347,7 +347,6 @@ set( PCBNEW_SRCS
 
 # extra sources from common
 set( PCBNEW_COMMON_SRCS
-    ../common/dialogs/dialog_page_settings.cpp
     ../common/base_units.cpp
     )
 

@@ -350,6 +350,11 @@ public:
 
     //-----</BASE_SCREEN API moved here>-----------------------------------------
 
+    /**
+     * @return true if this kind of frame can contain multiple separate
+     * sheets (for example a schematic frame).
+     */
+    virtual bool CanHaveMultipleSheets() const { return false; }
 
     virtual const TITLE_BLOCK& GetTitleBlock() const = 0;
 

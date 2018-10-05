@@ -55,6 +55,8 @@ private:
                                         // when the initial one is replaced by a new one
     std::unique_ptr<UNIT_BINDER>     m_customSizeX;
     std::unique_ptr<UNIT_BINDER>     m_customSizeY;
+    /// True if the dialog has multi-sheet options like export-to-other and sheet numbering
+    bool            m_showMultiSheetOptions;
     /// IU_PER_MILs taken from the screen object
     int             m_iuPerMils;
 

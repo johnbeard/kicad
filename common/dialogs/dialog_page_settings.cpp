@@ -75,44 +75,11 @@ static const wxString pageFmts[] =
                                     // to be recognized in code
 };
 
-void EDA_DRAW_FRAME::Process_PageSettings( wxCommandEvent& event )
-{
-    FRAME_T smallSizeFrames[] =
-    {
-        FRAME_PCB, FRAME_PCB_MODULE_EDITOR, FRAME_PCB_MODULE_VIEWER,
-        FRAME_PCB_MODULE_VIEWER_MODAL, FRAME_PCB_FOOTPRINT_WIZARD,
-        FRAME_PCB_FOOTPRINT_PREVIEW,
-        FRAME_CVPCB_DISPLAY
-    };
-
-    // Fix the max page size: it is MAX_PAGE_SIZE_EDITORS
-    // or MAX_PAGE_SIZE_PCBNEW for Pcbnew draw frames, due to the small internal
-    // units that do not allow too large draw areas
-    wxSize maxPageSize( MAX_PAGE_SIZE_EDITORS_MILS, MAX_PAGE_SIZE_EDITORS_MILS );
-
-    for( unsigned ii = 0; ii < DIM( smallSizeFrames ); ii++ )
-    {
-        if( IsType( smallSizeFrames[ii] ) )
-        {
-            maxPageSize.x = maxPageSize.y = MAX_PAGE_SIZE_PCBNEW_MILS;
-            break;
-        }
-    }
-
-    DIALOG_PAGES_SETTINGS dlg( this, maxPageSize );
-    dlg.SetWksFileName( BASE_SCREEN::m_PageLayoutDescrFileName );
-
-    if( dlg.ShowModal() == wxID_OK )
-    {
-        if( m_canvas )
-            m_canvas->Refresh();
-    }
-}
-
 
 DIALOG_PAGES_SETTINGS::DIALOG_PAGES_SETTINGS( EDA_DRAW_FRAME* parent, wxSize aMaxUserSizeMils ) :
     DIALOG_PAGES_SETTINGS_BASE( parent ),
     m_initialized( false ),
+    m_showMultiSheetOptions( parent->CanHaveMultipleSheets() )
 {
     m_parent   = parent;
     m_screen   = m_parent->GetScreen();
@@ -167,19 +134,22 @@ void DIALOG_PAGES_SETTINGS::initDialog()
     // initialize the page layout descr filename
     SetWksFileName( BASE_SCREEN::m_PageLayoutDescrFileName );
 
-#ifdef EESCHEMA
-    // Init display value for schematic sub-sheet number
-    wxString format = m_TextSheetCount->GetLabel();
-    msg.Printf( format, m_screen->m_NumberOfScreens );
-    m_TextSheetCount->SetLabel( msg );
+    if( m_showMultiSheetOptions )
+    {
+        // Init display value for schematic sub-sheet number
+        wxString format = m_TextSheetCount->GetLabel();
+        msg.Printf( format, m_screen->m_NumberOfScreens );
+        m_TextSheetCount->SetLabel( msg );
 
-    format = m_TextSheetNumber->GetLabel();
-    msg.Printf( format, m_screen->m_ScreenNumber );
-    m_TextSheetNumber->SetLabel( msg );
-#else
-    m_TextSheetCount->Show( false );
-    m_TextSheetNumber->Show( false );
-#endif
+        format = m_TextSheetNumber->GetLabel();
+        msg.Printf( format, m_screen->m_ScreenNumber );
+        m_TextSheetNumber->SetLabel( msg );
+    }
+    else
+    {
+        m_TextSheetCount->Show( false );
+        m_TextSheetNumber->Show( false );
+    }
 
     m_pageInfo = m_parent->GetPageSettings();
     SetCurrentPageSizeSelection( m_pageInfo.GetType() );
@@ -209,18 +179,19 @@ void DIALOG_PAGES_SETTINGS::initDialog()
     m_TextComment3->SetValue( m_tb.GetComment3() );
     m_TextComment4->SetValue( m_tb.GetComment4() );
 
-#ifndef EESCHEMA
-    // these options have meaning only for Eeschema.
-    // disable them for other apps
-    m_RevisionExport->Show( false );
-    m_DateExport->Show( false );
-    m_TitleExport->Show( false );
-    m_CompanyExport->Show( false );
-    m_Comment1Export->Show( false );
-    m_Comment2Export->Show( false );
-    m_Comment3Export->Show( false );
-    m_Comment4Export->Show( false );
-#endif
+    if( !m_showMultiSheetOptions )
+    {
+        // these options have meaning only if there are multiple sheets
+        // (for example in Eeschema). Disable them otherwise.
+        m_RevisionExport->Show( false );
+        m_DateExport->Show( false );
+        m_TitleExport->Show( false );
+        m_CompanyExport->Show( false );
+        m_Comment1Export->Show( false );
+        m_Comment2Export->Show( false );
+        m_Comment3Export->Show( false );
+        m_Comment4Export->Show( false );
+    }
 
     GetPageLayoutInfoFromDialog();
     UpdatePageLayoutExample();
