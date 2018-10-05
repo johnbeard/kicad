@@ -215,10 +215,34 @@ const TITLE_BLOCK& SCH_BASE_FRAME::GetTitleBlock() const
 }
 
 
-void SCH_BASE_FRAME::SetTitleBlock( const TITLE_BLOCK& aTitleBlock )
+void SCH_BASE_FRAME::SetTitleBlock( const TITLE_BLOCK& aTitleBlock,
+    const TITLE_BLOCK_EXPORT_OPTIONS& aExportOpts )
 {
-    wxASSERT( GetScreen() );
-    GetScreen()->SetTitleBlock( aTitleBlock );
+    SCH_SCREEN* this_screen = GetScreen();
+    wxASSERT( this_screen );
+
+    // always set all fields in the current screen
+    this_screen->SetTitleBlock( aTitleBlock );
+
+    // Build the screen list
+    SCH_SCREENS screen_list;
+
+    wxASSERT( screen_list.GetCount() > 0 );
+
+    // Update title blocks for all screens
+    for( SCH_SCREEN* screen = screen_list.GetFirst(); screen != NULL; screen = screen_list.GetNext() )
+    {
+        // the current screen is handled above
+        if( screen == this_screen )
+            continue;
+
+        TITLE_BLOCK tb = screen->GetTitleBlock();
+
+        // Update selectively
+        tb.ImportFrom( aTitleBlock, aExportOpts );
+
+        screen->SetTitleBlock( tb );
+    }
 }
 
 

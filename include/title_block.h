@@ -28,7 +28,10 @@
 #include <wx/arrstr.h>
 #include <ki_exception.h>
 
+#include <unordered_set>
+
 class OUTPUTFORMATTER;
+class TITLE_BLOCK_EXPORT_OPTIONS;
 
 /**
  * Class TITLE_BLOCK
@@ -53,9 +56,26 @@ class TITLE_BLOCK
 
 public:
 
+    enum class FIELD
+    {
+        TITLE,
+        DATE,
+        REVISION,
+        COMPANY,
+        COMMENT,
+    };
+
+    constexpr static int max_comments = 4;
+
     TITLE_BLOCK() {};
     virtual ~TITLE_BLOCK() {};      // a virtual dtor seems needed to build
                                     // python lib without warning
+
+    /**
+     * Update from another title block, taking only the fields specified
+     * by the export options given.
+     */
+    void ImportFrom( const TITLE_BLOCK& aOther, const TITLE_BLOCK_EXPORT_OPTIONS& aExportOptions );
 
     void SetTitle( const wxString& aTitle )
     {
@@ -159,6 +179,83 @@ private:
         else
             return m_emptytext;
     }
+};
+
+
+/**
+ * Options for how to distribute settings to sheets within a title block
+ * to the title blocks of other sheets
+ */
+class TITLE_BLOCK_EXPORT_OPTIONS
+{
+public:
+
+    /**
+     * Set whether or not to export the given field to other title blocks
+     * @param aField the field to export
+     * @param aIndex the index of that field to export
+     * @param aExport whether or not to export that field
+     */
+    void SetShouldExport( TITLE_BLOCK::FIELD aField, int aIndex, bool aExport );
+
+    /**
+     * Set whether or not to export the given field to other title blocks.
+     * This overload is used when the field has only a single value
+     * @param aField the field to export
+     * @param aExport whether or not to export that field
+     */
+    void SetShouldExport( TITLE_BLOCK::FIELD aField, bool aExport )
+    {
+        SetShouldExport( aField, 0, aExport );
+    }
+
+    /**
+     * Determine whether or not to export the given field to other title blocks
+     * based on values set so far.
+     * @param aField the field to check the export setting
+     * @param aIndex the index of that field to check
+     * @return whether or not to export that field
+     */
+    bool ShouldExport( TITLE_BLOCK::FIELD aField, int aIndex ) const;
+
+    /**
+     * Determine whether or not to export the given field to other title blocks
+     * based on values set so far.
+     * This overload is used when the field has only a single value
+     * @param aField the field to check the export setting
+     * @param aIndex the index of that field to check
+     * @return whether or not to export that field
+     */
+    bool ShouldExport( TITLE_BLOCK::FIELD aField ) const
+    {
+        return ShouldExport( aField, 0 );
+    }
+
+private:
+
+    /**
+     * The key type that refers to a specific index of a specific field
+     * of a TITLE_BLOCK
+     */
+    using KEY_TYPE = std::pair< TITLE_BLOCK::FIELD, int >;
+
+    /**
+     * Very simple hashing function class to make a unique (ish) hash
+     * for a filed-index pair
+     */
+    struct KEY_HASH
+    {
+        std::size_t operator()(const KEY_TYPE& val) const
+        {
+            return ( static_cast<int>( val.first ) << 8 ) + val.second;
+        }
+    };
+
+    /**
+     * Set of the keys to export to other sheets
+     */
+    std::unordered_set<KEY_TYPE, KEY_HASH> m_exports;
+
 };
 
 #endif // TITLE_BLOCK_H

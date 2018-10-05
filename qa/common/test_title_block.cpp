@@ -85,5 +85,30 @@ BOOST_AUTO_TEST_CASE( Copy )
     BOOST_CHECK_EQUAL( "comment2", tb_cpy.GetComment2() );
 }
 
+/**
+ * Check selective exporting of fields
+ */
+BOOST_AUTO_TEST_CASE( Export )
+{
+    TITLE_BLOCK new_tb;
+
+    new_tb.SetTitle( "new title" );
+    new_tb.SetDate( "new date" );
+    new_tb.SetComment( 1, "new comment2" );
+
+    TITLE_BLOCK_EXPORT_OPTIONS export_options;
+
+    // update some of the items, but not all
+    export_options.SetShouldExport( TITLE_BLOCK::FIELD::TITLE, true );
+    export_options.SetShouldExport( TITLE_BLOCK::FIELD::COMMENT, 1, true );
+
+    m_tb.ImportFrom( new_tb, export_options );
+
+    // Check only specified fields were exported
+    BOOST_CHECK_EQUAL( "new title", m_tb.GetTitle() );
+    BOOST_CHECK_EQUAL( "date", m_tb.GetDate() );
+    BOOST_CHECK_EQUAL( "new comment2", m_tb.GetComment( 1 ) );
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

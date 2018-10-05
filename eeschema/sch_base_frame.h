@@ -171,7 +171,8 @@ public:
     void OnGridSettings( wxCommandEvent& aEvent );
 
     const TITLE_BLOCK& GetTitleBlock() const override;
-    void SetTitleBlock( const TITLE_BLOCK& aTitleBlock ) override;
+    void SetTitleBlock( const TITLE_BLOCK& aTitleBlock,
+        const TITLE_BLOCK_EXPORT_OPTIONS& aExportOptions ) override;
 
     void UpdateStatusBar() override;
 

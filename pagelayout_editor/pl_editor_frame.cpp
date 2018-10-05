@@ -309,7 +309,8 @@ const TITLE_BLOCK& PL_EDITOR_FRAME::GetTitleBlock() const
 }
 
 
-void PL_EDITOR_FRAME::SetTitleBlock( const TITLE_BLOCK& aTitleBlock )
+void PL_EDITOR_FRAME::SetTitleBlock( const TITLE_BLOCK& aTitleBlock,
+    const TITLE_BLOCK_EXPORT_OPTIONS& aExportOpts )
 {
     m_pageLayout.SetTitleBlock( aTitleBlock );
 }

@@ -331,6 +331,7 @@ set( COMMON_SRCS
     settings.cpp
     status_popup.cpp
     systemdirsappend.cpp
+    title_block.cpp
     trace_helpers.cpp
     undo_redo_container.cpp
     utf8.cpp

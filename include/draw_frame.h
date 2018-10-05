@@ -352,7 +352,20 @@ public:
 
 
     virtual const TITLE_BLOCK& GetTitleBlock() const = 0;
-    virtual void SetTitleBlock( const TITLE_BLOCK& aTitleBlock ) = 0;
+
+    /**
+     * Set the title block, exporting to other sheets as necessary based on the
+     * provided options.
+     *
+     * It is up to implementations to decide how to export to other sheets,
+     * as this depends on the specific sheet type.
+     *
+     * @param aTitleBlock    the title block to set
+     * @param aExportOptions the options governing whether or not specific
+     *                       options are exported
+     */
+    virtual void SetTitleBlock( const TITLE_BLOCK& aTitleBlock,
+        const TITLE_BLOCK_EXPORT_OPTIONS& aExportOptions ) = 0;
 
     // the background color of the draw canvas:
     // Virtual because some frames can have a specific way to get/set the bg color

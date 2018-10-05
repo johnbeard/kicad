@@ -42,11 +42,6 @@
 #include <wx/valgen.h>
 #include <wx/tokenzr.h>
 
-#ifdef EESCHEMA
-#include <sch_screen.h>
-#include <general.h>
-#endif
-
 #include <worksheet.h>
 #include <dialog_page_settings.h>
 
@@ -518,52 +513,35 @@ bool DIALOG_PAGES_SETTINGS::SavePageSettings()
     m_tb.SetComment3( m_TextComment3->GetValue() );
     m_tb.SetComment4( m_TextComment4->GetValue() );
 
-    m_parent->SetTitleBlock( m_tb );
+
+    TITLE_BLOCK_EXPORT_OPTIONS tb_export_opts;
+
+    tb_export_opts.SetShouldExport( TITLE_BLOCK::FIELD::REVISION,
+        m_RevisionExport->IsChecked());
+
+    tb_export_opts.SetShouldExport( TITLE_BLOCK::FIELD::DATE,
+        m_DateExport->IsChecked());
+
+    tb_export_opts.SetShouldExport( TITLE_BLOCK::FIELD::COMPANY,
+        m_CompanyExport->IsChecked());
+
+    tb_export_opts.SetShouldExport( TITLE_BLOCK::FIELD::TITLE,
+        m_TitleExport->IsChecked());
+
+    tb_export_opts.SetShouldExport( TITLE_BLOCK::FIELD::COMMENT, 0,
+        m_Comment1Export->IsChecked());
+
+    tb_export_opts.SetShouldExport( TITLE_BLOCK::FIELD::COMMENT, 1,
+        m_Comment2Export->IsChecked());
+
+    tb_export_opts.SetShouldExport( TITLE_BLOCK::FIELD::COMMENT, 2,
+        m_Comment3Export->IsChecked());
+
+    tb_export_opts.SetShouldExport( TITLE_BLOCK::FIELD::COMMENT, 3,
+        m_Comment4Export->IsChecked());
 
 
-#ifdef EESCHEMA
-    // Exports settings to other sheets if requested:
-    SCH_SCREEN* screen;
-
-    // Build the screen list
-    SCH_SCREENS ScreenList;
-
-    // Update title blocks for all screens
-    for( screen = ScreenList.GetFirst(); screen != NULL; screen = ScreenList.GetNext() )
-    {
-        if( screen == m_screen )
-            continue;
-
-        TITLE_BLOCK tb2 = screen->GetTitleBlock();
-
-        if( m_RevisionExport->IsChecked() )
-            tb2.SetRevision( m_tb.GetRevision() );
-
-        if( m_DateExport->IsChecked() )
-            tb2.SetDate( m_tb.GetDate() );
-
-        if( m_TitleExport->IsChecked() )
-            tb2.SetTitle( m_tb.GetTitle() );
-
-        if( m_CompanyExport->IsChecked() )
-            tb2.SetCompany( m_tb.GetCompany() );
-
-        if( m_Comment1Export->IsChecked() )
-            tb2.SetComment1( m_tb.GetComment1() );
-
-        if( m_Comment2Export->IsChecked() )
-            tb2.SetComment2( m_tb.GetComment2() );
-
-        if( m_Comment3Export->IsChecked() )
-            tb2.SetComment3( m_tb.GetComment3() );
-
-        if( m_Comment4Export->IsChecked() )
-            tb2.SetComment4( m_tb.GetComment4() );
-
-        screen->SetTitleBlock( tb2 );
-    }
-
-#endif
+    m_parent->SetTitleBlock( m_tb, tb_export_opts );
 
     return true;
 }

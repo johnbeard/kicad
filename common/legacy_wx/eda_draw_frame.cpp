@@ -46,6 +46,7 @@
 #include <math/box2.h>
 #include <lockfile.h>
 #include <trace_helpers.h>
+#include <page_info.h>
 
 #include <wx/clipbrd.h>
 #include <fctsys.h>

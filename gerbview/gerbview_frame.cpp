@@ -1003,7 +1003,8 @@ const TITLE_BLOCK& GERBVIEW_FRAME::GetTitleBlock() const
 }
 
 
-void GERBVIEW_FRAME::SetTitleBlock( const TITLE_BLOCK& aTitleBlock )
+void GERBVIEW_FRAME::SetTitleBlock( const TITLE_BLOCK& aTitleBlock,
+    const TITLE_BLOCK_EXPORT_OPTIONS& aExportOpts )
 {
     wxASSERT( m_gerberLayout );
     m_gerberLayout->SetTitleBlock( aTitleBlock );

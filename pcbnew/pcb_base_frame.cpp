@@ -304,7 +304,8 @@ const TITLE_BLOCK& PCB_BASE_FRAME::GetTitleBlock() const
 }
 
 
-void PCB_BASE_FRAME::SetTitleBlock( const TITLE_BLOCK& aTitleBlock )
+void PCB_BASE_FRAME::SetTitleBlock( const TITLE_BLOCK& aTitleBlock,
+    const TITLE_BLOCK_EXPORT_OPTIONS& aExportOpts )
 {
     wxASSERT( m_Pcb );
     m_Pcb->SetTitleBlock( aTitleBlock );
