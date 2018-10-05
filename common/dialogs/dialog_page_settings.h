@@ -24,8 +24,13 @@
 #ifndef _DIALOG_PAGES_SETTINGS_H_
 #define _DIALOG_PAGES_SETTINGS_H_
 
-#include <widgets/unit_binder.h>
+
 #include <dialog_page_settings_base.h>
+#include <title_block.h>
+
+
+class UNIT_BINDER;
+class WORKSHEET_LAYOUT;
 
 /*!
  * DIALOG_PAGES_SETTINGS class declaration
@@ -48,8 +53,10 @@ private:
     TITLE_BLOCK     m_tb;               /// Temporary title block (basic inscriptions).
     WORKSHEET_LAYOUT *m_pagelayout;     // the alternate and temporary page layout shown by the dialog
                                         // when the initial one is replaced by a new one
-    UNIT_BINDER     m_customSizeX;
-    UNIT_BINDER     m_customSizeY;
+    std::unique_ptr<UNIT_BINDER>     m_customSizeX;
+    std::unique_ptr<UNIT_BINDER>     m_customSizeY;
+    /// IU_PER_MILs taken from the screen object
+    int             m_iuPerMils;
 
 public:
     DIALOG_PAGES_SETTINGS( EDA_DRAW_FRAME* parent, wxSize aMaxUserSizeMils );

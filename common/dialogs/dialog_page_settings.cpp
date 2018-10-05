@@ -38,6 +38,7 @@
 #include <worksheet_shape_builder.h>
 #include <base_screen.h>
 #include <wildcards_and_files_ext.h>
+#include <widgets/unit_binder.h>
 
 #include <wx/valgen.h>
 #include <wx/tokenzr.h>
@@ -112,10 +113,6 @@ void EDA_DRAW_FRAME::Process_PageSettings( wxCommandEvent& event )
 DIALOG_PAGES_SETTINGS::DIALOG_PAGES_SETTINGS( EDA_DRAW_FRAME* parent, wxSize aMaxUserSizeMils ) :
     DIALOG_PAGES_SETTINGS_BASE( parent ),
     m_initialized( false ),
-    m_customSizeX( parent, m_userSizeXLabel, m_userSizeXCtrl, m_userSizeXUnits, false,
-                   MIN_PAGE_SIZE * IU_PER_MILS, aMaxUserSizeMils.x * IU_PER_MILS ),
-    m_customSizeY( parent, m_userSizeYLabel, m_userSizeYCtrl, m_userSizeYUnits, false,
-                   MIN_PAGE_SIZE * IU_PER_MILS, aMaxUserSizeMils.y * IU_PER_MILS )
 {
     m_parent   = parent;
     m_screen   = m_parent->GetScreen();
@@ -126,6 +123,16 @@ DIALOG_PAGES_SETTINGS::DIALOG_PAGES_SETTINGS( EDA_DRAW_FRAME* parent, wxSize aMa
     m_customFmt = false;
     m_localPrjConfigChanged = false;
     m_pagelayout = NULL;
+
+    m_iuPerMils = m_screen->MilsToIuScalar();
+    const int min_page_size_iu = MIN_PAGE_SIZE * m_iuPerMils;
+
+    m_customSizeX = std::make_unique<UNIT_BINDER>( parent, m_userSizeXLabel, m_userSizeXCtrl,
+            m_userSizeXUnits, false,
+            min_page_size_iu, aMaxUserSizeMils.x * m_iuPerMils );
+    m_customSizeY = std::make_unique<UNIT_BINDER>( parent, m_userSizeYLabel, m_userSizeYCtrl,
+            m_userSizeYUnits, false,
+            min_page_size_iu, aMaxUserSizeMils.y * m_iuPerMils );
 
     m_PickDate->SetValue( wxDateTime::Now() );
 
@@ -184,13 +191,13 @@ void DIALOG_PAGES_SETTINGS::initDialog()
 
     if( m_customFmt )
     {
-        m_customSizeX.SetValue( m_pageInfo.GetWidthMils() * IU_PER_MILS );
-        m_customSizeY.SetValue( m_pageInfo.GetHeightMils() * IU_PER_MILS );
+        m_customSizeX->SetValue( m_pageInfo.GetWidthMils() * m_iuPerMils );
+        m_customSizeY->SetValue( m_pageInfo.GetHeightMils() * m_iuPerMils );
     }
     else
     {
-        m_customSizeX.SetValue( m_pageInfo.GetCustomWidthMils() * IU_PER_MILS );
-        m_customSizeY.SetValue( m_pageInfo.GetCustomHeightMils() * IU_PER_MILS );
+        m_customSizeX->SetValue( m_pageInfo.GetCustomWidthMils() * m_iuPerMils );
+        m_customSizeY->SetValue( m_pageInfo.GetCustomHeightMils() * m_iuPerMils );
     }
 
     m_TextRevision->SetValue( m_tb.GetRevision() );
@@ -251,8 +258,8 @@ void DIALOG_PAGES_SETTINGS::OnPaperSizeChoice( wxCommandEvent& event )
     if( paperType.Contains( PAGE_INFO::Custom ) )
     {
         m_orientationComboBox->Enable( false );
-        m_customSizeX.Enable( true );
-        m_customSizeY.Enable( true );
+        m_customSizeX->Enable( true );
+        m_customSizeY->Enable( true );
         m_customFmt = true;
     }
     else
@@ -268,8 +275,8 @@ void DIALOG_PAGES_SETTINGS::OnPaperSizeChoice( wxCommandEvent& event )
             m_orientationComboBox->Enable( false );
         }
 #endif
-        m_customSizeX.Enable( false );
-        m_customSizeY.Enable( false );
+        m_customSizeX->Enable( false );
+        m_customSizeY->Enable( false );
         m_customFmt = false;
     }
 
@@ -447,7 +454,7 @@ bool DIALOG_PAGES_SETTINGS::SavePageSettings()
 
         if( retSuccess )
         {
-            if( !m_customSizeX.Validate( true ) || !m_customSizeY.Validate( true ) )
+            if( !m_customSizeX->Validate( true ) || !m_customSizeY->Validate( true ) )
                 return false;
 
             PAGE_INFO::SetCustomWidthMils( m_layout_size.x );
@@ -720,8 +727,8 @@ void DIALOG_PAGES_SETTINGS::GetPageLayoutInfoFromDialog()
 
 void DIALOG_PAGES_SETTINGS::GetCustomSizeMilsFromDialog()
 {
-    double customSizeX = (double) m_customSizeX.GetValue() / IU_PER_MILS;
-    double customSizeY = (double) m_customSizeY.GetValue() / IU_PER_MILS;
+    double customSizeX = (double) m_customSizeX->GetValue() / m_iuPerMils;
+    double customSizeY = (double) m_customSizeY->GetValue() / m_iuPerMils;
 
     // Prepare to painless double -> int conversion.
     customSizeX = Clamp( double( INT_MIN ), customSizeX, double( INT_MAX ) );
