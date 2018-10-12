@@ -156,3 +156,90 @@ void KIGFX::PREVIEW::DrawTextNextToCursor( KIGFX::VIEW* aView,
         gal->BitmapText( str, textPos, 0.0 );
     }
 }
+
+
+static const double ANGLE_EPSILON = 1e-9;
+
+
+static bool angleIsSpecial( double aRadians )
+{
+    return std::fabs( std::remainder( aRadians, M_PI_4 ) ) < ANGLE_EPSILON;
+}
+
+
+/**
+ * Get the colour for a "special" item, for example a line that's
+ * snapped to a special angle.
+ *
+ * @param aRs the current render settings
+ * @return the colour for the special item
+ */
+static COLOR4D getSpecialItemColor( KIGFX::PCB_RENDER_SETTINGS& aRs )
+{
+    static const COLOR4D greenDarkBg { 0.5, 1.0, 0.5, 1.0 };
+    static const COLOR4D greenLightBg { 0.0, 0.7, 0.0, 1.0 };
+
+    return aRs.IsBackgroundDark() ? greenDarkBg : greenLightBg;
+}
+
+
+void KIGFX::PREVIEW::DrawPreviewLine( KIGFX::VIEW *aView,
+        const VECTOR2I& aStart, const VECTOR2I& aEnd, bool aDim,
+        bool aHighlightSpecialAngles )
+{
+    auto gal = aView->GetGAL();
+    auto rs = static_cast<KIGFX::PCB_RENDER_SETTINGS*>( aView->GetPainter()->GetSettings() );
+
+    const auto vec = aEnd - aStart;
+    COLOR4D strokeColor = rs->GetLayerColor( LAYER_AUX_ITEMS );
+
+    if( aHighlightSpecialAngles && angleIsSpecial( vec.Angle() ) )
+        strokeColor = getSpecialItemColor( *rs );
+
+    gal->SetStrokeColor( strokeColor.WithAlpha( PreviewOverlayDeemphAlpha( aDim ) ) );
+    gal->DrawLine( aStart, aEnd );
+}
+
+
+void KIGFX::PREVIEW::DrawPreviewArc( KIGFX::VIEW *aView,
+        const VECTOR2I& aOrigin, double aRad, double aStartAngle,
+        double aEndAngle, bool aDim, bool aFill, bool aHighlightSpecialAngles )
+{
+    auto gal = aView->GetGAL();
+    auto rs = static_cast<KIGFX::PCB_RENDER_SETTINGS*>( aView->GetPainter()->GetSettings() );
+
+    auto color = rs->GetLayerColor( LAYER_AUX_ITEMS );
+
+    if( aHighlightSpecialAngles && angleIsSpecial( aStartAngle - aEndAngle ) )
+        color = getSpecialItemColor( *rs );
+
+    gal->SetIsStroke( true );
+    gal->SetIsFill( aFill );
+    gal->SetStrokeColor( color.WithAlpha( PreviewOverlayDeemphAlpha( aDim ) ) );
+
+    if( aFill )
+        gal->SetFillColor( color.WithAlpha( 0.2 ) );
+
+    // draw the angle reference arc
+    gal->DrawArc( aOrigin, aRad, -aStartAngle, -aEndAngle );
+}
+
+
+void KIGFX::PREVIEW::DrawPreviewCircle( KIGFX::VIEW *aView,
+        const VECTOR2I& aOrigin, double aRad, bool aDim, bool aFill )
+{
+    auto gal = aView->GetGAL();
+    auto rs = static_cast<KIGFX::PCB_RENDER_SETTINGS*>( aView->GetPainter()->GetSettings() );
+
+    auto color = rs->GetLayerColor( LAYER_AUX_ITEMS );
+
+    gal->SetStrokeColor( color.WithAlpha( PreviewOverlayDeemphAlpha( aDim ) ) );
+    gal->SetIsStroke( true );
+
+    gal->SetIsFill( aFill );
+
+    if( aFill )
+        gal->SetFillColor( color.WithAlpha( 0.2 ) );
+
+    gal->DrawCircle( aOrigin, aRad );
+}

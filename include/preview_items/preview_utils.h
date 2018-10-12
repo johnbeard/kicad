@@ -72,6 +72,47 @@ void DrawTextNextToCursor( KIGFX::VIEW* aView,
         const VECTOR2D& aCursorPos, const VECTOR2D& aTextQuadrant,
         const std::vector<wxString>& aStrings );
 
+/**
+ * Draw a simple line suitable for use in a preview item.
+ *
+ * @param aView the view to draw in
+ * @param aStart line start point
+ * @param aEnd line end point
+ * @param aDim draw the line "dimmed" (e.g. for already-locked-in items)
+ * @param aHighlightSpecialAngles highlight special angles
+ */
+void DrawPreviewLine( KIGFX::VIEW *aView,
+        const VECTOR2I& aStart, const VECTOR2I& aEnd, bool aDim,
+        bool aHighlightSpecialAngles );
+
+/**
+ * Draw an arc suitable for use in a preview item
+ *
+ * @param aView the view to draw in
+ * @param aOrigin the arc origin
+ * @param aRad the arc radius
+ * @param aStartAngle the arc start angle (in radians)
+ * @param aEndAngle the arc end angle (in radians)
+ * @param aDim draw the arc "dimmed"
+ * @param aFill fill the arc
+ * @param aHighlightSpecialAngles highlight the arc when the angle is "special"
+ */
+void DrawPreviewArc( KIGFX::VIEW *aView,
+        const VECTOR2I& aOrigin, double aRad, double aStartAngle,
+        double aEndAngle, bool aDim, bool aFill, bool aHighlightSpecialAngles );
+
+/**
+ * Draw an circle suitable for use in a preview item
+ *
+ * @param aView the view to draw in
+ * @param aOrigin the arc origin
+ * @param aRad the arc radius
+ * @param aDim draw the arc "dimmed"
+ * @param aFill fill the arc
+ */
+void DrawPreviewCircle( KIGFX::VIEW *aView,
+        const VECTOR2I& aOrigin, double aRad, bool aDim, bool aFill );
+
 } // PREVIEW
 } // KIGFX
 
