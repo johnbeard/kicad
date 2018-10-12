@@ -26,6 +26,8 @@
 
 #include <math/vector2d.h>
 #include <geometry/geometry_utils.h>
+#include <preview_items/multistep_geom_manager.h>
+
 
 namespace KIGFX
 {
@@ -85,6 +87,40 @@ private:
 
     VECTOR2I m_origin, m_end;
     bool m_angleSnap = false;
+};
+
+class TWO_POINT_GEOMETRY_MANAGER_NG: public MULTISTEP_GEOM_MANAGER
+{
+private:
+
+    enum TWO_PT_STEPS
+    {
+        SET_ORIGIN = 0,   ///> Waiting to lock in origin point
+        SET_END,          ///> Waiting to lock in the end point
+        COMPLETE,
+    };
+
+    bool acceptPoint( const VECTOR2I& aPt ) override
+    {
+        if( getStep() == SET_ORIGIN )
+        {
+            m_start = aPt;
+        }
+        else if( getStep() == SET_END )
+        {
+            m_end = aPt;
+        }
+
+        return true;
+    }
+
+    int getMaxStep() const override
+    {
+        return COMPLETE;
+    }
+
+    VECTOR2I m_start;
+    VECTOR2I m_end;
 };
 
 } // PREVIEW

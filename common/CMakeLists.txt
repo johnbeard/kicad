@@ -239,6 +239,7 @@ set( COMMON_PREVIEW_ITEMS_SRCS
     preview_items/arc_geom_manager.cpp
     preview_items/bright_box.cpp
     preview_items/centreline_rect_item.cpp
+    preview_items/circle_assistant.cpp
     preview_items/polygon_geom_manager.cpp
     preview_items/polygon_item.cpp
     preview_items/preview_utils.cpp

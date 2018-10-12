@@ -51,6 +51,7 @@
 #include "grid_helper.h"
 #include <dialogs/dialog_text_properties.h>
 #include <preview_items/arc_assistant.h>
+#include <preview_items/circle_assistant.h>
 
 #include <class_board.h>
 #include <class_edge_mod.h>
@@ -975,6 +976,17 @@ bool DRAWING_TOOL::drawSegment( int aShape, DRAWSEGMENT*& aGraphic,
     // Only two shapes are currently supported
     assert( aShape == S_SEGMENT || aShape == S_CIRCLE );
 
+    // The geometry manager that will govern the construction
+    KIGFX::PREVIEW::TWO_POINT_GEOMETRY_MANAGER_NG geom_manager;
+
+    std::unique_ptr<EDA_ITEM> assistant;
+
+    if( aShape == S_CIRCLE )
+    {
+        assistant = std::make_unique<KIGFX::PREVIEW::CIRCLE_ASSISTANT>(
+                geom_manager, m_frame->GetUserUnits() );
+    }
+
     DRAWSEGMENT line45;
     GRID_HELPER grid( m_frame );
 
@@ -984,6 +996,9 @@ bool DRAWING_TOOL::drawSegment( int aShape, DRAWSEGMENT*& aGraphic,
     // Add a VIEW_GROUP that serves as a preview for the new item
     SELECTION preview;
     m_view->Add( &preview );
+
+    if( assistant )
+        m_view->Add( &*assistant );
 
     m_toolMgr->RunAction( PCB_ACTIONS::selectionClear, true );
     m_controls->ShowCursor( true );
@@ -1006,6 +1021,8 @@ bool DRAWING_TOOL::drawSegment( int aShape, DRAWSEGMENT*& aGraphic,
         cursorPos = grid.BestSnapAnchor( cursorPos, aGraphic );
         m_controls->ForceCursorPosition(true, cursorPos );
         aGraphic->SetEnd( wxPoint( cursorPos.x, cursorPos.y ) );
+
+        geom_manager.AddPoint( cursorPos, true );
 
         if( aShape == S_SEGMENT )
             line45 = *aGraphic; // used only for direction 45 mode with lines
@@ -1086,6 +1103,8 @@ bool DRAWING_TOOL::drawSegment( int aShape, DRAWSEGMENT*& aGraphic,
                 aGraphic->SetEnd( wxPoint( cursorPos.x, cursorPos.y ) );
                 aGraphic->SetLayer( getDrawingLayer() );
 
+                geom_manager.AddPoint( cursorPos, true );
+
                 if( !IsOCurseurSet )
                     m_frame->GetScreen()->m_O_Curseur = wxPoint( cursorPos.x, cursorPos.y );
 
@@ -1138,6 +1157,8 @@ bool DRAWING_TOOL::drawSegment( int aShape, DRAWSEGMENT*& aGraphic,
             else
                 aGraphic->SetEnd( wxPoint( cursorPos.x, cursorPos.y ) );
 
+            geom_manager.AddPoint( cursorPos, false );
+
             m_view->Update( &preview );
 
             if( started )
@@ -1171,6 +1192,10 @@ bool DRAWING_TOOL::drawSegment( int aShape, DRAWSEGMENT*& aGraphic,
         m_frame->GetScreen()->m_O_Curseur = wxPoint( 0, 0 );
 
     m_view->Remove( &preview );
+
+    if( assistant )
+        m_view->Remove( &*assistant );
+
     frame()->SetMsgPanel( board() );
     m_controls->SetAutoPan( false );
     m_controls->CaptureCursor( false );
