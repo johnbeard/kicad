@@ -113,8 +113,8 @@ public:
     //-----<PUBLIC PLUGIN API>--------------------------------------------------
     const wxString PluginName() const override;
 
-    BOARD* Load( const wxString& aFileName, BOARD* aAppendToMe,
-                 const PROPERTIES* aProperties = NULL ) override;
+    BOARD* Load( wxInputStream& aStream, const wxString& aName, BOARD* aAppendToMe,
+                 const PROPERTIES* aProperties ) override;
 
     const wxString GetFileExtension() const override;
 

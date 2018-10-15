@@ -388,6 +388,22 @@ static inline long hexParse( const char* next, const char** out = NULL )
 BOARD* LEGACY_PLUGIN::Load( const wxString& aFileName, BOARD* aAppendToMe,
         const PROPERTIES* aProperties )
 {
+    FILE_LINE_READER reader( aFileName );
+    return load( reader, aAppendToMe, aProperties );
+}
+
+
+BOARD* LEGACY_PLUGIN::Load( wxInputStream& aStream, const wxString& aName,
+        BOARD* aAppendToMe, const PROPERTIES* aProperties )
+{
+    INPUTSTREAM_LINE_READER reader( &aStream, aName );
+    return load( reader, aAppendToMe, aProperties );
+}
+
+
+BOARD* LEGACY_PLUGIN::load( LINE_READER& aReader, BOARD* aAppendToMe,
+        const PROPERTIES* aProperties )
+{
     LOCALE_IO   toggle;     // toggles on, then off, the C locale.
 
     init( aProperties );
@@ -396,14 +412,12 @@ BOARD* LEGACY_PLUGIN::Load( const wxString& aFileName, BOARD* aAppendToMe,
 
     // Give the filename to the board if it's new
     if( !aAppendToMe )
-        m_board->SetFileName( aFileName );
+        m_board->SetFileName( aReader.GetSource() );
 
     // delete on exception, iff I own m_board, according to aAppendToMe
     unique_ptr<BOARD> deleter( aAppendToMe ? NULL : m_board );
 
-    FILE_LINE_READER    reader( aFileName );
-
-    m_reader = &reader;          // member function accessibility
+    m_reader = &aReader;          // member function accessibility
 
     checkVersion();
 

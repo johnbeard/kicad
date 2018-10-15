@@ -1879,11 +1879,25 @@ PCB_IO::~PCB_IO()
 
 BOARD* PCB_IO::Load( const wxString& aFileName, BOARD* aAppendToMe, const PROPERTIES* aProperties )
 {
-    FILE_LINE_READER    reader( aFileName );
+    // This much faster than the stream-based LINE_READER
+    FILE_LINE_READER reader( aFileName );
+    return load( reader, aAppendToMe, aProperties );
+}
 
+
+BOARD* PCB_IO::Load( wxInputStream& aStream, const wxString& aName, BOARD* aAppendToMe,
+    const PROPERTIES* aProperties )
+{
+    INPUTSTREAM_LINE_READER reader( &aStream, aName );
+    return load( reader, aAppendToMe, aProperties );
+}
+
+
+BOARD* PCB_IO::load( LINE_READER& aReader, BOARD* aAppendToMe, const PROPERTIES* aProperties )
+{
     init( aProperties );
 
-    m_parser->SetLineReader( &reader );
+    m_parser->SetLineReader( &aReader );
     m_parser->SetBoard( aAppendToMe );
 
     BOARD* board;
@@ -1915,7 +1929,7 @@ BOARD* PCB_IO::Load( const wxString& aFileName, BOARD* aAppendToMe, const PROPER
 
     // Give the filename to the board if it's new
     if( !aAppendToMe )
-        board->SetFileName( aFileName );
+        board->SetFileName( aReader.GetSource() );
 
     return board;
 }

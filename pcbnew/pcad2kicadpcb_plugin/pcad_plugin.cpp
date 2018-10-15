@@ -67,7 +67,8 @@ const wxString PCAD_PLUGIN::GetFileExtension() const
 }
 
 
-BOARD* PCAD_PLUGIN::Load( const wxString& aFileName, BOARD* aAppendToMe, const PROPERTIES* aProperties )
+BOARD* PCAD_PLUGIN::Load( wxInputStream& aStream, const wxString& aName,
+        BOARD* aAppendToMe, const PROPERTIES* aProperties )
 {
     wxXmlDocument   xmlDoc;
 
@@ -77,13 +78,13 @@ BOARD* PCAD_PLUGIN::Load( const wxString& aFileName, BOARD* aAppendToMe, const P
 
     // Give the filename to the board if it's new
     if( !aAppendToMe )
-        m_board->SetFileName( aFileName );
+        m_board->SetFileName( aName );
 
     PCB pcb( m_board );
 
     LOCALE_IO toggle;    // toggles on, then off, the C locale.
 
-    LoadInputFile( aFileName, &xmlDoc );
+    LoadInputStream( aStream, aName, &xmlDoc );
     pcb.ParseBoard( NULL, &xmlDoc, wxT( "PCB" ) );
     pcb.AddToBoard();
 

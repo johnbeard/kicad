@@ -37,7 +37,7 @@ namespace PCAD2KICAD {
 static KEYWORD empty_keywords[1] = {};
 static const char ACCEL_ASCII_KEYWORD[] = "ACCEL_ASCII";
 
-void LoadInputFile( const wxString& aFileName, wxXmlDocument* aXmlDoc )
+void LoadInputStream( wxInputStream& aStream, const wxString& aName, wxXmlDocument* aXmlDoc )
 {
     char      line[sizeof( ACCEL_ASCII_KEYWORD )];
     int       tok;
@@ -45,22 +45,18 @@ void LoadInputFile( const wxString& aFileName, wxXmlDocument* aXmlDoc )
     wxString  str, propValue, content;
     wxCSConv  conv( wxT( "windows-1251" ) );
 
-    FILE* fp = wxFopen( aFileName, wxT( "rt" ) );
-
-    if( !fp )
-        THROW_IO_ERROR( wxT( "Unable to open file: " ) + aFileName );
+    bool ok = aStream.Read( line, sizeof(ACCEL_ASCII_KEYWORD) - 1 ).LastRead() ==
+                    ( sizeof(ACCEL_ASCII_KEYWORD) - 1 );
 
     // check file format
-    if( !fgets( line, sizeof( line ), fp )
+    if( !ok
         // first line starts with "ACCEL_ASCII" with optional stuff on same line after that.
         || memcmp( line, ACCEL_ASCII_KEYWORD, sizeof(ACCEL_ASCII_KEYWORD)-1 ) )
         THROW_IO_ERROR( "Unknown file type" );
 
-    // rewind the file
-    fseek( fp, 0, SEEK_SET );
-
+    INPUTSTREAM_LINE_READER reader( &aStream, aName );
     // lexer now owns fp, will close on exception or return
-    DSNLEXER lexer( empty_keywords, 0, fp,  aFileName );
+    DSNLEXER lexer( empty_keywords, 0, &reader );
 
     iNode = new XNODE( wxXML_ELEMENT_NODE, wxT( "www.lura.sk" ) );
 

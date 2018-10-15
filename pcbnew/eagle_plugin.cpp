@@ -210,7 +210,8 @@ wxSize inline EAGLE_PLUGIN::kicad_fontz( const ECOORD& d ) const
 }
 
 
-BOARD* EAGLE_PLUGIN::Load( const wxString& aFileName, BOARD* aAppendToMe,  const PROPERTIES* aProperties )
+BOARD* EAGLE_PLUGIN::Load( wxInputStream& aStream, const wxString& aName,
+    BOARD* aAppendToMe,  const PROPERTIES* aProperties )
 {
     LOCALE_IO       toggle;     // toggles on, then off, the C locale.
     wxXmlNode*      doc;
@@ -221,7 +222,7 @@ BOARD* EAGLE_PLUGIN::Load( const wxString& aFileName, BOARD* aAppendToMe,  const
 
     // Give the filename to the board if it's new
     if( !aAppendToMe )
-        m_board->SetFileName( aFileName );
+        m_board->SetFileName( aName );
 
     // delete on exception, if I own m_board, according to aAppendToMe
     unique_ptr<BOARD> deleter( aAppendToMe ? NULL : m_board );
@@ -230,11 +231,10 @@ BOARD* EAGLE_PLUGIN::Load( const wxString& aFileName, BOARD* aAppendToMe,  const
     {
         // Load the document
         wxXmlDocument xmlDocument;
-        wxFileName fn = aFileName;
 
-        if( !xmlDocument.Load( fn.GetFullPath() ) )
+        if( !xmlDocument.Load( aStream ) )
             THROW_IO_ERROR( wxString::Format( _( "Unable to read file \"%s\"" ),
-                                              fn.GetFullPath() ) );
+                                              aName ) );
 
         doc = xmlDocument.GetRoot();
 

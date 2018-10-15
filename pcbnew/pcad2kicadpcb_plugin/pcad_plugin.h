@@ -41,7 +41,8 @@ public:
 
     const wxString  PluginName() const override;
 
-    BOARD*          Load( const wxString&   aFileName,
+    BOARD*          Load( wxInputStream&    aStream,
+                          const wxString&   aName,
                           BOARD*            aAppendToMe,
                           const PROPERTIES* aProperties = NULL ) override;
 

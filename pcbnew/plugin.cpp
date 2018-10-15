@@ -25,6 +25,8 @@
 #include <io_mgr.h>
 #include <properties.h>
 
+#include <wx/wfstream.h>
+
 
 #define FMT_UNIMPLEMENTED   _( "Plugin \"%s\" does not implement the \"%s\" function." )
 
@@ -44,6 +46,13 @@ static void not_implemented( PLUGIN* aPlugin, const char* aCaller )
 
 
 BOARD* PLUGIN::Load( const wxString& aFileName, BOARD* aAppendToMe, const PROPERTIES* aProperties )
+{
+    wxFFileInputStream fis( aFileName );
+    return Load( fis, aFileName, aAppendToMe, aProperties );
+}
+
+
+BOARD* PLUGIN::Load( wxInputStream& aStream, const wxString& aName, BOARD* aAppendToMe, const PROPERTIES* aProperties )
 {
     not_implemented( this, __FUNCTION__ );
     return NULL;

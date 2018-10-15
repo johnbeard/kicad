@@ -34,7 +34,7 @@
 
 namespace PCAD2KICAD
 {
-    void LoadInputFile( const wxString& aFileName, wxXmlDocument* aXmlDoc );
+    void LoadInputStream( wxInputStream& aFileName, const wxString& aName, wxXmlDocument* aXmlDoc );
 }
 
 #endif    // S_EXPR_LOADER_H_

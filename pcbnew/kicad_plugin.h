@@ -118,6 +118,9 @@ public:
     BOARD* Load( const wxString& aFileName, BOARD* aAppendToMe,
                  const PROPERTIES* aProperties = NULL ) override;
 
+    BOARD* Load( wxInputStream& aStream, const wxString& aName, BOARD* aAppendToMe,
+                 const PROPERTIES* aProperties = NULL ) override;
+
     void FootprintEnumerate( wxArrayString& aFootprintNames, const wxString& aLibraryPath,
                              const PROPERTIES* aProperties = NULL ) override;
 
@@ -215,6 +218,9 @@ protected:
     void formatHeader( BOARD* aBoard, int aNestLevel = 0 ) const;
 
 private:
+
+    BOARD* load( LINE_READER& aReader, BOARD* aAppendToMe, const PROPERTIES* aProperties = NULL );
+
     void format( BOARD* aBoard, int aNestLevel = 0 ) const;
 
     void format( DIMENSION* aDimension, int aNestLevel = 0 ) const;

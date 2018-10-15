@@ -84,6 +84,9 @@ public:
     BOARD* Load( const wxString& aFileName, BOARD* aAppendToMe,
             const PROPERTIES* aProperties = NULL ) override;
 
+    BOARD* Load( wxInputStream& aStream, const wxString& aName,
+            BOARD* aAppendToMe, const PROPERTIES* aProperties ) override;
+
     void FootprintEnumerate( wxArrayString& aFootprintNames, const wxString& aLibraryPath,
             const PROPERTIES* aProperties = NULL ) override;
 
@@ -141,6 +144,11 @@ protected:
 
     double  diskToBiu;              ///< convert from disk engineering units to BIUs
                                     ///< with this scale factor
+
+    /**
+     * Load from a LINE_READER interface.
+     */
+    BOARD* load( LINE_READER& aReader, BOARD* aAppendToMe, const PROPERTIES* aProperties );
 
     ///> Converts net code using the mapping table if available,
     ///> otherwise returns unchanged net code

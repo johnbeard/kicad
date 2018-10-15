@@ -287,6 +287,13 @@ public:
      * knows about, into either a new BOARD or an existing one. This may be used to load an
      * entire new BOARD, or to augment an existing one if @a aAppendToMe is not NULL.
      *
+     * The default implementation is to construct an input stream
+     * and read from that using the stream Load() function.
+     * This might not be the fastest way: when the plugin
+     * is line-based, a FILE_LINE_READER is substantially faster than an
+     * INPUTSTREAM_LINE_READER, so it makes sense to override this function
+     * as well and provide that implementation.
+     *
      * @param aFileName is the name of the file to use as input and may be foreign in
      *  nature or native in nature.
      *
@@ -309,6 +316,16 @@ public:
      */
     virtual BOARD* Load( const wxString& aFileName, BOARD* aAppendToMe,
                          const PROPERTIES* aProperties = NULL );
+
+    /**
+     * Load a board from a stream containing a file format...
+     * @param  aStream     [description]
+     * @param  aAppendToMe [description]
+     * @param  aProperties [description]
+     * @return             [description]
+     */
+    virtual BOARD* Load( wxInputStream& aStream, const wxString& aName, BOARD* aAppendToMe,
+        const PROPERTIES* aProperties );
 
     /**
      * Function Save
