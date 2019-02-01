@@ -168,6 +168,7 @@ void LIB_TREE_MODEL_ADAPTER::UpdateSearchString( wxString const& aSearch )
     {
         auto item = wxDataViewItem( bestMatch );
         m_widget->Select( item );
+        m_widget->ExpandAncestors( item );
         m_widget->EnsureVisible( item );
     }
 }

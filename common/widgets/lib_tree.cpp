@@ -33,6 +33,16 @@
 #include <lib_table_base.h>
 
 
+/**
+ * Flag to enable logging of LIB_TREE code
+ *
+ * Use "KICAD_LIB_TREE" to enable.
+ *
+ * @ingroup trace_env_vars
+ */
+static const wxChar* trace_lib_tree = wxT( "KICAD_LIB_TREE" );
+
+
 LIB_TREE::LIB_TREE( wxWindow* aParent, LIB_TABLE* aLibTable, LIB_TREE_MODEL_ADAPTER::PTR& aAdapter,
                     WIDGETS aWidgets, wxHtmlWindow* aDetails )
     : wxPanel( aParent, wxID_ANY, wxDefaultPosition, wxDefaultSize,
@@ -187,13 +197,25 @@ void LIB_TREE::Regenerate( bool aKeepState )
 {
     STATE current;
 
+    wxLogTrace( trace_lib_tree, "Regenerate, keep state: %d", aKeepState );
+
     // Store the state
     if( aKeepState )
         m_unfilteredState = getState();
 
+    wxLogTrace( trace_lib_tree, "Unfiltered state: selection '%s'",
+        m_unfilteredState.selection.GetUniStringLibId() );
+
+    wxLogTrace( trace_lib_tree, "   Current selection '%s'",
+        GetSelectedLibId().GetUniStringLibId() );
+
     wxString filter = m_query_ctrl->GetValue();
+
+    wxLogTrace( trace_lib_tree, "   Updating adapter filter '%s'", filter);
     m_adapter->UpdateSearchString( filter );
     m_filtering = !filter.IsEmpty();
+    wxLogTrace( trace_lib_tree, "  Filtering '%d'", m_filtering );
+
     postPreselectEvent();
 
     // Restore the state
@@ -213,8 +235,12 @@ void LIB_TREE::SetFocus()
 
 void LIB_TREE::toggleExpand( const wxDataViewItem& aTreeId )
 {
+    wxLogTrace( trace_lib_tree, "toggleExpand" );
+
     if( !aTreeId.IsOk() )
         return;
+
+    wxLogTrace( trace_lib_tree, "...ok" );
 
     if( m_tree_ctrl->IsExpanded( aTreeId ) )
         m_tree_ctrl->Collapse( aTreeId );
@@ -225,8 +251,12 @@ void LIB_TREE::toggleExpand( const wxDataViewItem& aTreeId )
 
 void LIB_TREE::selectIfValid( const wxDataViewItem& aTreeId )
 {
+    wxLogTrace( trace_lib_tree, "selectIfValid" );
+
     if( aTreeId.IsOk() )
     {
+        wxLogTrace( trace_lib_tree, "...ok" );
+
         m_tree_ctrl->EnsureVisible( aTreeId );
         m_tree_ctrl->Select( aTreeId );
         postPreselectEvent();
@@ -236,20 +266,32 @@ void LIB_TREE::selectIfValid( const wxDataViewItem& aTreeId )
 
 void LIB_TREE::centerIfValid( const wxDataViewItem& aTreeId )
 {
+    wxLogTrace( trace_lib_tree, "centerIfValid" );
+
     if( aTreeId.IsOk() )
+    {
+        wxLogTrace( trace_lib_tree, "...ok" );
         m_tree_ctrl->EnsureVisible( aTreeId );
+    }
 }
 
 
 void LIB_TREE::expandIfValid( const wxDataViewItem& aTreeId )
 {
+    wxLogTrace( trace_lib_tree, "expandIfValid" );
+
+
     if( aTreeId.IsOk() && !m_tree_ctrl->IsExpanded( aTreeId ) )
+    {
+        wxLogTrace( trace_lib_tree, "Expand" );
         m_tree_ctrl->Expand( aTreeId );
+    }
 }
 
 
 void LIB_TREE::postPreselectEvent()
 {
+    wxLogTrace( trace_lib_tree, "Post Preselect" );
     wxCommandEvent event( COMPONENT_PRESELECTED );
     wxPostEvent( this, event );
 }
@@ -257,6 +299,7 @@ void LIB_TREE::postPreselectEvent()
 
 void LIB_TREE::postSelectEvent()
 {
+    wxLogTrace( trace_lib_tree, "Post Select" );
     wxCommandEvent event( COMPONENT_SELECTED );
     wxPostEvent( this, event );
 }
@@ -282,6 +325,9 @@ LIB_TREE::STATE LIB_TREE::getState() const
 
 void LIB_TREE::setState( const STATE& aState )
 {
+    wxLogTrace( trace_lib_tree, "Setting state: selection '%s'",
+        aState.selection.GetUniStringLibId() );
+
     m_tree_ctrl->Freeze();
 
     for( const auto& item : aState.expanded )
@@ -298,6 +344,7 @@ void LIB_TREE::setState( const STATE& aState )
 
 void LIB_TREE::onQueryText( wxCommandEvent& aEvent )
 {
+    wxLogTrace( trace_lib_tree, "onQueryText" );
     Regenerate( false );
 
     // Required to avoid interaction with SetHint()
@@ -349,6 +396,7 @@ void LIB_TREE::onQueryCharHook( wxKeyEvent& aKeyStroke )
         /* fall through, so the selected component will be treated as the selected one */
 
     default:
+        wxLogTrace( trace_lib_tree, "Skipping onQueryCharHook" );
         aKeyStroke.Skip(); // Any other key: pass on to search box directly.
         break;
     }
@@ -357,12 +405,16 @@ void LIB_TREE::onQueryCharHook( wxKeyEvent& aKeyStroke )
 
 void LIB_TREE::onTreeSelect( wxDataViewEvent& aEvent )
 {
+    wxLogTrace( trace_lib_tree, "onTreeSelect" );
     postPreselectEvent();
 }
 
 
 void LIB_TREE::onTreeActivate( wxDataViewEvent& aEvent )
 {
+    wxLogTrace( trace_lib_tree, "Activated: '%s'",
+        GetSelectedLibId().GetUniStringLibId() );
+
     if( !GetSelectedLibId().IsValid() )
     {
         // Expand library/part units subtree
@@ -384,6 +436,8 @@ void LIB_TREE::onDetailsLink( wxHtmlLinkEvent& aEvent )
 
 void LIB_TREE::onPreselect( wxCommandEvent& aEvent )
 {
+    wxLogTrace( trace_lib_tree, "onPreselect: '%s'",
+        GetSelectedLibId().GetUniStringLibId() );
     if( m_details_ctrl )
     {
         int unit = 0;
