@@ -190,8 +190,8 @@ void DIALOG_SYMBOL_REMAP::createProjectSymbolLibTable( REPORTER& aReporter )
                             libName, fullFileName );
                 aReporter.Report( msg, REPORTER::RPT_INFO );
 
-                prjLibTable.InsertRow( new SYMBOL_LIB_TABLE_ROW( libName, fullFileName,
-                                                                 pluginType ) );
+                prjLibTable.InsertRow( std::make_unique<SYMBOL_LIB_TABLE_ROW>(
+                        libName, fullFileName, pluginType ) );
             }
             else
             {

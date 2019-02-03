@@ -118,23 +118,33 @@ class FP_LIB_TABLE_GRID : public LIB_TABLE_GRID, public FP_LIB_TABLE
     friend class FP_GRID_TRICKS;
 
 protected:
-    LIB_TABLE_ROW* at( size_t aIndex ) override { return &rows.at( aIndex ); }
+    LIB_TABLE_ROW* at( size_t aIndex ) override
+    {
+        return rows.at( aIndex ).get();
+    }
 
     size_t size() const override { return rows.size(); }
 
-    LIB_TABLE_ROW* makeNewRow() override
+    std::unique_ptr<LIB_TABLE_ROW> makeNewRow() override
     {
-        return dynamic_cast< LIB_TABLE_ROW* >( new FP_LIB_TABLE_ROW );
+        return std::make_unique<FP_LIB_TABLE_ROW>();
     }
 
-    LIB_TABLE_ROWS_ITER begin() override { return rows.begin(); }
-
-    LIB_TABLE_ROWS_ITER insert( LIB_TABLE_ROWS_ITER aIterator, LIB_TABLE_ROW* aRow ) override
+    LIB_TABLE_ROWS_ITER begin() override
     {
-        return rows.insert( aIterator, aRow );
+        return rows.begin();
     }
 
-    void push_back( LIB_TABLE_ROW* aRow ) override { rows.push_back( aRow ); }
+    LIB_TABLE_ROWS_ITER insert(
+            LIB_TABLE_ROWS_ITER aIterator, std::unique_ptr<LIB_TABLE_ROW> aRow ) override
+    {
+        return rows.insert( aIterator, std::move( aRow ) );
+    }
+
+    void push_back( std::unique_ptr<LIB_TABLE_ROW> aRow ) override
+    {
+        rows.push_back( std::move( aRow ) );
+    }
 
     LIB_TABLE_ROWS_ITER erase( LIB_TABLE_ROWS_ITER aFirst, LIB_TABLE_ROWS_ITER aLast ) override
     {
@@ -555,11 +565,11 @@ void PANEL_FP_LIB_TABLE::moveUpHandler( wxCommandEvent& event )
     // @todo: add multiple selection moves.
     if( curRow >= 1 )
     {
-        boost::ptr_vector< LIB_TABLE_ROW >::auto_type move_me =
-            tbl->rows.release( tbl->rows.begin() + curRow );
+        auto from_iter = tbl->rows.begin() + curRow;
+        auto to_iter = tbl->rows.begin() + curRow - 1;
+        std::swap( from_iter, to_iter );
 
         --curRow;
-        tbl->rows.insert( tbl->rows.begin() + curRow, move_me.release() );
 
         if( tbl->GetView() )
         {
@@ -585,11 +595,9 @@ void PANEL_FP_LIB_TABLE::moveDownHandler( wxCommandEvent& event )
     // @todo: add multiple selection moves.
     if( unsigned( curRow + 1 ) < tbl->rows.size() )
     {
-        boost::ptr_vector< LIB_TABLE_ROW >::auto_type move_me =
-            tbl->rows.release( tbl->rows.begin() + curRow );
-
-        ++curRow;
-        tbl->rows.insert( tbl->rows.begin() + curRow, move_me.release() );
+        auto from_iter = tbl->rows.begin() + curRow;
+        auto to_iter = tbl->rows.begin() + curRow + 1;
+        std::swap( from_iter, to_iter );
 
         if( tbl->GetView() )
         {

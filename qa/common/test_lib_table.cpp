@@ -168,13 +168,13 @@ struct LIB_TABLE_TEST_FIXTURE
     {
         for( const auto& lib : main_lib_defs )
         {
-            m_mainTableNoFb.InsertRow( makeRowFromDef( lib ).release() );
-            m_mainTableWithFb.InsertRow( makeRowFromDef( lib ).release() );
+            m_mainTableNoFb.InsertRow( makeRowFromDef( lib ) );
+            m_mainTableWithFb.InsertRow( makeRowFromDef( lib ) );
         }
 
         for( const auto& lib : fallback_lib_defs )
         {
-            m_fallbackTable.InsertRow( makeRowFromDef( lib ).release() );
+            m_fallbackTable.InsertRow( makeRowFromDef( lib ) );
         }
     }
 

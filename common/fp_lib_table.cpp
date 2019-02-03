@@ -84,7 +84,7 @@ void FP_LIB_TABLE::Parse( LIB_TABLE_LEXER* in )
 
     while( ( tok = in->NextTok() ) != T_RIGHT )
     {
-        std::unique_ptr< FP_LIB_TABLE_ROW > row( new FP_LIB_TABLE_ROW );
+        auto row = std::make_unique<FP_LIB_TABLE_ROW>();
 
         if( tok == T_EOF )
             in->Expecting( T_RIGHT );
@@ -188,12 +188,9 @@ void FP_LIB_TABLE::Parse( LIB_TABLE_LEXER* in )
         // FindLib() we search this table before any fall back.)
         wxString nickname = row->GetNickName(); // store it to be able to used it
                                                 // after row deletion if an error occurs
-        LIB_TABLE_ROW* tmp = row.release();
 
-        if( !InsertRow( tmp ) )
+        if( !InsertRow( std::move( row ) ) )
         {
-            delete tmp;     // The table did not take ownership of the row.
-
             wxString msg = wxString::Format(
                                 _( "Duplicate library nickname \"%s\" found in footprint library "
                                    "table file line %d" ), GetChars( nickname ), lineNum );
@@ -231,8 +228,8 @@ void FP_LIB_TABLE::Format( OUTPUTFORMATTER* aOutput, int aIndentLevel ) const
 {
     aOutput->Print( aIndentLevel, "(fp_lib_table\n" );
 
-    for( LIB_TABLE_ROWS_CITER it = rows.begin();  it != rows.end();  ++it )
-        it->Format( aOutput, aIndentLevel+1 );
+    for( const auto& row : rows )
+        row->Format( aOutput, aIndentLevel + 1 );
 
     aOutput->Print( aIndentLevel, ")\n" );
 }

@@ -48,23 +48,33 @@ class SYMBOL_LIB_TABLE_GRID : public LIB_TABLE_GRID, public SYMBOL_LIB_TABLE
     friend class SYMBOL_GRID_TRICKS;
 
 protected:
-    LIB_TABLE_ROW* at( size_t aIndex ) override { return &rows.at( aIndex ); }
+    LIB_TABLE_ROW* at( size_t aIndex ) override
+    {
+        return rows.at( aIndex ).get();
+    }
 
     size_t size() const override { return rows.size(); }
 
-    LIB_TABLE_ROW* makeNewRow() override
+    std::unique_ptr<LIB_TABLE_ROW> makeNewRow() override
     {
-        return dynamic_cast< LIB_TABLE_ROW* >( new SYMBOL_LIB_TABLE_ROW );
+        return std::make_unique<SYMBOL_LIB_TABLE_ROW>();
     }
 
-    LIB_TABLE_ROWS_ITER begin() override { return rows.begin(); }
-
-    LIB_TABLE_ROWS_ITER insert( LIB_TABLE_ROWS_ITER aIterator, LIB_TABLE_ROW* aRow ) override
+    LIB_TABLE_ROWS_ITER begin() override
     {
-        return rows.insert( aIterator, aRow );
+        return rows.begin();
     }
 
-    void push_back( LIB_TABLE_ROW* aRow ) override { rows.push_back( aRow ); }
+    LIB_TABLE_ROWS_ITER insert(
+            LIB_TABLE_ROWS_ITER aIterator, std::unique_ptr<LIB_TABLE_ROW> aRow ) override
+    {
+        return rows.insert( aIterator, std::move( aRow ) );
+    }
+
+    void push_back( std::unique_ptr<LIB_TABLE_ROW> aRow ) override
+    {
+        rows.push_back( std::move( aRow ) );
+    }
 
     LIB_TABLE_ROWS_ITER erase( LIB_TABLE_ROWS_ITER aFirst, LIB_TABLE_ROWS_ITER aLast ) override
     {
@@ -126,7 +136,7 @@ protected:
                     tbl->AppendRows( tmp_tbl.GetCount() - tbl->GetNumberRows() );
 
                 for( unsigned i = 0; i < tmp_tbl.GetCount(); ++i )
-                    tbl->rows.replace( i, tmp_tbl.At( i ).clone() );
+                    tbl->rows[i].reset( tmp_tbl.At( i ).clone() );
             }
 
             m_grid->AutoSizeColumns( false );
@@ -513,11 +523,11 @@ void PANEL_SYM_LIB_TABLE::moveUpHandler( wxCommandEvent& event )
     // @todo: add multiple selection moves.
     if( curRow >= 1 )
     {
-        boost::ptr_vector< LIB_TABLE_ROW >::auto_type move_me =
-            tbl->rows.release( tbl->rows.begin() + curRow );
+        auto src = tbl->rows.begin() + curRow;
+        auto dst = tbl->rows.begin() + curRow - 1;
+        std::swap( *src, *dst );
 
         --curRow;
-        tbl->rows.insert( tbl->rows.begin() + curRow, move_me.release() );
 
         if( tbl->GetView() )
         {
@@ -543,11 +553,11 @@ void PANEL_SYM_LIB_TABLE::moveDownHandler( wxCommandEvent& event )
     // @todo: add multiple selection moves.
     if( unsigned( curRow + 1 ) < tbl->rows.size() )
     {
-        boost::ptr_vector< LIB_TABLE_ROW >::auto_type move_me =
-            tbl->rows.release( tbl->rows.begin() + curRow );
+        auto src = tbl->rows.begin() + curRow;
+        auto dst = tbl->rows.begin() + curRow + 1;
+        std::swap( *src, *dst );
 
-        ++curRow;
-        tbl->rows.insert( tbl->rows.begin() + curRow, move_me.release() );
+        --curRow;
 
         if( tbl->GetView() )
         {

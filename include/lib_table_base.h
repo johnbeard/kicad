@@ -47,17 +47,9 @@ class LIB_TABLE_GRID;
 class IO_ERROR;
 
 
-typedef boost::ptr_vector< LIB_TABLE_ROW > LIB_TABLE_ROWS;
-typedef LIB_TABLE_ROWS::iterator           LIB_TABLE_ROWS_ITER;
-typedef LIB_TABLE_ROWS::const_iterator     LIB_TABLE_ROWS_CITER;
-
-
-/**
- * Allows boost pointer containers to make clones of the data stored in them.  Since they
- * store pointers the data is cloned.  Copying and assigning pointers would cause ownership
- * issues if the standard C++ containers were used.
- */
-LIB_TABLE_ROW* new_clone( const LIB_TABLE_ROW& aRow );
+typedef std::vector<std::unique_ptr<LIB_TABLE_ROW>> LIB_TABLE_ROWS;
+typedef LIB_TABLE_ROWS::iterator                    LIB_TABLE_ROWS_ITER;
+typedef LIB_TABLE_ROWS::const_iterator              LIB_TABLE_ROWS_CITER;
 
 
 /**
@@ -132,7 +124,7 @@ public:
     /**
      * Change the full URI for the library.
      */
-    void SetFullURI( const wxString& aFullURI );
+void SetFullURI( const wxString& aFullURI );
 
     /**
      * Return the options string, which may hold a password or anything else needed to
@@ -173,7 +165,7 @@ public:
 
     static void Parse( std::unique_ptr< LIB_TABLE_ROW >& aRow, LIB_TABLE_LEXER* in );
 
-    LIB_TABLE_ROW* clone() const
+    std::unique_ptr<LIB_TABLE_ROW> clone() const
     {
         return do_clone();
     }
@@ -198,7 +190,7 @@ protected:
     void operator=( const LIB_TABLE_ROW& aRow );
 
 private:
-    virtual LIB_TABLE_ROW* do_clone() const = 0;
+    virtual std::unique_ptr<LIB_TABLE_ROW> do_clone() const = 0;
 
     void setProperties( PROPERTIES* aProperties );
 
@@ -354,7 +346,7 @@ public:
      */
     LIB_TABLE_ROW& At( unsigned aIndex )
     {
-        return rows[aIndex];
+        return *rows[aIndex];
     }
 
     /**
@@ -362,7 +354,7 @@ public:
      */
     const LIB_TABLE_ROW& At( unsigned aIndex ) const
     {
-        return rows[aIndex];
+        return *rows[aIndex];
     }
 
     /**
@@ -412,7 +404,7 @@ public:
      *
      * @return bool - true if the operation succeeded.
      */
-    bool InsertRow( LIB_TABLE_ROW* aRow, bool doReplace = false );
+    bool InsertRow( std::unique_ptr<LIB_TABLE_ROW> aRow, bool doReplace = false );
 
     /**
      * @return a #LIB_TABLE_ROW pointer if \a aURI is found in this table or in any chained
@@ -487,7 +479,7 @@ protected:
         nickIndex.clear();
 
         for( LIB_TABLE_ROWS_ITER it = rows.begin(); it != rows.end(); ++it )
-            nickIndex.insert( INDEX_VALUE( it->GetNickName(), it - rows.begin() ) );
+            nickIndex.insert( INDEX_VALUE( ( *it )->GetNickName(), it - rows.begin() ) );
     }
 
     void ensureIndex()

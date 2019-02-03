@@ -882,9 +882,9 @@ bool PCB_EDIT_FRAME::importFile( const wxString& aFileName, int aFileType )
                 if( !rel_path.IsEmpty() )
                     newLibPath = rel_path;
 
-                FP_LIB_TABLE_ROW* row = new FP_LIB_TABLE_ROW( newfilename.GetName(),
-                        newLibPath, wxT( "KiCad" ), wxEmptyString );
-                prjlibtable->InsertRow( row );
+                auto row = std::make_unique<FP_LIB_TABLE_ROW>(
+                        newfilename.GetName(), newLibPath, wxT( "KiCad" ), wxEmptyString );
+                prjlibtable->InsertRow( std::move( row ) );
             }
 
             if( !GetBoard()->GetFileName().IsEmpty() )

@@ -43,12 +43,6 @@
 using namespace LIB_TABLE_T;
 
 
-LIB_TABLE_ROW* new_clone( const LIB_TABLE_ROW& aRow )
-{
-    return aRow.clone();
-}
-
-
 void LIB_TABLE_ROW::setProperties( PROPERTIES* aProperties )
 {
     properties.reset( aProperties );
@@ -300,7 +294,7 @@ LIB_TABLE_ROW* LIB_TABLE::findRow( const wxString& aNickName ) const
 
         if( it != cur->nickIndex.end() )
         {
-            return &cur->rows[it->second];  // found
+            return cur->rows[it->second].get(); // found
         }
 
         // not found, search fall back table(s), if any
@@ -322,7 +316,7 @@ LIB_TABLE_ROW* LIB_TABLE::findRow( const wxString& aNickName )
 
         if( it != cur->nickIndex.end() )
         {
-            return &cur->rows[it->second];  // found
+            return cur->rows[it->second].get(); // found
         }
 
         // not found, search fall back table(s), if any
@@ -342,12 +336,12 @@ const LIB_TABLE_ROW* LIB_TABLE::FindRowByURI( const wxString& aURI )
 
         for( unsigned i = 0;  i < cur->rows.size();  i++ )
         {
-            wxString tmp = cur->rows[i].GetFullURI( true );
+            wxString tmp = cur->rows[i]->GetFullURI( true );
 
             if( tmp.Find( "://" ) != wxNOT_FOUND )
             {
                 if( tmp == aURI )
-                    return &cur->rows[i];  // found as URI
+                    return cur->rows[i].get(); // found as URI
             }
             else
             {
@@ -357,7 +351,7 @@ const LIB_TABLE_ROW* LIB_TABLE::FindRowByURI( const wxString& aURI )
                 // a symlink to the same real file, the comparison will be true.  See
                 // wxFileName::SameAs() in the wxWidgets source.
                 if( fn == wxFileName( tmp ) )
-                    return &cur->rows[i];  // found as full path and file name
+                    return cur->rows[i].get(); // found as full path and file name
             }
         }
 
@@ -380,11 +374,11 @@ std::vector<wxString> LIB_TABLE::GetLogicalLibs()
 
     do
     {
-        for( LIB_TABLE_ROWS_CITER it = cur->rows.begin();  it!=cur->rows.end();  ++it )
+        for( const auto& row : cur->rows )
         {
-            if( it->GetIsEnabled() )
+            if( row->GetIsEnabled() )
             {
-                unique.insert( it->GetNickName() );
+                unique.insert( row->GetNickName() );
             }
         }
 
@@ -393,16 +387,16 @@ std::vector<wxString> LIB_TABLE::GetLogicalLibs()
     ret.reserve( unique.size() );
 
     // return a sorted, unique set of nicknames in a std::vector<wxString> to caller
-    for( std::set< wxString >::const_iterator it = unique.begin();  it!=unique.end();  ++it )
+    for( const auto& nickname : unique )
     {
-        ret.push_back( *it );
+        ret.push_back( nickname );
     }
 
     return ret;
 }
 
 
-bool LIB_TABLE::InsertRow( LIB_TABLE_ROW* aRow, bool doReplace )
+bool LIB_TABLE::InsertRow( std::unique_ptr<LIB_TABLE_ROW> aRow, bool doReplace )
 {
     ensureIndex();
 
@@ -410,14 +404,14 @@ bool LIB_TABLE::InsertRow( LIB_TABLE_ROW* aRow, bool doReplace )
 
     if( it == nickIndex.end() )
     {
-        rows.push_back( aRow );
+        rows.push_back( std::move( aRow ) );
         nickIndex.insert( INDEX_VALUE( aRow->GetNickName(), rows.size() - 1 ) );
         return true;
     }
 
     if( doReplace )
     {
-        rows.replace( it->second, aRow );
+        rows[it->second] = std::move( aRow );
         return true;
     }
 

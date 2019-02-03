@@ -217,13 +217,14 @@ protected:
 
     virtual size_t size() const = 0;
 
-    virtual LIB_TABLE_ROW* makeNewRow() = 0;
+    virtual std::unique_ptr<LIB_TABLE_ROW> makeNewRow() = 0;
 
     virtual LIB_TABLE_ROWS_ITER begin() = 0;
 
-    virtual LIB_TABLE_ROWS_ITER insert( LIB_TABLE_ROWS_ITER aIterator, LIB_TABLE_ROW* aRow ) = 0;
+    virtual LIB_TABLE_ROWS_ITER insert(
+            LIB_TABLE_ROWS_ITER aIterator, std::unique_ptr<LIB_TABLE_ROW> aRow ) = 0;
 
-    virtual void push_back( LIB_TABLE_ROW* aRow ) = 0;
+    virtual void push_back( std::unique_ptr<LIB_TABLE_ROW> aRow ) = 0;
 
     virtual LIB_TABLE_ROWS_ITER erase( LIB_TABLE_ROWS_ITER aFirst, LIB_TABLE_ROWS_ITER aLast ) = 0;
 };

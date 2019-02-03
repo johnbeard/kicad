@@ -26,8 +26,9 @@
 #ifndef FP_LIB_TABLE_H_
 #define FP_LIB_TABLE_H_
 
-#include <lib_table_base.h>
 #include <io_mgr.h>
+#include <lib_table_base.h>
+#include <make_unique.h>
 
 class MODULE;
 class FP_LIB_TABLE_GRID;
@@ -63,16 +64,15 @@ public:
     bool operator!=( const FP_LIB_TABLE_ROW& aRow ) const   { return !( *this == aRow ); }
 
     /**
-     * Function GetType
-     *
-     * returns the type of footprint library table represented by this row.
+     * @return the type of footprint library table represented by this row.
      */
-    const wxString GetType() const override         { return IO_MGR::ShowType( type ); }
+    const wxString GetType() const override
+    {
+        return IO_MGR::ShowType( type );
+    }
 
     /**
-     * Function SetType
-     *
-     * changes the type represented by this row.
+     * Changes the type represented by this row.
      */
     void SetType( const wxString& aType ) override;
 
@@ -84,10 +84,9 @@ protected:
     }
 
 private:
-
-    virtual LIB_TABLE_ROW* do_clone() const override
+    virtual std::unique_ptr<LIB_TABLE_ROW> do_clone() const override
     {
-        return new FP_LIB_TABLE_ROW( *this );
+        return std::make_unique<FP_LIB_TABLE_ROW>( *this );
     }
 
     void setPlugin( PLUGIN* aPlugin )
