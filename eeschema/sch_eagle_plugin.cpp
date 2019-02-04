@@ -422,8 +422,8 @@ SCH_SHEET* SCH_EAGLE_PLUGIN::Load( const wxString& aFileName, KIWAY* aKiway,
         wxString libTableUri = "${KIPRJMOD}/" + getLibFileName().GetFullName();
 
         // Add the new library to the project symbol library table.
-        libTable->InsertRow( new SYMBOL_LIB_TABLE_ROW( getLibName(), libTableUri,
-                                                       wxString( "Legacy" ) ) );
+        libTable->InsertRow( std::make_unique<SYMBOL_LIB_TABLE_ROW>(
+                getLibName(), libTableUri, wxString( "Legacy" ) ) );
 
         // Save project symbol library table.
         wxFileName fn( m_kiway->Prj().GetProjectPath(),

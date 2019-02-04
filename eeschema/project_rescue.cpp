@@ -804,9 +804,8 @@ bool SYMBOL_LIB_TABLE_RESCUER::WriteRescueLibrary( SCH_EDIT_FRAME *aEditFrame )
         // quoted in the symbol library file format.
         libNickname.Replace( " ", "-" );
 
-        SYMBOL_LIB_TABLE_ROW* row = new SYMBOL_LIB_TABLE_ROW( libNickname, uri,
-                                                              wxString( "Legacy" ) );
-        m_prj->SchSymbolLibTable()->InsertRow( row );
+        auto row = std::make_unique<SYMBOL_LIB_TABLE_ROW>( libNickname, uri, wxString( "Legacy" ) );
+        m_prj->SchSymbolLibTable()->InsertRow( std::move( row ) );
 
         fn = wxFileName( m_prj->GetProjectPath(), SYMBOL_LIB_TABLE::GetSymbolLibTableFileName() );
 

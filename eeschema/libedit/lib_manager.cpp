@@ -638,9 +638,9 @@ bool LIB_MANAGER::addLibrary( const wxString& aFilePath, bool aCreate, SYMBOL_LI
     if( relPath.IsEmpty() )
         relPath = aFilePath;
 
-    SYMBOL_LIB_TABLE_ROW* libRow = new SYMBOL_LIB_TABLE_ROW( libName, relPath,
-            SCH_IO_MGR::ShowType( SCH_IO_MGR::SCH_LEGACY ) );
-    aTable->InsertRow( libRow );
+    auto libRow = std::make_unique<SYMBOL_LIB_TABLE_ROW>(
+            libName, relPath, SCH_IO_MGR::ShowType( SCH_IO_MGR::SCH_LEGACY ) );
+    aTable->InsertRow( std::move( libRow ) );
 
     if( aCreate )
     {

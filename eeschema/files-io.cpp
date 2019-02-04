@@ -567,9 +567,9 @@ bool SCH_EDIT_FRAME::AppendSchematic()
                     while( Prj().SchSymbolLibTable()->HasLibrary( newLibName ) )
                         newLibName = wxString::Format( "%s%d", libName, libNameCnt );
 
-                    auto newRow = new SYMBOL_LIB_TABLE_ROW( newLibName, uri, row->GetType(),
-                                                            row->GetOptions(), row->GetDescr() );
-                    Prj().SchSymbolLibTable()->InsertRow( newRow );
+                    auto newRow = std::make_unique<SYMBOL_LIB_TABLE_ROW>(
+                            newLibName, uri, row->GetType(), row->GetOptions(), row->GetDescr() );
+                    Prj().SchSymbolLibTable()->InsertRow( std::move( newRow ) );
 
                     if( libName != newLibName )
                         newScreens.ChangeSymbolLibNickname( libName, newLibName );

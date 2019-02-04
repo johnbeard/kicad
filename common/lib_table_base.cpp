@@ -402,7 +402,7 @@ std::vector<wxString> LIB_TABLE::GetLogicalLibs()
 }
 
 
-bool LIB_TABLE::InsertRow( LIB_TABLE_ROW* aRow, bool doReplace )
+bool LIB_TABLE::InsertRow( std::unique_ptr<LIB_TABLE_ROW> aRow, bool doReplace )
 {
     ensureIndex();
 
@@ -410,14 +410,15 @@ bool LIB_TABLE::InsertRow( LIB_TABLE_ROW* aRow, bool doReplace )
 
     if( it == nickIndex.end() )
     {
-        rows.push_back( aRow );
+        // hand over from unique_ptr to ptr_vector
+        rows.push_back( aRow.release() );
         nickIndex.insert( INDEX_VALUE( aRow->GetNickName(), rows.size() - 1 ) );
         return true;
     }
 
     if( doReplace )
     {
-        rows.replace( it->second, aRow );
+        rows.replace( it->second, aRow.release() );
         return true;
     }
 

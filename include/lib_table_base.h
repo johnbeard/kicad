@@ -412,7 +412,7 @@ public:
      *
      * @return bool - true if the operation succeeded.
      */
-    bool InsertRow( LIB_TABLE_ROW* aRow, bool doReplace = false );
+    bool InsertRow( std::unique_ptr<LIB_TABLE_ROW> aRow, bool doReplace = false );
 
     /**
      * @return a #LIB_TABLE_ROW pointer if \a aURI is found in this table or in any chained

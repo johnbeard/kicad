@@ -553,16 +553,16 @@ bool PCB_BASE_EDIT_FRAME::AddLibrary( const wxString& aFilename )
 
     try
     {
+        auto row = std::make_unique<FP_LIB_TABLE_ROW>( libName, normalizedPath, type, wxEmptyString );
+
         if( saveInGlobalTable )
         {
-            auto row = new FP_LIB_TABLE_ROW( libName, normalizedPath, type, wxEmptyString );
-            GFootprintTable.InsertRow( row );
+            GFootprintTable.InsertRow( std::move( row ) );
             GFootprintTable.Save( FP_LIB_TABLE::GetGlobalTableFileName() );
         }
         else if( saveInProjectTable )
         {
-            auto row = new FP_LIB_TABLE_ROW( libName, normalizedPath, type, wxEmptyString );
-            Prj().PcbFootprintLibs()->InsertRow( row );
+            Prj().PcbFootprintLibs()->InsertRow( std::move( row ) );
             Prj().PcbFootprintLibs()->Save( Prj().FootprintLibTblName() );
         }
     }
