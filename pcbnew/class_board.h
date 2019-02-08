@@ -533,17 +533,22 @@ public:
     bool IsModuleLayerVisible( PCB_LAYER_ID aLayer );
 
     /**
-     * Function GetDesignSettings
      * @return the BOARD_DESIGN_SETTINGS for this BOARD
      */
-    BOARD_DESIGN_SETTINGS& GetDesignSettings() const
+    BOARD_DESIGN_SETTINGS& GetDesignSettings()
     {
-        // remove const-ness with cast.
-        return (BOARD_DESIGN_SETTINGS&) m_designSettings;
+        return m_designSettings;
     }
 
     /**
-     * Function SetDesignSettings
+     * @copydoc GetDesignSettings
+     */
+    const BOARD_DESIGN_SETTINGS& GetDesignSettings() const
+    {
+        return m_designSettings;
+    }
+
+    /**
      * @param aDesignSettings the new BOARD_DESIGN_SETTINGS to use
      */
     void SetDesignSettings( const BOARD_DESIGN_SETTINGS& aDesignSettings )
