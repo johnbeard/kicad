@@ -205,18 +205,18 @@ If a comment is the first thing on a line, then that comment should have
 one or more blank lines above them. One blank line is preferred.
 
 ## 3.2 Doxygen ## {#doxygen}
-Doxygen is a C++ source code documenting tool used by the project.  Descriptive
-*.html files can be generated from the source code by installing Doxygen and
-building the target named **doxygen-docs** and **dev-docs** that include this
-document.
+Doxygen is a C++ source code documenting tool used by the project.
+Descriptive HTML files can be generated from the source code by installing
+Doxygen and building the targets named `doxygen-docs` and `dev-docs`
+(which includes this document).
 
     $ cd <kicad_build_base>
     $ make doxygen-docs
 
-The generated source \*.html files will be placed into
-\<kicad\_project\_base\>/Documentation/doxygen/html/ and the developer's
-\*.html files will be placed into
-\<kicad\_project\_base\>/Documentation/development/doxygen/html/
+The generated \*.html files will be placed into
+`\<kicad\_project\_base\>/Documentation/doxygen/html/` and the developer
+documentation's \*.html files will be placed into
+`\<kicad\_project\_base\>/Documentation/development/doxygen/html/`
 
 Doxygen comments are used to build developer documentation from the
 source code. They should normally be only placed in header files and not
@@ -227,7 +227,7 @@ in which case the Doxygen comments should go into the \*.cpp source file.
 Again, avoid duplicating the Doxygen comments in both the header and
 \*.cpp source files.
 
-KiCad uses the JAVADOC comment style defined in the [“Documenting the
+KiCad uses the Javadoc comment style defined in the [“Documenting the
 code”][doccode] section of the Doxygen [manual][manual]. Don't forget
 to use the special Doxygen tags: bug, todo, deprecated, etc., so other
 developers can quickly get useful information about your code. It is
@@ -239,14 +239,18 @@ Doxygen comments with a web browser before submitting a patch.
 [manual]:  http://www.doxygen.nl/manual
 
 ### 3.2.1 Function Comments ### {#function_comments}
+
 These go into a header file, unless the function is a private (i.e.
 static) function known only to a \*.cpp file. The format of a function
 comment is chosen to serve a dual purpose role: delineation of the
 function declaration within the source code and to create a consistent
-leading sentence in the doxygen html output. The chosen format is
+leading sentence in the Doxygen HTML output. The chosen format is
 to use a descriptive single line sentence, followed by a blank line,
 followed by an optional detailed description as the shown in the example
 below.
+
+A blank line can be used to separate the comment into paragraphs. All
+comment lines start with `*`.
 
 **Example**
 ~~~~~~~~~~~~~{.cpp}
@@ -265,17 +269,14 @@ below.
     int PRINTF_FUNC Print( int aNestLevel, const char* aFmt, ... );
 ~~~~~~~~~~~~~
 
-The single line description goes on the 2nd line of the comment. The
-\@return keyword if present, should describe the return value followed
-by a hyphen. The \@param keyword names a function parameter and the text
+The single line description goes on the second line of the comment. The
+`@return` keyword if present, should describe the return value followed
+by a hyphen. The `@param` keyword names a function parameter and the text
 following should flow like a normal English sentence.
 
 ### 3.2.2 Class Comments ### {#class_comments}
 A class comment describes a class declaration by giving the purpose and
-use of the class. Its format is similar to a function comment. Doxygen
-can use the html \<p\> (paragraph designation) to begin a new paragraph
-in its output. So if the text of the comment is large, break it put into
-multiple paragraphs.
+use of the class. Its format is similar to a function comment.
 
 **Example**
 ~~~~~~~~~~~~~{.cpp}
@@ -286,13 +287,13 @@ multiple paragraphs.
      * The primary interface is "printf() like" but with support for
      * indentation control. The destination of the 8 bit wide text is
      * up to the implementer.
-     * <p>
+     *
      * The implementer only has to implement the write() function, but
      * can also optionally re-implement GetQuoteChar().
-     * <p>
+     *
      * If you want to output a wxString, then use CONV_TO_UTF8() on it
      * before passing it as an argument to Print().
-     * <p>
+     *
      * Since this is an abstract interface, only classes derived from
      * this one may actually be used.
      */
@@ -309,12 +310,12 @@ The indentation level for the KiCad source code is defined as four
 spaces. Please do not use tabs.
 
 ### 4.1.1 Defines ### {#defines}
-There should be only one space after a \#define statement.
+There should be only one space after a `#define` keyword.
 
 ### 4.1.2 Column Alignment ### {#column_alignment}
 Please try to align multiple consecutive similar lines into consistent
-columns when possible, such as \#define lines which can be thought of as
-containing 4 columns: \#define, symbol, value, and comment. Notice how
+columns when possible, such as `#define` lines which can be thought of as
+containing 4 columns: `#define`, symbol, value, and comment. Notice how
 all 4 columns are aligned in the example below.
 
 **Example**
@@ -335,9 +336,9 @@ This is consist with the statement above about blank lines above
 comments.
 
 ### 4.2.2 Function Definitions ### {#function_definitions}
-Function definitions in *.cpp files will not typically be accompanied by
+Function definitions in \*.cpp files will not typically be accompanied by
 any comment, since those are normally only in the header file. It is
-desirable to set off the function definition within the *.cpp file by
+desirable to set off the function definition within the \*.cpp file by
 leaving two blank lines above the function definition.
 
 ### 4.2.3 If Statements ### {#if_statements}
@@ -422,7 +423,8 @@ if..else, indent all to the same level.
 Parenthesis should be placed immediately after function names and
 keywords. Spaces should be placed after the opening parenthesis, before
 the closing parenthesis, and between the comma and the next argument in
-functions. No space is needed if a function has no arguments.
+functions. No space is needed if a function or control statement has no
+arguments.
 
 **Example**
 ~~~~~~~~~~~~~{.cpp}
@@ -458,8 +460,8 @@ The case statement is to be indented to the same level as the switch.
 
 
 # 5. License Statement # {#license_statement}
-There is a the file copyright.h which you can copy into the top of
-your new source files and edit the \<author\> field. KiCad depends on
+There is a the file `copyright.h` which you can copy into the top of
+your new source files and edit the `<author>` field. KiCad depends on
 the copyright enforcement capabilities of copyright law, and this
 means that source files must be copyrighted and not be released into
 the public domain. Each source file has one or more owners.
@@ -469,14 +471,14 @@ the public domain. Each source file has one or more owners.
 Project \*.h source files should:
 
 - contain a license statement
-- contain a nested include \#ifndef
+- contain a nested include `#ifndef`
 - be fully self standing and not depend on other headers that are not
   included within it.
 
 The license statement was described above.
 
 ## 6.1 Nested Include #ifndef ## {#nested_include}
-Each header file should include an \#ifndef which is commonly used to
+Each header file should include an `#ifndef` which is commonly used to
 prevent compiler errors in the case where the header file is seen
 multiple times in the code stream presented to the compiler. Just
 after the license statement, at the top of the file there should be
@@ -494,10 +496,10 @@ And at the very bottom of the header file, use a line like this one:
     #endif // RICHIO_H_
 ~~~~~~~~~~~~~
 
-The \#ifndef wrapper begins after the license statement, and ends at
+The `#ifndef` wrapper begins after the license statement, and ends at
 the very bottom of the file. It is important that it wrap any nested
-\#include statements, so that the compiler can skip them if the
-\#ifndef evaluates to false, which will reduce compilation time.
+`#include` statements, so that the compiler can skip them if the
+`#ifndef` evaluates to false, which will reduce compilation time.
 
 ## 6.2 Headers Without Unsatisfied Dependencies ## {#header_depends}
 Any header file should include other headers that it depends on. (Note:
@@ -515,12 +517,12 @@ header file should compile without error.
 
 Such structuring of the header files removes the need within a client
 \*.cpp file to include some project header file before some other project
-header file. (A client \*.cpp file is one that intends to **use, not
-implement,** the public API exposed within the header file.)
+header file. (A client \*.cpp file is one that intends to *use, not
+implement,* the public API exposed within the header file.)
 
 Client code should not have to piece together things that a header file
 wishes to expose. The exposing header file should be viewed as a fully
-sufficient **ticket to use** the public API of that header file.
+sufficient *ticket to use* the public API of that header file.
 
 This is not saying anything about how much to expose, only that that
 which is exposed needs to be fully usable merely by including the header
@@ -534,6 +536,20 @@ the implementation \*.cpp file. However, the number one concern of
 this section is that client (using) code can use the public API which
 is exposed in the header file, merely by including that one header
 file.
+
+Generally, you can make this work correctly for headers with implementation
+\*.cpp files by including the header *first* in the implementation file
+(say, `foobar.cpp`):
+
+~~~~~~~~~~~~~{.cpp}
+    #include <foobar.h> // This file's "own" header
+
+    #include <pcb_base_frame.h> // Needed only by the .cpp file
+~~~~~~~~~~~~~
+
+This ensures any declarations needed by the header must have been declared
+in the header itself, and are not being accidentally included via `#include`
+statements in the implementation file before the inclusion of `foobar.h`.
 
 
 # 7. I Wrote X Lines of Code Before I Read This Document # {#x_lines}
@@ -551,7 +567,7 @@ uncrustify [website][uncrustify] for more information.
 
 
 # 8. Show Me an Example # {#show_me_an_example}
-Nothing drives the point home like an example. The source file richio.h
+Nothing drives the point home like an example. The source file `richio.h`
 below was taken directly from the KiCad source.
 
 ~~~~~~~~~~~~~{.cpp}
