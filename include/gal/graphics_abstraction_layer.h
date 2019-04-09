@@ -56,7 +56,7 @@ namespace KIGFX
  * for drawing purposes these are transformed to screen units with this layer. So zooming is handled here as well.
  *
  */
-class GAL : GAL_DISPLAY_OPTIONS_OBSERVER
+class GAL
 {
     // These friend declarations allow us to hide routines that should not be called.  The
     // corresponding RAII objects must be used instead.
@@ -1046,7 +1046,6 @@ public:
 protected:
 
     GAL_DISPLAY_OPTIONS&    options;
-    UTIL::LINK              observerLink;
 
     std::stack<double> depthStack;             ///< Stored depth values
     VECTOR2I           screenSize;             ///< Screen size in screen coordinates
@@ -1151,7 +1150,7 @@ protected:
     /**
      * Handler for observer settings changes
      */
-    void OnGalDisplayOptionsChanged( const GAL_DISPLAY_OPTIONS& aOptions ) override;
+    void onGalDisplayOptionsChanged( const GAL_DISPLAY_OPTIONS& aOptions );
 
     /**
      * Function updatedGalDisplayOptions
@@ -1165,6 +1164,10 @@ protected:
     virtual bool updatedGalDisplayOptions( const GAL_DISPLAY_OPTIONS& aOptions );
 
 private:
+
+    ///> RAII link to GAL options signal
+    SIGNAL::scoped_connection  galOptionsConnection;
+
     struct TEXT_PROPERTIES
     {
         VECTOR2D            m_glyphSize;            ///< Size of the glyphs

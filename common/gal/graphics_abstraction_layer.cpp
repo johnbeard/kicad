@@ -78,7 +78,9 @@ GAL::GAL( GAL_DISPLAY_OPTIONS& aDisplayOptions ) :
     strokeFont.LoadNewStrokeFont( newstroke_font, newstroke_font_bufsize );
 
     // subscribe for settings updates
-    observerLink = options.Subscribe( this );
+    galOptionsConnection = options.m_sig_on_changed.connect( [this]( const GAL_DISPLAY_OPTIONS& aOptions ) {
+        onGalDisplayOptionsChanged( aOptions );
+    } );
 }
 
 
@@ -87,7 +89,7 @@ GAL::~GAL()
 }
 
 
-void GAL::OnGalDisplayOptionsChanged( const GAL_DISPLAY_OPTIONS& aOptions )
+void GAL::onGalDisplayOptionsChanged( const GAL_DISPLAY_OPTIONS& aOptions )
 {
     // defer to the child class first
     updatedGalDisplayOptions( aOptions );

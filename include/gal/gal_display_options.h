@@ -24,7 +24,7 @@
 #ifndef GAL_DISPLAY_OPTIONS_H__
 #define GAL_DISPLAY_OPTIONS_H__
 
-#include <observable.h>
+#include <signal/signal.h>
 
 class wxConfigBase;
 class wxString;
@@ -58,21 +58,12 @@ namespace KIGFX
         BEST,
     };
 
-    class GAL_DISPLAY_OPTIONS;
-
-    class GAL_DISPLAY_OPTIONS_OBSERVER
-    {
-    public:
-        virtual void OnGalDisplayOptionsChanged( const GAL_DISPLAY_OPTIONS& ) = 0;
-    protected:
-        // Observer lifetimes aren't handled by base class pointer
-        virtual ~GAL_DISPLAY_OPTIONS_OBSERVER() {}
-    };
-
-    class GAL_DISPLAY_OPTIONS : public UTIL::OBSERVABLE<GAL_DISPLAY_OPTIONS_OBSERVER>
+    class GAL_DISPLAY_OPTIONS
     {
     public:
         GAL_DISPLAY_OPTIONS();
+
+        SIGNAL::signal<void( const GAL_DISPLAY_OPTIONS& )> m_sig_on_changed;
 
         void ReadConfig ( wxConfigBase* aCfg, const wxString& aBaseName );
         void WriteConfig( wxConfigBase* aCfg, const wxString& aBaseName );

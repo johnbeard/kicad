@@ -95,5 +95,5 @@ void GAL_DISPLAY_OPTIONS::WriteConfig( wxConfigBase* aCfg, const wxString& aBase
 
 void GAL_DISPLAY_OPTIONS::NotifyChanged()
 {
-    Notify( &GAL_DISPLAY_OPTIONS_OBSERVER::OnGalDisplayOptionsChanged, *this );
+    m_sig_on_changed( *this );
 }
