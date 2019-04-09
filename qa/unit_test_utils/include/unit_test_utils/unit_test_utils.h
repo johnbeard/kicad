@@ -230,6 +230,17 @@ void CheckUnorderedMatches(
     }
 }
 
+/**
+ * Wrapper around BOOST_CHECK_EQUAL_COLLECTIONS that iterates the entire
+ * collection (avoids repeating being() and end() )
+ *
+ * Macro wrapper to preserve call-site info in failure
+ */
+#define KI_TEST_CHECK_EQUAL_COLLECTIONS_WHOLE( A, B )                            \
+    do                                                                           \
+    {                                                                            \
+        BOOST_CHECK_EQUAL_COLLECTIONS( A.begin(), A.end(), B.begin(), B.end() ); \
+    } while( 0 )
 
 /**
  * Get a simple string "aIn -> aOut".

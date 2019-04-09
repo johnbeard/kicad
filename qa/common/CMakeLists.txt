@@ -58,6 +58,8 @@ set( common_srcs
     geometry/test_shape_poly_set_distance.cpp
     geometry/test_shape_poly_set_iterator.cpp
 
+    signal/test_signal.cpp
+
     view/test_zoom_controller.cpp
 )
 
