@@ -180,7 +180,7 @@ GLuint GL_BITMAP_CACHE::cacheBitmap( const BITMAP_BASE* aBitmap )
     return textureID;
 }
 
-OPENGL_GAL::OPENGL_GAL( GAL_DISPLAY_OPTIONS& aDisplayOptions, wxWindow* aParent,
+OPENGL_GAL::OPENGL_GAL( const GAL_DISPLAY_OPTIONS& aDisplayOptions, wxWindow* aParent,
                         wxEvtHandler* aMouseListener, wxEvtHandler* aPaintListener,
                         const wxString& aName ) :
     GAL( aDisplayOptions ),
@@ -229,7 +229,7 @@ OPENGL_GAL::OPENGL_GAL( GAL_DISPLAY_OPTIONS& aDisplayOptions, wxWindow* aParent,
     bitmapCache.reset( new GL_BITMAP_CACHE );
 
     compositor = new OPENGL_COMPOSITOR;
-    compositor->SetAntialiasingMode( options.gl_antialiasing_mode );
+    compositor->SetAntialiasingMode( options.GetOptions().gl_antialiasing_mode );
 
     // Initialize the flags
     isFramebufferInitialized = false;
@@ -325,20 +325,20 @@ OPENGL_GAL::~OPENGL_GAL()
 }
 
 
-bool OPENGL_GAL::updatedGalDisplayOptions( const GAL_DISPLAY_OPTIONS& aOptions )
+bool OPENGL_GAL::updatedGalDisplayOptions( const GAL_DISPLAY_OPTIONS::OPTIONS& aOptions )
 {
     bool refresh = false;
 
-    if( options.gl_antialiasing_mode != compositor->GetAntialiasingMode() )
+    if( aOptions.gl_antialiasing_mode != compositor->GetAntialiasingMode() )
     {
-        compositor->SetAntialiasingMode( options.gl_antialiasing_mode );
+        compositor->SetAntialiasingMode( aOptions.gl_antialiasing_mode );
         isFramebufferInitialized = false;
         refresh = true;
     }
 
-    if( options.m_scaleFactor != GetScaleFactor() )
+    if( aOptions.m_scaleFactor != GetScaleFactor() )
     {
-        SetScaleFactor( options.m_scaleFactor );
+        SetScaleFactor( aOptions.m_scaleFactor );
         refresh = true;
     }
 

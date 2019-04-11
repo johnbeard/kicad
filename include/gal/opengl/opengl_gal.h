@@ -80,7 +80,7 @@ public:
      *
      * @param aName is the name of this window for use by wxWindow::FindWindowByName()
      */
-    OPENGL_GAL( GAL_DISPLAY_OPTIONS& aDisplayOptions, wxWindow* aParent,
+    OPENGL_GAL( const GAL_DISPLAY_OPTIONS& aDisplayOptions, wxWindow* aParent,
                 wxEvtHandler* aMouseListener = nullptr, wxEvtHandler* aPaintListener = nullptr,
                 const wxString& aName = wxT( "GLCanvas" ) );
 
@@ -346,7 +346,7 @@ private:
     virtual void endDrawing() override;
 
     ///< Update handler for OpenGL settings
-    bool updatedGalDisplayOptions( const GAL_DISPLAY_OPTIONS& aOptions ) override;
+    bool updatedGalDisplayOptions( const GAL_DISPLAY_OPTIONS::OPTIONS& aOptions ) override;
 
     // Polygon tesselation
     /// The tessellator

@@ -182,7 +182,8 @@ PCB_TEST_FRAME::PCB_TEST_FRAME( wxFrame* frame, const wxString& title, const wxP
 
     KIGFX::GAL_DISPLAY_OPTIONS options;
 
-    options.gl_antialiasing_mode = KIGFX::OPENGL_ANTIALIASING_MODE::NONE; //SUPERSAMPLING_X4;
+    options.SetAntiAliasingModes(
+            KIGFX::OPENGL_ANTIALIASING_MODE::NONE, KIGFX::CAIRO_ANTIALIASING_MODE::NONE );
 
     m_galPanel.reset( new PCB_DRAW_PANEL_GAL( this, -1, wxPoint( 0,
                             0 ), wxDefaultSize, options, aGalType ) );

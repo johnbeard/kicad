@@ -177,7 +177,7 @@ FOOTPRINT_VIEWER_FRAME::FOOTPRINT_VIEWER_FRAME( KIWAY* aKiway, wxWindow* aParent
 
     GetScreen()->m_Center = true;      // Center coordinate origins on screen.
     LoadSettings( config() );
-    GetGalDisplayOptions().m_axesEnabled = true;
+    GetGalDisplayOptions().SetAxesEnabled( true );
 
     SetSize( m_FramePos.x, m_FramePos.y, m_FrameSize.x, m_FrameSize.y );
 

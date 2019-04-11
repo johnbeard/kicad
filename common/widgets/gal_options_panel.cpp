@@ -194,16 +194,17 @@ GAL_OPTIONS_PANEL::GAL_OPTIONS_PANEL( wxWindow* aParent, KIGFX::GAL_DISPLAY_OPTI
 
 bool GAL_OPTIONS_PANEL::TransferDataToWindow()
 {
-    m_gridStyle->SetSelection( UTIL::GetConfigForVal(
-            gridStyleSelectMap, m_galOptions.m_gridStyle ) );
+    const KIGFX::GAL_DISPLAY_OPTIONS::OPTIONS& galOpts = m_galOptions.GetOptions();
 
-    m_gridSizeIncrementer->SetValue( m_galOptions.m_gridLineWidth );
+    m_gridStyle->SetSelection( UTIL::GetConfigForVal( gridStyleSelectMap, galOpts.m_gridStyle ) );
 
-    m_gridMinSpacingIncrementer->SetValue( m_galOptions.m_gridMinSpacing );
+    m_gridSizeIncrementer->SetValue( galOpts.m_gridLineWidth );
 
-    m_cursorShape->SetSelection( m_galOptions.m_fullscreenCursor );
+    m_gridMinSpacingIncrementer->SetValue( galOpts.m_gridMinSpacing );
 
-    m_forceCursorDisplay->SetValue( m_galOptions.m_forceDisplayCursor );
+    m_cursorShape->SetSelection( galOpts.m_fullscreenCursor );
+
+    m_forceCursorDisplay->SetValue( galOpts.m_forceDisplayCursor );
 
     return true;
 }
@@ -211,18 +212,20 @@ bool GAL_OPTIONS_PANEL::TransferDataToWindow()
 
 bool GAL_OPTIONS_PANEL::TransferDataFromWindow()
 {
-    m_galOptions.m_gridStyle = UTIL::GetValFromConfig(
-            gridStyleSelectMap, m_gridStyle->GetSelection() );
+    KIGFX::GAL_DISPLAY_OPTIONS::OPTIONS newGalOpts = m_galOptions.GetOptions();
 
-    m_galOptions.m_gridLineWidth = std::floor( m_gridSizeIncrementer->GetValue() + 0.5 );
+    newGalOpts.m_gridStyle =
+            UTIL::GetValFromConfig( gridStyleSelectMap, m_gridStyle->GetSelection() );
 
-    m_galOptions.m_gridMinSpacing = m_gridMinSpacingIncrementer->GetValue();
+    newGalOpts.m_gridLineWidth = std::floor( m_gridSizeIncrementer->GetValue() + 0.5 );
 
-    m_galOptions.m_fullscreenCursor = m_cursorShape->GetSelection();
+    newGalOpts.m_gridMinSpacing = m_gridMinSpacingIncrementer->GetValue();
 
-    m_galOptions.m_forceDisplayCursor = m_forceCursorDisplay->GetValue();
+    newGalOpts.m_fullscreenCursor = m_cursorShape->GetSelection();
 
-    m_galOptions.NotifyChanged();
+    newGalOpts.m_forceDisplayCursor = m_forceCursorDisplay->GetValue();
+
+    m_galOptions.Update( newGalOpts );
 
     return true;
 }

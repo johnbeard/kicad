@@ -419,7 +419,7 @@ bool EDA_DRAW_PANEL_GAL::SwitchBackend( GAL_TYPE aGalType )
 
     // trigger update of the gal options in case they differ
     // from the defaults
-    m_options.NotifyChanged();
+    m_options.Update();
 
     wxASSERT( new_gal );
     delete m_gal;

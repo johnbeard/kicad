@@ -225,9 +225,7 @@ GERBVIEW_FRAME::GERBVIEW_FRAME( KIWAY* aKiway, wxWindow* aParent ):
     }
 
     // Enable the axes to match legacy draw style
-    auto& galOptions = GetGalDisplayOptions();
-    galOptions.m_axesEnabled = true;
-    galOptions.NotifyChanged();
+    GetGalDisplayOptions().SetAxesEnabled( true );
 
     m_LayersManager->ReFill();
     m_LayersManager->ReFillRender();    // Update colors in Render after the config is read

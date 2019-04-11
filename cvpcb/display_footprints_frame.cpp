@@ -162,8 +162,8 @@ DISPLAY_FOOTPRINTS_FRAME::DISPLAY_FOOTPRINTS_FRAME( KIWAY* aKiway, wxWindow* aPa
     // Run the control tool, it is supposed to be always active
     m_toolManager->InvokeTool( "cvpcb.InteractiveSelection" );
 
-    auto& galOpts = GetGalDisplayOptions();
-    galOpts.m_axesEnabled = true;
+    GetGalDisplayOptions().SetAxesEnabled( true );
+
     UseGalCanvas( true );
 
     // Restore last zoom.  (If auto-zooming we'll adjust when we load the footprint.)

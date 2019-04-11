@@ -56,7 +56,7 @@ namespace KIGFX
  * for drawing purposes these are transformed to screen units with this layer. So zooming is handled here as well.
  *
  */
-class GAL : GAL_DISPLAY_OPTIONS_OBSERVER
+class GAL
 {
     // These friend declarations allow us to hide routines that should not be called.  The
     // corresponding RAII objects must be used instead.
@@ -66,7 +66,7 @@ class GAL : GAL_DISPLAY_OPTIONS_OBSERVER
 
 public:
     // Constructor / Destructor
-    GAL( GAL_DISPLAY_OPTIONS& aOptions );
+    GAL( const GAL_DISPLAY_OPTIONS& aOptions );
     virtual ~GAL();
 
     /// @brief Returns the initalization status for the canvas.
@@ -1044,9 +1044,7 @@ public:
     virtual void EnableDepthTest( bool aEnabled = false ) {};
 
 protected:
-
-    GAL_DISPLAY_OPTIONS&    options;
-    UTIL::LINK              observerLink;
+    const GAL_DISPLAY_OPTIONS& options;
 
     std::stack<double> depthStack;             ///< Stored depth values
     VECTOR2I           screenSize;             ///< Screen size in screen coordinates
@@ -1151,7 +1149,7 @@ protected:
     /**
      * Handler for observer settings changes
      */
-    void OnGalDisplayOptionsChanged( const GAL_DISPLAY_OPTIONS& aOptions ) override;
+    void onGalDisplayOptionsChanged( const GAL_DISPLAY_OPTIONS::OPTIONS& aOptions );
 
     /**
      * Function updatedGalDisplayOptions
@@ -1162,9 +1160,13 @@ protected:
      * @return true if the new settings changed something. Derived classes
      * can use this information to refresh themselves
      */
-    virtual bool updatedGalDisplayOptions( const GAL_DISPLAY_OPTIONS& aOptions );
+    virtual bool updatedGalDisplayOptions( const GAL_DISPLAY_OPTIONS::OPTIONS& aOptions );
 
 private:
+
+    ///> RAII link to GAL options signal
+    SIGNAL::scoped_connection  galOptionsConnection;
+
     struct TEXT_PROPERTIES
     {
         VECTOR2D            m_glyphSize;            ///< Size of the glyphs

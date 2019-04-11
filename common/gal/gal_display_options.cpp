@@ -50,7 +50,7 @@ static const UTIL::CFG_MAP<KIGFX::GRID_STYLE> gridStyleConfigVals =
 };
 
 
-GAL_DISPLAY_OPTIONS::GAL_DISPLAY_OPTIONS()
+GAL_DISPLAY_OPTIONS::OPTIONS::OPTIONS()
     : gl_antialiasing_mode( OPENGL_ANTIALIASING_MODE::NONE ),
       cairo_antialiasing_mode( CAIRO_ANTIALIASING_MODE::NONE ),
       m_gridStyle( GRID_STYLE::DOTS ),
@@ -71,15 +71,15 @@ void GAL_DISPLAY_OPTIONS::ReadAppConfig( wxConfigBase& aCfg, const wxString& aBa
 
     aCfg.Read( baseName + GalGridStyleConfig, &readLong,
             static_cast<long>( KIGFX::GRID_STYLE::DOTS ) );
-    m_gridStyle = UTIL::GetValFromConfig( gridStyleConfigVals, readLong );
+    m_options.m_gridStyle = UTIL::GetValFromConfig( gridStyleConfigVals, readLong );
 
-    aCfg.Read( baseName + GalGridLineWidthConfig, &m_gridLineWidth, 1.0 );
-    aCfg.Read( baseName + GalGridMaxDensityConfig, &m_gridMinSpacing, 10 );
-    aCfg.Read( baseName + GalGridAxesEnabledConfig, &m_axesEnabled, false );
-    aCfg.Read( baseName + GalFullscreenCursorConfig, &m_fullscreenCursor, false );
-    aCfg.Read( baseName + GalForceDisplayCursorConfig, &m_forceDisplayCursor, true );
+    aCfg.Read( baseName + GalGridLineWidthConfig, &m_options.m_gridLineWidth, 1.0 );
+    aCfg.Read( baseName + GalGridMaxDensityConfig, &m_options.m_gridMinSpacing, 10 );
+    aCfg.Read( baseName + GalGridAxesEnabledConfig, &m_options.m_axesEnabled, false );
+    aCfg.Read( baseName + GalFullscreenCursorConfig, &m_options.m_fullscreenCursor, false );
+    aCfg.Read( baseName + GalForceDisplayCursorConfig, &m_options.m_forceDisplayCursor, true );
 
-    NotifyChanged();
+    notifyChanged();
 }
 
 
@@ -88,18 +88,18 @@ void GAL_DISPLAY_OPTIONS::ReadCommonConfig( wxConfigBase& aCommonConfig, wxWindo
     int temp;
     aCommonConfig.Read(
             GAL_ANTIALIASING_MODE_KEY, &temp, (int) KIGFX::OPENGL_ANTIALIASING_MODE::NONE );
-    gl_antialiasing_mode = (KIGFX::OPENGL_ANTIALIASING_MODE) temp;
+    m_options.gl_antialiasing_mode = (KIGFX::OPENGL_ANTIALIASING_MODE) temp;
 
     aCommonConfig.Read(
             CAIRO_ANTIALIASING_MODE_KEY, &temp, (int) KIGFX::CAIRO_ANTIALIASING_MODE::NONE );
-    cairo_antialiasing_mode = (KIGFX::CAIRO_ANTIALIASING_MODE) temp;
+    m_options.cairo_antialiasing_mode = (KIGFX::CAIRO_ANTIALIASING_MODE) temp;
 
     {
         const DPI_SCALING dpi{ &aCommonConfig, aWindow };
-        m_scaleFactor = dpi.GetScaleFactor();
+        m_options.m_scaleFactor = dpi.GetScaleFactor();
     }
 
-    NotifyChanged();
+    notifyChanged();
 }
 
 
@@ -117,17 +117,60 @@ void GAL_DISPLAY_OPTIONS::WriteConfig( wxConfigBase& aCfg, const wxString& aBase
     const wxString baseName = aBaseName + GAL_DISPLAY_OPTIONS_KEY;
 
     aCfg.Write( baseName + GalGridStyleConfig,
-                 UTIL::GetConfigForVal( gridStyleConfigVals, m_gridStyle ) );
+                 UTIL::GetConfigForVal( gridStyleConfigVals, m_options.m_gridStyle ) );
 
-    aCfg.Write( baseName + GalGridLineWidthConfig, m_gridLineWidth );
-    aCfg.Write( baseName + GalGridMaxDensityConfig, m_gridMinSpacing );
-    aCfg.Write( baseName + GalGridAxesEnabledConfig, m_axesEnabled );
-    aCfg.Write( baseName + GalFullscreenCursorConfig, m_fullscreenCursor );
-    aCfg.Write( baseName + GalForceDisplayCursorConfig, m_forceDisplayCursor );
+    aCfg.Write( baseName + GalGridLineWidthConfig, m_options.m_gridLineWidth );
+    aCfg.Write( baseName + GalGridMaxDensityConfig, m_options.m_gridMinSpacing );
+    aCfg.Write( baseName + GalGridAxesEnabledConfig, m_options.m_axesEnabled );
+    aCfg.Write( baseName + GalFullscreenCursorConfig, m_options.m_fullscreenCursor );
+    aCfg.Write( baseName + GalForceDisplayCursorConfig, m_options.m_forceDisplayCursor );
 }
 
 
-void GAL_DISPLAY_OPTIONS::NotifyChanged()
+void GAL_DISPLAY_OPTIONS::Update( const OPTIONS& aNewOptions )
 {
-    Notify( &GAL_DISPLAY_OPTIONS_OBSERVER::OnGalDisplayOptionsChanged, *this );
+    m_options = aNewOptions;
+    notifyChanged();
+}
+
+
+void GAL_DISPLAY_OPTIONS::Update()
+{
+    notifyChanged();
+}
+
+
+void GAL_DISPLAY_OPTIONS::notifyChanged()
+{
+    m_sig_on_changed( m_options );
+}
+
+
+void GAL_DISPLAY_OPTIONS::ToggleCursorStyle()
+{
+    m_options.m_fullscreenCursor = !m_options.m_fullscreenCursor;
+    notifyChanged();
+}
+
+
+void GAL_DISPLAY_OPTIONS::SetAxesEnabled( bool aVisible )
+{
+    m_options.m_axesEnabled = aVisible;
+    notifyChanged();
+}
+
+
+void GAL_DISPLAY_OPTIONS::ToggleForceDisplayCursor()
+{
+    m_options.m_forceDisplayCursor = !m_options.m_forceDisplayCursor;
+    notifyChanged();
+}
+
+
+void GAL_DISPLAY_OPTIONS::SetAntiAliasingModes(
+        OPENGL_ANTIALIASING_MODE aOpenGLMode, CAIRO_ANTIALIASING_MODE aCairoMode )
+{
+    m_options.gl_antialiasing_mode = aOpenGLMode;
+    m_options.cairo_antialiasing_mode = aCairoMode;
+    notifyChanged();
 }

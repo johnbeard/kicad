@@ -24,7 +24,7 @@
 #ifndef GAL_DISPLAY_OPTIONS_H__
 #define GAL_DISPLAY_OPTIONS_H__
 
-#include <observable.h>
+#include <signal/signal.h>
 
 class wxConfigBase;
 class wxString;
@@ -60,21 +60,55 @@ namespace KIGFX
         BEST,
     };
 
-    class GAL_DISPLAY_OPTIONS;
-
-    class GAL_DISPLAY_OPTIONS_OBSERVER
+    /**
+     * A model of the options that govern the display of GAL canvases.
+     *
+     * This class contains two parts: the raw data in the OPTIONS struct, and
+     * the signal-slot wrapper around it.
+     *
+     * Access to the (const) data is permitted, but to change the data, client
+     * code must use the public interfaces, which enforce correct notification
+     * of listeners.
+     *
+     * A holder of a const reference may subscribe for updates, but may not
+     * modify the data (so cannot trigger updates).
+     */
+    class GAL_DISPLAY_OPTIONS
     {
     public:
-        virtual void OnGalDisplayOptionsChanged( const GAL_DISPLAY_OPTIONS& ) = 0;
-    protected:
-        // Observer lifetimes aren't handled by base class pointer
-        virtual ~GAL_DISPLAY_OPTIONS_OBSERVER() {}
-    };
+        /**
+         * Gal display options data members
+         */
+        class OPTIONS
+        {
+        public:
+            OPTIONS();
 
-    class GAL_DISPLAY_OPTIONS : public UTIL::OBSERVABLE<GAL_DISPLAY_OPTIONS_OBSERVER>
-    {
-    public:
-        GAL_DISPLAY_OPTIONS();
+            OPENGL_ANTIALIASING_MODE gl_antialiasing_mode;
+
+            CAIRO_ANTIALIASING_MODE cairo_antialiasing_mode;
+
+            ///> The grid style to draw the grid in
+            KIGFX::GRID_STYLE m_gridStyle;
+
+            ///> Thickness to render grid lines/dots
+            double m_gridLineWidth;
+
+            ///> Minimum pixel distance between displayed grid lines
+            double m_gridMinSpacing;
+
+            ///> Whether or not to draw the coordinate system axes
+            bool m_axesEnabled;
+
+            ///> Fullscreen crosshair or small cross
+            bool m_fullscreenCursor;
+
+            ///> Force cursor display
+            bool m_forceDisplayCursor;
+
+            ///> The pixel scale factor (>1 for hi-DPI scaled displays)
+            double m_scaleFactor;
+        };
 
         /**
          * Read GAL config options from applicaton-level config
@@ -102,32 +136,68 @@ namespace KIGFX
 
         void WriteConfig( wxConfigBase& aCfg, const wxString& aBaseName );
 
-        void NotifyChanged();
+        /**
+         * Read-only access to the raw options data
+         *
+         * Write access is made though the model mutation interfaces
+         * @return reference to the options
+         */
+        const OPTIONS& GetOptions() const
+        {
+            return m_options;
+        }
 
-        OPENGL_ANTIALIASING_MODE gl_antialiasing_mode;
+        /**
+         * Update the model with a whole new set of options, useful when initialising
+         * or setting from config.
+         * @param aNewOptions the new options to set
+         */
+        void Update( const OPTIONS& aNewOptions );
 
-        CAIRO_ANTIALIASING_MODE cairo_antialiasing_mode;
+        /**
+         * Force a notification, even if nothing has changed.
+         */
+        void Update();
 
-        ///> The grid style to draw the grid in
-        KIGFX::GRID_STYLE m_gridStyle;
+        /**
+         * Cycles the cursor style (currently: full screen / small) and sends
+         * notification.
+         */
+        void ToggleCursorStyle();
 
-        ///> Thickness to render grid lines/dots
-        double m_gridLineWidth;
+        /**
+         * Enable/disable the axes
+         */
+        void SetAxesEnabled( bool aVisible );
 
-        ///> Minimum pixel distance between displayed grid lines
-        double m_gridMinSpacing;
+        /**
+         * Toggle whether or not the cursor is always shown
+         */
+        void ToggleForceDisplayCursor();
 
-        ///> Whether or not to draw the coordinate system axes
-        bool m_axesEnabled;
+        /**
+         * Set relevant anti-aliasing modes per canvas.
+         */
+        void SetAntiAliasingModes(
+                OPENGL_ANTIALIASING_MODE aOpenGLMode, CAIRO_ANTIALIASING_MODE aCairoMode );
 
-        ///> Fullscreen crosshair or small cross
-        bool m_fullscreenCursor;
+        /**
+         * A signal that can be subscribed to for notifications when this object changes
+         *
+         * Mutable: this can be subscribed to even on a const GAL_DISPLAY_OPTIONS reference
+         */
+        mutable SIGNAL::signal<void( const OPTIONS& )> m_sig_on_changed;
 
-        ///> Force cursor display
-        bool m_forceDisplayCursor;
+    private:
+        /**
+         * The internal copy of the options data.
+         */
+        OPTIONS m_options;
 
-        ///> The pixel scale factor (>1 for hi-DPI scaled displays)
-        double m_scaleFactor;
+        /**
+         * Send notification about model changes to listeners
+         */
+        void notifyChanged();
     };
 
 }

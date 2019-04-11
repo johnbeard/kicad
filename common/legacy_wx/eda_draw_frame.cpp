@@ -397,9 +397,7 @@ void EDA_DRAW_FRAME::OnToggleCrossHairStyle( wxCommandEvent& aEvent )
     INSTALL_UNBUFFERED_DC( dc, m_canvas );
     m_canvas->CrossHairOff( &dc );
 
-    auto& galOpts = GetGalDisplayOptions();
-    galOpts.m_fullscreenCursor = !galOpts.m_fullscreenCursor;
-    galOpts.NotifyChanged();
+    GetGalDisplayOptions().ToggleCursorStyle();
 
     m_canvas->CrossHairOn( &dc );
 }
@@ -465,7 +463,7 @@ void EDA_DRAW_FRAME::OnUpdateSelectGrid( wxUpdateUIEvent& aEvent )
 
 void EDA_DRAW_FRAME::OnUpdateCrossHairStyle( wxUpdateUIEvent& aEvent )
 {
-    aEvent.Check( GetGalDisplayOptions().m_fullscreenCursor );
+    aEvent.Check( GetGalDisplayOptions().GetOptions().m_fullscreenCursor );
 }
 
 

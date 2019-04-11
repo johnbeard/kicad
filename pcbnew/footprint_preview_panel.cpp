@@ -380,21 +380,16 @@ FOOTPRINT_PREVIEW_PANEL* FOOTPRINT_PREVIEW_PANEL::New( KIWAY* aKiway, wxWindow* 
     // Fetch grid & display settings from PCBNew if it's running; otherwise fetch them
     // from PCBNew's config settings.
     // We need a copy with a lifetime that matches the panel
-    std::unique_ptr<KIGFX::GAL_DISPLAY_OPTIONS> gal_opts;
+    auto gal_opts = std::make_unique<KIGFX::GAL_DISPLAY_OPTIONS>();
 
     if( pcbnew )
     {
         // Copy the existing Pcbnew options
-        // REVIEW: This also copies the current subscription list of the options
-        // to the new options. This is probably not what is intended, but because
-        // this widget doesn't change the options it should be OK.
-        gal_opts = std::make_unique<KIGFX::GAL_DISPLAY_OPTIONS>( pcbnew->GetGalDisplayOptions() );
+        gal_opts->Update( pcbnew->GetGalDisplayOptions().GetOptions() );
     }
     else
     {
-        // Make and populate a new one from config
-        gal_opts = std::make_unique<KIGFX::GAL_DISPLAY_OPTIONS>();
-
+        // Populate a new one from config
         gal_opts->ReadConfig( *commonCfg, *cfg, wxString( PCB_EDIT_FRAME_NAME ), aParent );
     }
 

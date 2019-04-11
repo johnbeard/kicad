@@ -68,7 +68,7 @@ class CAIRO_COMPOSITOR;
 class CAIRO_GAL_BASE : public GAL
 {
 public:
-    CAIRO_GAL_BASE( GAL_DISPLAY_OPTIONS& aDisplayOptions );
+    CAIRO_GAL_BASE( const GAL_DISPLAY_OPTIONS& aDisplayOptions );
 
     virtual ~CAIRO_GAL_BASE();
 
@@ -350,7 +350,7 @@ public:
      *
      * @param aName is the name of this window for use by wxWindow::FindWindowByName()
      */
-    CAIRO_GAL( GAL_DISPLAY_OPTIONS& aDisplayOptions,
+    CAIRO_GAL( const GAL_DISPLAY_OPTIONS& aDisplayOptions,
                wxWindow* aParent, wxEvtHandler* aMouseListener = NULL,
                wxEvtHandler* aPaintListener = NULL, const wxString& aName = wxT( "CairoCanvas" ) );
 
@@ -464,7 +464,7 @@ protected:
     void skipMouseEvent( wxMouseEvent& aEvent );
 
     ///> Cairo-specific update handlers
-    bool updatedGalDisplayOptions( const GAL_DISPLAY_OPTIONS& aOptions ) override;
+    bool updatedGalDisplayOptions( const GAL_DISPLAY_OPTIONS::OPTIONS& aOptions ) override;
 };
 
 } // namespace KIGFX

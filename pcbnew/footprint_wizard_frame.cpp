@@ -250,10 +250,13 @@ FOOTPRINT_WIZARD_FRAME::FOOTPRINT_WIZARD_FRAME( KIWAY* aKiway,
     // Run the control tool, it is supposed to be always active
     m_toolManager->InvokeTool( "pcbnew.InteractiveSelection" );
 
-    auto& galOpts = GetGalDisplayOptions();
+    KIGFX::GAL_DISPLAY_OPTIONS::OPTIONS galOpts = GetGalDisplayOptions().GetOptions();
+
     galOpts.m_fullscreenCursor = true;
     galOpts.m_forceDisplayCursor = true;
     galOpts.m_axesEnabled = true;
+
+    GetGalDisplayOptions().Update( galOpts );
 
     UseGalCanvas( backend != EDA_DRAW_PANEL_GAL::GAL_TYPE_NONE );
     updateView();

@@ -43,7 +43,7 @@ using namespace KIGFX;
 
 
 
-CAIRO_GAL_BASE::CAIRO_GAL_BASE( GAL_DISPLAY_OPTIONS& aDisplayOptions ) :
+CAIRO_GAL_BASE::CAIRO_GAL_BASE( const GAL_DISPLAY_OPTIONS& aDisplayOptions ) :
     GAL( aDisplayOptions )
 {
     // Initialise grouping
@@ -1138,7 +1138,7 @@ unsigned int CAIRO_GAL_BASE::getNewGroupNumber()
 }
 
 
-CAIRO_GAL::CAIRO_GAL( GAL_DISPLAY_OPTIONS& aDisplayOptions,
+CAIRO_GAL::CAIRO_GAL( const GAL_DISPLAY_OPTIONS& aDisplayOptions,
         wxWindow* aParent, wxEvtHandler* aMouseListener,
         wxEvtHandler* aPaintListener, const wxString& aName ) :
     CAIRO_GAL_BASE( aDisplayOptions ),
@@ -1430,10 +1430,12 @@ void CAIRO_GAL::deleteBitmaps()
 
 void CAIRO_GAL::setCompositor()
 {
+    const GAL_DISPLAY_OPTIONS::OPTIONS& galOpts = options.GetOptions();
+
     // Recreate the compositor with the new Cairo context
     compositor.reset( new CAIRO_COMPOSITOR( &currentContext ) );
     compositor->Resize( screenSize.x, screenSize.y );
-    compositor->SetAntialiasingMode( options.cairo_antialiasing_mode );
+    compositor->SetAntialiasingMode( galOpts.cairo_antialiasing_mode );
 
     // Prepare buffers
     mainBuffer = compositor->CreateBuffer();
@@ -1457,14 +1459,13 @@ void CAIRO_GAL::skipMouseEvent( wxMouseEvent& aEvent )
 }
 
 
-bool CAIRO_GAL::updatedGalDisplayOptions( const GAL_DISPLAY_OPTIONS& aOptions )
+bool CAIRO_GAL::updatedGalDisplayOptions( const GAL_DISPLAY_OPTIONS::OPTIONS& aOptions )
 {
     bool refresh = false;
 
     if( validCompositor && aOptions.cairo_antialiasing_mode != compositor->GetAntialiasingMode() )
     {
-
-        compositor->SetAntialiasingMode( options.cairo_antialiasing_mode );
+        compositor->SetAntialiasingMode( aOptions.cairo_antialiasing_mode );
         validCompositor = false;
         deinitSurface();
 

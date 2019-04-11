@@ -392,10 +392,7 @@ void EDA_DRAW_FRAME::OnSelectUnits( wxCommandEvent& aEvent )
 
 void EDA_DRAW_FRAME::OnToggleCrossHairStyle( wxCommandEvent& aEvent )
 {
-    auto& galOpts = GetGalDisplayOptions();
-    galOpts.m_fullscreenCursor = !galOpts.m_fullscreenCursor;
-
-    galOpts.NotifyChanged();
+    GetGalDisplayOptions().ToggleCursorStyle();
 
     // make sure the cursor is redrawn
     GetCanvas()->Refresh();
@@ -462,7 +459,7 @@ void EDA_DRAW_FRAME::OnUpdateSelectGrid( wxUpdateUIEvent& aEvent )
 
 void EDA_DRAW_FRAME::OnUpdateCrossHairStyle( wxUpdateUIEvent& aEvent )
 {
-    aEvent.Check( GetGalDisplayOptions().m_fullscreenCursor );
+    aEvent.Check( GetGalDisplayOptions().GetOptions().m_fullscreenCursor );
 }
 
 

@@ -34,7 +34,7 @@
 using namespace KIGFX;
 
 
-GAL::GAL( GAL_DISPLAY_OPTIONS& aDisplayOptions ) :
+GAL::GAL( const GAL_DISPLAY_OPTIONS& aDisplayOptions ) :
     options( aDisplayOptions ),
     strokeFont( this )
 {
@@ -78,7 +78,10 @@ GAL::GAL( GAL_DISPLAY_OPTIONS& aDisplayOptions ) :
     strokeFont.LoadNewStrokeFont( newstroke_font, newstroke_font_bufsize );
 
     // subscribe for settings updates
-    observerLink = options.Subscribe( this );
+    galOptionsConnection = options.m_sig_on_changed.connect(
+            [this]( const GAL_DISPLAY_OPTIONS::OPTIONS& aOptions ) {
+                onGalDisplayOptionsChanged( aOptions );
+            } );
 }
 
 
@@ -87,7 +90,7 @@ GAL::~GAL()
 }
 
 
-void GAL::OnGalDisplayOptionsChanged( const GAL_DISPLAY_OPTIONS& aOptions )
+void GAL::onGalDisplayOptionsChanged( const GAL_DISPLAY_OPTIONS::OPTIONS& aOptions )
 {
     // defer to the child class first
     updatedGalDisplayOptions( aOptions );
@@ -96,43 +99,43 @@ void GAL::OnGalDisplayOptionsChanged( const GAL_DISPLAY_OPTIONS& aOptions )
 }
 
 
-bool GAL::updatedGalDisplayOptions( const GAL_DISPLAY_OPTIONS& aOptions )
+bool GAL::updatedGalDisplayOptions( const GAL_DISPLAY_OPTIONS::OPTIONS& aOptions )
 {
     bool refresh = false;
 
-    if( options.m_gridStyle != gridStyle )
+    if( aOptions.m_gridStyle != gridStyle )
     {
-        gridStyle = options.m_gridStyle ;
+        gridStyle = aOptions.m_gridStyle;
         refresh = true;
     }
 
-    if( options.m_gridLineWidth != gridLineWidth )
+    if( aOptions.m_gridLineWidth != gridLineWidth )
     {
-        gridLineWidth = std::floor( options.m_gridLineWidth + 0.5 );
+        gridLineWidth = std::floor( aOptions.m_gridLineWidth + 0.5 );
         refresh = true;
     }
 
-    if( options.m_gridMinSpacing != gridMinSpacing )
+    if( aOptions.m_gridMinSpacing != gridMinSpacing )
     {
-        gridMinSpacing = options.m_gridMinSpacing;
+        gridMinSpacing = aOptions.m_gridMinSpacing;
         refresh = true;
     }
 
-    if( options.m_axesEnabled != axesEnabled )
+    if( aOptions.m_axesEnabled != axesEnabled )
     {
-        axesEnabled = options.m_axesEnabled;
+        axesEnabled = aOptions.m_axesEnabled;
         refresh = true;
     }
 
-    if( options.m_forceDisplayCursor != forceDisplayCursor )
+    if( aOptions.m_forceDisplayCursor != forceDisplayCursor )
     {
-        forceDisplayCursor = options.m_forceDisplayCursor;
+        forceDisplayCursor = aOptions.m_forceDisplayCursor;
         refresh = true;
     }
 
-    if( options.m_fullscreenCursor != fullscreenCursor )
+    if( aOptions.m_fullscreenCursor != fullscreenCursor )
     {
-        fullscreenCursor = options.m_fullscreenCursor;
+        fullscreenCursor = aOptions.m_fullscreenCursor;
         refresh = true;
     }
 

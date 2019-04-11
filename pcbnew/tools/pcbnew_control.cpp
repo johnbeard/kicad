@@ -644,11 +644,7 @@ int PCBNEW_CONTROL::ResetCoords( const TOOL_EVENT& aEvent )
 
 int PCBNEW_CONTROL::SwitchCursor( const TOOL_EVENT& aEvent )
 {
-    auto& galOpts = m_frame->GetGalDisplayOptions();
-
-    galOpts.m_fullscreenCursor = !galOpts.m_fullscreenCursor;
-    galOpts.NotifyChanged();
-
+    m_frame->GetGalDisplayOptions().ToggleCursorStyle();
     return 0;
 }
 

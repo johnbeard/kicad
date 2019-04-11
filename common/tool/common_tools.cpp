@@ -365,11 +365,7 @@ int COMMON_TOOLS::GridPreset( const TOOL_EVENT& aEvent )
 
 int COMMON_TOOLS::ToggleCursor( const TOOL_EVENT& aEvent )
 {
-    auto& galOpts = m_frame->GetGalDisplayOptions();
-
-    galOpts.m_forceDisplayCursor = !galOpts.m_forceDisplayCursor;
-    galOpts.NotifyChanged();
-
+    m_frame->GetGalDisplayOptions().ToggleForceDisplayCursor();
     return 0;
 }
 

@@ -217,7 +217,7 @@ void EDA_DRAW_PANEL::DrawCrossHair( wxDC* aDC, COLOR4D aColor )
     GRSetDrawMode( aDC, GR_XOR );
 #endif
 
-    if( GetParent()->GetGalDisplayOptions().m_fullscreenCursor )
+    if( GetParent()->GetGalDisplayOptions().GetOptions().m_fullscreenCursor )
     {
         wxSize  clientSize = GetClientSize();
 
