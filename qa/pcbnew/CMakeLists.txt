@@ -32,7 +32,6 @@ add_executable( qa_pcbnew
 
     # stuff from common which is needed...why?
     ../../common/colors.cpp
-    ../../common/observable.cpp
 
     # The main test entry points
     test_module.cpp

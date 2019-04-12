@@ -34,7 +34,6 @@ set( common_srcs
 
     # stuff from common which is needed...why?
     ../../common/colors.cpp
-    ../../common/observable.cpp
 
     test_array_options.cpp
     test_color4d.cpp

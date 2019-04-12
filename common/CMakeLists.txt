@@ -339,7 +339,6 @@ set( COMMON_SRCS
     md5_hash.cpp
     msgpanel.cpp
     netlist_keywords.cpp
-    observable.cpp
     prependpath.cpp
     printout.cpp
     project.cpp

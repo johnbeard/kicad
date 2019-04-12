@@ -36,7 +36,6 @@ add_executable( qa_eeschema
 
     # stuff from common which is needed...why?
     ../../common/colors.cpp
-    ../../common/observable.cpp
 
     eeschema_test_utils.cpp
 

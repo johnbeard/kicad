@@ -28,7 +28,6 @@ add_executable( qa_common_tools
 
     # stuff from common which is needed...why?
     ../../common/colors.cpp
-    ../../common/observable.cpp
 
     # The main entry point
     main.cpp
