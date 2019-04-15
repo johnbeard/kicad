@@ -21,6 +21,7 @@ add_subdirectory( unit_test_utils )
 add_subdirectory( common )
 add_subdirectory( pcbnew )
 add_subdirectory( eeschema )
+add_subdirectory( utils/kicad2step )
 
 # Utility/debugging/profiling programs
 add_subdirectory( common_tools )
