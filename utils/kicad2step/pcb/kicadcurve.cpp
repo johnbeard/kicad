@@ -28,40 +28,6 @@
 #include "sexpr/sexpr.h"
 #include "kicadcurve.h"
 
-#include <core/optional.h>
-
-/**
- * Get the layer name from a layer element, if the layer is syntactically
- * valid
- *
- * E.g. (layer "Edge.Cuts") -> "Edge.Cuts"
- *
- * @param  aLayerElem the s-expr element to get the name from
- * @return            the layer name if valid, else empty
- */
-static OPT<std::string> getLayerName( const SEXPR::SEXPR& aLayerElem )
-{
-    OPT<std::string> layer;
-
-    if( aLayerElem.GetNumberOfChildren() == 2 )
-    {
-        const auto& layerChild = *aLayerElem.GetChild( 1 );
-
-        // The layer child can be quoted (string) or unquoted (symbol)
-        // depending on PCB version.
-        if( layerChild.IsString() )
-        {
-            layer = layerChild.GetString();
-        }
-        else if( layerChild.IsSymbol() )
-        {
-            layer = layerChild.GetSymbol();
-        }
-    }
-
-    return layer;
-}
-
 
 KICADCURVE::KICADCURVE()
 {
@@ -149,7 +115,7 @@ bool KICADCURVE::Read( SEXPR::SEXPR* aEntry, CURVE_TYPE aCurveType )
         }
         else if( text == "layer" )
         {
-            const OPT<std::string> layer = getLayerName( *child );
+            const OPT<std::string> layer = GetLayerName( *child );
 
             if( !layer )
             {

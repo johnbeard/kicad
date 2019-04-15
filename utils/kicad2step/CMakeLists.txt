@@ -1,7 +1,3 @@
-include_directories( BEFORE
-    ${CMAKE_SOURCE_DIR}/include
-)
-
 include_directories( SYSTEM
     ${OCE_INCLUDE_DIRS}
     ${OCC_INCLUDE_DIR}
@@ -29,6 +25,7 @@ add_library( kicad2step_lib STATIC
 target_include_directories( kicad2step_lib PUBLIC
     pcb
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/include # for core
 )
 
 set( K2S_FILES
