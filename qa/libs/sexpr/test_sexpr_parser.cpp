@@ -170,6 +170,33 @@ BOOST_AUTO_TEST_CASE( SimpleSymbol )
     BOOST_CHECK_PREDICATE( KI_TEST::SexprIsSymbolWithValue, ( child )( "symbol" ) );
 }
 
+
+/**
+ * Test things that should evaluate to strings
+ */
+BOOST_AUTO_TEST_CASE( SymbolStrings )
+{
+    const std::vector<std::pair<std::string, std::string>> cases = {
+        { "\"\"", "" },
+        { "\"string\"", "string" },
+        { "\"has some spaces\"", "has some spaces" },
+
+        // REVIEW: This one looks odd: shouldn't the backslash be removed when
+        // it is being used as an escape?
+        { "\"escaped \\\" quote\"", "escaped \\\" quote"},
+    };
+
+    for( const auto& c : cases )
+    {
+        BOOST_TEST_CONTEXT( c.first << " parses as string" )
+        {
+            auto sexp = Parse( c.first );
+            BOOST_CHECK_PREDICATE( KI_TEST::SexprIsStringWithValue, ( *sexp )( c.second ) );
+        }
+    }
+}
+
+
 /**
  * Test several atoms in a list, including nested lists
  */
