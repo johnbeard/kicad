@@ -30,6 +30,8 @@ add_executable( qa_pcbnew_tools
     pcbnew_tools.cpp
 
     tools/3d_output/3d_output.cpp
+    tools/3d_output/offscreen_context.cpp
+    tools/3d_output/offscreen_context_glx.cpp
 
     tools/drc_tool/drc_tool.cpp
 
@@ -42,6 +44,10 @@ add_executable( qa_pcbnew_tools
     # Older CMakes cannot link OBJECT libraries
     # https://cmake.org/pipermail/cmake/2013-November/056263.html
     $<TARGET_OBJECTS:pcbnew_kiface_objects>
+)
+
+target_include_directories( qa_pcbnew_tools PRIVATE
+    ${CMAKE_SOURCE_DIR}/3d-viewer
 )
 
 target_link_libraries( qa_pcbnew_tools

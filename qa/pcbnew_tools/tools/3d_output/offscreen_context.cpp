@@ -21,11 +21,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 
-#ifndef PCBNEW_TOOLS_3D_OUTPUT_H
-#define PCBNEW_TOOLS_3D_OUTPUT_H
+#include "offscreen_context.h"
 
-#include <qa_utils/utility_program.h>
 
-extern KI_TEST::UTILITY_PROGRAM output_3d_tool;
+OFFSCREEN_CONTEXT::OFFSCREEN_CONTEXT( int aHeight, int aWidth )
+        : m_height( aHeight ), m_width( aWidth ), m_fbo( nullptr )
+{}
 
-#endif // PCBNEW_TOOLS_3D_OUTPUT_H
+
+OFFSCREEN_CONTEXT* OFFSCREEN_CONTEXT::Setup()
+{
+    GLenum err = glewInit(); // must come after Context creation and before FBO construction
+
+    if( err != GLEW_OK )
+    {
+        std::cerr << "Unable to init GLEW: " << glewGetErrorString(err) << "\n";
+        return false;
+    }
+
+    m_fbo = fbo_new();
+
+    if ( !fbo_init( m_fbo, m_width, m_height ) )
+    {
+        return false;
+    }
+
+    return true;
+}

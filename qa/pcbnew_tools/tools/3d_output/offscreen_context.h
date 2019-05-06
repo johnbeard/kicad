@@ -21,11 +21,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 
-#ifndef PCBNEW_TOOLS_3D_OUTPUT_H
-#define PCBNEW_TOOLS_3D_OUTPUT_H
+#ifndef OFFSCREEN_CONTEXT__H
+#define OFFSCREEN_CONTEXT__H
 
-#include <qa_utils/utility_program.h>
 
-extern KI_TEST::UTILITY_PROGRAM output_3d_tool;
+#include "framebuffer_object.h"
 
-#endif // PCBNEW_TOOLS_3D_OUTPUT_H
+
+class OFFSCREEN_CONTEXT
+{
+public:
+
+    OFFSCREEN_CONTEXT( int aHeight, int aWidth);
+
+    bool Setup();
+
+private:
+    ///> Target size
+    int m_height;
+    int m_width;
+
+    ///> Framebuffer Object
+    FRAMEBUFFER_OBJECT*  m_fbo;
+
+}
+
+// struct OffscreenContext
+// {
+//     OffscreenContext(int width, int height) :
+//         openGLContext(nullptr), xdisplay(nullptr), xwindow(0),
+//         width(width), height(height),
+//         fbo(nullptr) {}
+//     GLXContext openGLContext;
+//     Display *xdisplay;
+//     Window xwindow;
+//     int width;
+//     int height;
+//     fbo_t *fbo;
+// };
+
+#endif // OFFSCREEN_CONTEXT__H

@@ -21,11 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 
-#ifndef PCBNEW_TOOLS_3D_OUTPUT_H
-#define PCBNEW_TOOLS_3D_OUTPUT_H
+#ifndef FRAMEBUFFER_OBJECT__H
+#define FRAMEBUFFER_OBJECT__H
 
-#include <qa_utils/utility_program.h>
-
-extern KI_TEST::UTILITY_PROGRAM output_3d_tool;
-
-#endif // PCBNEW_TOOLS_3D_OUTPUT_H
+#endif // FRAMEBUFFER_OBJECT__H

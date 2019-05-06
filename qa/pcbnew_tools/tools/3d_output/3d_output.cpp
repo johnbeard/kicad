@@ -21,6 +21,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 
+
+#include <GL/glew.h>    // Must be included first
+
+#include <common_ogl/openGL_includes.h>
+#include <common_ogl/ogl_utils.h>
+
 #include "3d_output.h"
 
 #include <class_board.h>
@@ -31,8 +37,10 @@
 #include <qa_utils/stdstream_line_reader.h>
 
 #include <common.h>
+#include <gl_context_mgr.h>
 
 #include <wx/cmdline.h>
+#include <wx/tokenzr.h>
 
 #include <cstdio>
 #include <string>
@@ -64,9 +72,11 @@ class OUTPUT_3D_RUNNER
 {
 public:
 
-    OUTPUT_3D_RUNNER( const OUTPUT_3D_PARAMS& aParams )
-        : m_params( aParams )
-    {}
+    OUTPUT_3D_RUNNER( const OUTPUT_3D_PARAMS& aParams );
+
+    ~OUTPUT_3D_RUNNER();
+
+    bool Init();
 
     bool Run( const BOARD& aBoard )
     {
@@ -75,8 +85,60 @@ public:
 
 private:
 
+    wxGLContext *m_glRC;
+    std::unique_ptr<wxGLCanvas> m_glCanvas;
+
     const OUTPUT_3D_PARAMS& m_params;
 };
+
+
+OUTPUT_3D_RUNNER::OUTPUT_3D_RUNNER( const OUTPUT_3D_PARAMS& aParams )
+    : m_params( aParams )
+{
+    wxWindow* parent = nullptr;
+    int* attribList = nullptr;
+    m_glCanvas = std::make_unique<wxGLCanvas>( parent, wxID_ANY, attribList );
+}
+
+
+OUTPUT_3D_RUNNER::~OUTPUT_3D_RUNNER()
+{
+    GL_CONTEXT_MANAGER::Get().DestroyCtx( m_glRC );
+}
+
+
+bool OUTPUT_3D_RUNNER::Init()
+{
+    m_glRC = GL_CONTEXT_MANAGER::Get().CreateCtx( m_glCanvas.get() );
+
+    GL_CONTEXT_MANAGER::Get().LockCtx( m_glRC, m_glCanvas.get() );
+
+    if( m_params.m_verbose )
+        std::cout << _( "Initialising OpenGL" ) << std::endl;
+
+    const GLenum err = glewInit();
+
+    if( GLEW_OK != err )
+    {
+        std::cout << "GLEW error: " << glewGetErrorString( err ) << std::endl;
+
+        return false;
+    }
+    else
+    {
+        if( m_params.m_verbose )
+        {
+            std::cout << "GLEW version: " << glewGetString( GLEW_VERSION ) << std::endl;
+        }
+    }
+
+    if( m_params.m_verbose )
+        std::cout << "OpenGL version: " << glGetString( GL_VERSION ) << std::endl;
+
+    GL_CONTEXT_MANAGER::Get().UnlockCtx( m_glRC );
+
+    return true;
+}
 
 
 static const wxCmdLineEntryDesc g_cmdLineDesc[] = {
@@ -172,9 +234,11 @@ int output_3d_main( int argc, char** argv )
     };
 
     long repeats = 1;
-    cl_parser.Found( "repeats", &repeats );
+    cl_parser.Found( "repeat", &repeats );
 
     OUTPUT_3D_RUNNER runner( exec_context );
+
+    runner.Init();
 
     bool ok = true;
 
