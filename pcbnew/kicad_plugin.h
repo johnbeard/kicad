@@ -29,6 +29,8 @@
 #include <string>
 #include <layers_id_colors_and_visibility.h>
 
+#include <mutex>
+
 class BOARD;
 class BOARD_ITEM;
 class FP_CACHE;
@@ -250,6 +252,9 @@ private:
     void formatLayer( const BOARD_ITEM* aItem ) const;
 
     void formatLayers( LSET aLayerMask, int aNestLevel = 0 ) const;
+
+    // Mutex that protects the cache from concurrent access
+    std::mutex m_cache_mutex;
 };
 
 #endif  // KICAD_PLUGIN_H_

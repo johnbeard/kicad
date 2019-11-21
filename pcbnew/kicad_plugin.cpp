@@ -2038,6 +2038,8 @@ void PCB_IO::init( const PROPERTIES* aProperties )
 
 void PCB_IO::validateCache( const wxString& aLibraryPath, bool checkModified )
 {
+    std::lock_guard<std::mutex> cache_guard( m_cache_mutex );
+
     if( !m_cache || !m_cache->IsPath( aLibraryPath ) || ( checkModified && m_cache->IsModified() ) )
     {
         // a spectacular episode in memory management:
