@@ -31,6 +31,8 @@ add_executable( qa_pcbnew_tools
 
     tools/drc_tool/drc_tool.cpp
 
+    tools/lib_loader/lib_loader.cpp
+
     tools/pcb_parser/pcb_parser_tool.cpp
 
     tools/polygon_generator/polygon_generator.cpp
