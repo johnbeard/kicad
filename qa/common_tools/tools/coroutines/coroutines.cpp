@@ -21,16 +21,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  */
 
-#include "coroutine_tools.h"
-
-#include <cstdio>
-#include <string>
-
-#include <common.h>
+#include <functional>
 
 #include <tool/coroutine.h>
 
+#include <qa_utils/utility_registry.h>
+
+#include <common.h>
+
 #include <wx/cmdline.h>
+
+#include <cstdio>
+#include <string>
 
 
 typedef COROUTINE<int, int> MyCoroutine;

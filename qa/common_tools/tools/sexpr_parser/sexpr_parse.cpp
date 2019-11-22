@@ -27,9 +27,9 @@
  * for benchmarking, testing, etc.
  */
 
-#include "sexpr_parse.h"
-
 #include <sexpr/sexpr_parser.h>
+
+#include <qa_utils/utility_registry.h>
 
 #include <common.h>
 #include <profile.h>
